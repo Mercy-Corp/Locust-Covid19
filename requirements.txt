@@ -1,0 +1,12 @@
+# dependencies to make setuptools work and basic unittesting
+setuptools
+wheel
+twine
+coverage
+nose
+pycco
+
+# your dependencies
+# numpy
+# pandas
+# ...
