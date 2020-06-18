@@ -9,4 +9,5 @@ pycco
 # your dependencies
 # numpy
 # pandas
-# ...
+# datetime
+# pyarrow.parquet
