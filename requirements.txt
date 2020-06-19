@@ -11,3 +11,5 @@ pandas
 geopandas
 fastparquet
 pathlib
+os
+numpy
