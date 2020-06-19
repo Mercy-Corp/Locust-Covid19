@@ -4,22 +4,30 @@ The aim of this module is to prepare the location table.
 
 Created on Thu Jun 18 09:16:40 2020
 
-@author: ioanna.papachristou@accenture.co
+@author: ioanna.papachristou@accenture.com
 """
 
-from pathlib import Path
 import pandas as pd
 import geopandas as gpd
-from fastparquet import ParquetFile
 
 PATH = r'./data/'
 
-
 def import_shapefile(country, hierarchy):
+    '''
+    Imports a shp with the boundaries.
+    :param country: the referring country of the shp. Choose between: "_KEN_", "_ETH_" or "_SOM_"
+    :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
+    :return: A shapefile
+    '''
     shp = gpd.read_file(PATH + "input/gadm36" + str(country) + str(hierarchy) + ".shp")
     return shp
 
 def shapefiles_list(hierarchy):
+    '''
+    Creates a list of shapefiles according to hierarchy.
+    :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
+    :return: A list of geodataframes for all three countries (KEN, ETH, SOM) per hierarchy.
+    '''
 
     if hierarchy == 0:
         Kenya_0 = import_shapefile(country="_KEN_", hierarchy=hierarchy)
@@ -47,6 +55,12 @@ def shapefiles_list(hierarchy):
     return gdf_list
 
 def create_sub_tables(shp_list, hierarchy):
+    """
+    Creates sub-tables per hierarchy to be used for the final location table.
+    :param shp_list: A list of shapefiles
+    :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
+    :return: A geodataframe of all location data for the selected hierarchy
+    """
     # Concatenate shp
     gdf = gpd.GeoDataFrame(pd.concat(shp_list, ignore_index=True, sort=False))
     # Add new columns
@@ -87,6 +101,10 @@ class LocationTable:
              "NAME_3"]]
 
     def concat_sub_tables(self):
+        '''
+        Concatenates the list of geodataframes into a single geodataframe.
+        :return: A geodataframe of all hierarchies containing only the necessary columns.
+        '''
         gdf_all_list = [self.countries, self.regions1, self.regions2, self.regions3]
         gdf_all = gpd.GeoDataFrame(pd.concat(gdf_all_list, ignore_index=True))
         gdf_all = gdf_all[
@@ -96,15 +114,20 @@ class LocationTable:
         return gdf_all
 
     def export_to_parquet(self, gdf, file_name):
+        '''
+        Exports a geodataframe to a parquet format.
+        :param gdf: The geodataframe to be exported
+        :param file_name: the name of the file to be exported
+        '''
         gdf.to_parquet(self.path+file_name+".parquet", compression='uncompressed')
         print("Location table extracted")
-
 
 
 if __name__ == '__main__':
 
     print("------- Extracting location table ---------")
     loc_table = LocationTable()
+    # Create geodataframe
     gdf_all = loc_table.concat_sub_tables()
     # Export table to parquet
     loc_table.export_to_parquet(gdf_all, 'output/location_table')
