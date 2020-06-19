@@ -67,9 +67,9 @@ class Shapefiles:
 if __name__ == '__main__':
 
     print("------- Extracting lists of shapefiles geodataframes ---------")
-    countries = Shapefiles(0).shapefiles_list()
-    regions1 = Shapefiles(1).shapefiles_list()
-    regions2 = Shapefiles(2).shapefiles_list()
-    regions3 = Shapefiles(3).shapefiles_list()
+    countries_list = Shapefiles(0).shapefiles_list()
+    regions1_list = Shapefiles(1).shapefiles_list()
+    regions2_list = Shapefiles(2).shapefiles_list()
+    regions3_list = Shapefiles(3).shapefiles_list()
     #regions4 = Shapefiles(4).shapefiles_list() #only for testing, should raise value error
     #print(regions3)
