@@ -17,13 +17,13 @@ class LocationTable:
     '''
     This class creates the location table.
     '''
-    def __init__(self):
+    def __init__(self, path):
 
-        self.path = PATH
-        self.countries = Shapefiles(0).create_sub_tables(Shapefiles(0).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0"]]
-        self.regions1 = Shapefiles(1).create_sub_tables(Shapefiles(1).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0", "GID_1", "NAME_1"]]
-        self.regions2 = Shapefiles(2).create_sub_tables(Shapefiles(2).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0", "GID_1", "NAME_1", "GID_2", "NAME_2"]]
-        self.regions3 = Shapefiles(3).create_sub_tables(Shapefiles(3).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0", "GID_1", "NAME_1", "GID_2", "NAME_2",
+        self.path = path
+        self.countries = Shapefiles(self.path,0).create_sub_tables(Shapefiles(self.path,0).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0"]]
+        self.regions1 = Shapefiles(self.path,1).create_sub_tables(Shapefiles(self.path,1).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0", "GID_1", "NAME_1"]]
+        self.regions2 = Shapefiles(self.path,2).create_sub_tables(Shapefiles(self.path,2).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0", "GID_1", "NAME_1", "GID_2", "NAME_2"]]
+        self.regions3 = Shapefiles(self.path,3).create_sub_tables(Shapefiles(self.path,3).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0", "GID_1", "NAME_1", "GID_2", "NAME_2",
              "GID_3", "NAME_3"]]
 
     def concat_sub_tables(self):
@@ -52,7 +52,10 @@ class LocationTable:
 if __name__ == '__main__':
 
     print("------- Extracting location table ---------")
-    loc_table = LocationTable()
+
+    path = r'./data/'
+
+    loc_table = LocationTable(path)
     # Create geodataframe
     gdf_all = loc_table.concat_sub_tables()
     # Export table to parquet
