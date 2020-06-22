@@ -31,7 +31,7 @@ class Shapefiles:
     def import_shapefile(self, country):
         '''
         Imports a shp with the boundaries.
-        :param country: the referring country of the shp. Choose between: "_KEN_", "_ETH_" or "_SOM_"
+        :param country: the referring country of the shp. Choose between: "_KEN_", "_ETH_", "_SOM_" or "_UGA_"
         :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
         :return: A shapefile
         '''
@@ -48,24 +48,28 @@ class Shapefiles:
             Kenya_0 = self.import_shapefile(country="_KEN_")
             Ethiopia_0 = self.import_shapefile(country="_ETH_")
             Somalia_0 = self.import_shapefile(country="_SOM_")
-            gdf_list = [Kenya_0, Ethiopia_0, Somalia_0]
+            Uganda_0 = self.import_shapefile(country="_UGA_")
+            gdf_list = [Kenya_0, Ethiopia_0, Somalia_0, Uganda_0]
 
         elif self.hierarchy == 1:
             Kenya_1 = self.import_shapefile(country="_KEN_")
             Ethiopia_1 = self.import_shapefile(country="_ETH_")
             Somalia_1 = self.import_shapefile(country="_SOM_")
-            gdf_list = [Kenya_1, Ethiopia_1, Somalia_1]
+            Uganda_1 = self.import_shapefile(country="_UGA_")
+            gdf_list = [Kenya_1, Ethiopia_1, Somalia_1, Uganda_1]
 
         elif self.hierarchy == 2:
             Kenya_2 = self.import_shapefile(country="_KEN_")
             Ethiopia_2 = self.import_shapefile(country="_ETH_")
             Somalia_2 = self.import_shapefile(country="_SOM_")
-            gdf_list = [Kenya_2, Ethiopia_2, Somalia_2]
+            Uganda_2 = self.import_shapefile(country="_UGA_")
+            gdf_list = [Kenya_2, Ethiopia_2, Somalia_2, Uganda_2]
 
         elif self.hierarchy == 3:
             Kenya_3 = self.import_shapefile(country="_KEN_")
             Ethiopia_3 = self.import_shapefile(country="_ETH_")
-            gdf_list = [Kenya_3, Ethiopia_3]
+            Uganda_3 = self.import_shapefile(country="_UGA_")
+            gdf_list = [Kenya_3, Ethiopia_3, Uganda_3]
 
         return gdf_list
 
