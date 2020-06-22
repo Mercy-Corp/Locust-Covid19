@@ -10,19 +10,16 @@ Created on Thu Jun 19 11:14:40 2020
 import geopandas as gpd
 import pandas as pd
 
-PATH = r'./data/'
-
 class Shapefiles:
     '''
     Functions related to shapefiles.
     '''
-    def __init__(self, hierarchy):
+    def __init__(self, path, hierarchy):
         '''
 
         :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
         '''
-        self.path = PATH
-
+        self.path = path
         if hierarchy > 3 or hierarchy < 0:
             raise ValueError("'hierarchy' should be an integer between 0 and 3, where 0 refers to the country level.")
         else:
@@ -99,15 +96,17 @@ class Shapefiles:
 
 if __name__ == '__main__':
 
+    path = r'./data/'
+
     print("------- Extracting lists of shapefiles geodataframes ---------")
-    countries_list = Shapefiles(0).shapefiles_list()
-    regions1_list = Shapefiles(1).shapefiles_list()
-    regions2_list = Shapefiles(2).shapefiles_list()
-    regions3_list = Shapefiles(3).shapefiles_list()
-    #regions4 = Shapefiles(4).shapefiles_list() #only for testing, should raise value error
+    countries_list = Shapefiles(path, 0).shapefiles_list()
+    regions1_list = Shapefiles(path, 1).shapefiles_list()
+    regions2_list = Shapefiles(path, 2).shapefiles_list()
+    regions3_list = Shapefiles(path, 3).shapefiles_list()
+    #regions4 = Shapefiles(path, 4).shapefiles_list() #only for testing, should raise value error
     #print(regions3)
 
     print("------- Extracting geodataframes ---------")
-    countries = Shapefiles(0).create_sub_tables(countries_list)
+    countries = Shapefiles(path, 0).create_sub_tables(countries_list)
     print(countries.head())
 

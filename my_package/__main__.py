@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
     print("------- Extracting location table ---------")
 
-    loc_table = LocationTable()
+    loc_table = LocationTable(path)
     location_table = loc_table.concat_sub_tables()      # Create geodataframe
     loc_table.export_to_parquet(location_table, 'location_table')       # Export table to parquet format
 
@@ -32,6 +32,6 @@ if __name__ == '__main__':
 
     print("------- Extracting shapefile table ---------")
 
-    shp_table = ShapefileTable()
+    shp_table = ShapefileTable(path)
     gdf_all = shp_table.concat_sub_tables()
     shp_table.export_to_shp(gdf_all, 'shapefile_table')     # Export table to shp

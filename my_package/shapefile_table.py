@@ -11,15 +11,13 @@ import pandas as pd
 import geopandas as gpd
 from my_package.utils_shapefiles import Shapefiles
 
-PATH = r'./data/'
-
 class ShapefileTable:
-    def __init__(self):
-        self.path = PATH
-        self.countries = Shapefiles(0).create_sub_tables(Shapefiles(0).shapefiles_list())[["locationID", "geometry"]]
-        self.regions1 = Shapefiles(1).create_sub_tables(Shapefiles(1).shapefiles_list())[["locationID", "geometry"]]
-        self.regions2 = Shapefiles(2).create_sub_tables(Shapefiles(2).shapefiles_list())[["locationID", "geometry"]]
-        self.regions3 = Shapefiles(3).create_sub_tables(Shapefiles(3).shapefiles_list())[["locationID", "geometry"]]
+    def __init__(self, path):
+        self.path = path
+        self.countries = Shapefiles(self.path,0).create_sub_tables(Shapefiles(self.path,0).shapefiles_list())[["locationID", "geometry"]]
+        self.regions1 = Shapefiles(self.path,1).create_sub_tables(Shapefiles(self.path,1).shapefiles_list())[["locationID", "geometry"]]
+        self.regions2 = Shapefiles(self.path,2).create_sub_tables(Shapefiles(self.path,2).shapefiles_list())[["locationID", "geometry"]]
+        self.regions3 = Shapefiles(self.path,3).create_sub_tables(Shapefiles(self.path,3).shapefiles_list())[["locationID", "geometry"]]
 
     def concat_sub_tables(self):
         '''
@@ -49,7 +47,9 @@ if __name__ == '__main__':
 
     print("------- Extracting shapefile table ---------")
 
-    shp_table = ShapefileTable()
+    path = r'./data/'
+
+    shp_table = ShapefileTable(path)
     gdf_all = shp_table.concat_sub_tables()
     #Export table to shp
     shp_table.export_to_shp(gdf_all, 'shapefile_table')
