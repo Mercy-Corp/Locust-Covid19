@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The aim of this module is to prepare the location table.
+The aim of this module is to prepare the shapefile table.
 
 Created on Thu Jun 19 11:04:40 2020
 
@@ -29,6 +29,10 @@ class ShapefileTable:
         gdf_all_list = [self.countries, self.regions1, self.regions2, self.regions3]
         #print(gdf_all_list[0].columns)
         gdf_all = gpd.GeoDataFrame(pd.concat(gdf_all_list, ignore_index=True))
+        gdf_all.crs = {"init": "epsg:4326"}
+
+        #Calculate areas in units = degrees
+        gdf_all['area'] = gdf_all['geometry'].area
         return gdf_all
 
     def export_to_shp(self, gdf, file_name):
