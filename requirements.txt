@@ -7,6 +7,9 @@ nose
 pycco
 
 # your dependencies
-# numpy
-# pandas
-# ...
+pandas
+geopandas
+fastparquet
+pathlib
+os
+numpy
