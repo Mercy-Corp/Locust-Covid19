@@ -80,10 +80,10 @@ class ProductionTable: #TODO describe functions
         :return: Exports table to a) parquet and b) csv format
         '''
         # Export to parquet
-        df.to_parquet(path + 'output/production_table_20200630.parquet',
+        df.to_parquet(self.path + 'output/production_table_20200630.parquet',
                                  compression='uncompressed', index=False) #TODO automatise date at the end of the name
         # Export to csv
-        df.to_csv(path + 'output/production_table_20200630.csv', sep='|', encoding='utf-8', index=False)
+        df.to_csv(self.path + 'output/production_table_20200630.csv', sep='|', encoding='utf-8', index=False)
 
         print("Production table exported")
 
