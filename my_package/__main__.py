@@ -3,7 +3,6 @@
 from my_package.location_table import LocationTable
 from my_package.shapefile_table import ShapefileTable
 from my_package.production_table import ProductionTable
-
 import os
 
 if __name__ == '__main__':
