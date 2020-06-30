@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     path = r'./data/'
     # Create Input and Output folder structure
-    directories = [path + "data/input", path + "data/output"]
+    directories = [path + "input", path + "output"]
     for directory in directories:
         if not os.path.exists(directory):
             os.makedirs(directory)

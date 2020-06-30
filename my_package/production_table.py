@@ -10,7 +10,7 @@ Created on Thu Jun 30 15:36:40 2020
 # Imports
 import pandas as pd
 
-class ProductionTable: #TODO describe functions
+class ProductionTable:
     '''
     This class creates the production table.
     '''
