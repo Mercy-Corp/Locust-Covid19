@@ -1,0 +1,1 @@
+This folder has miscellaneous things, for example jupyter notebooks or sample files.
