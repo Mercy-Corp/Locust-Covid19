@@ -13,3 +13,5 @@ fastparquet
 pathlib
 os
 numpy
+datetime
+pyarrow.parquet
