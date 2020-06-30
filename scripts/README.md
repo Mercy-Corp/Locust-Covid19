@@ -1,1 +1,0 @@
-This folder has scripts that are associated to our code. For example, table creation scripts.
