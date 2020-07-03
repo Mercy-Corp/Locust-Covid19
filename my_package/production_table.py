@@ -9,16 +9,26 @@ Created on Thu Jun 30 15:36:40 2020
 
 # Imports
 import pandas as pd
+import time
+
+#S3 paths
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+
+# #local paths
+# INPUT_PATH = r'data/input/'
+# OUTPUT_PATH = r'data/output/'
 
 class ProductionTable:
     '''
     This class creates the production table.
     '''
-    def __init__(self, path):
-        self.path = path
-        self.production_df = pd.read_csv(self.path + "input/FAOSTAT_data_6-30-2020.csv", sep=",") #TODO imports from parquet format?
-        self.dates = pd.read_csv(self.path + "output/date_23_06-2020.csv")
-        self.locations = pd.read_csv(self.path + "output/location_table.csv", sep="|")[['locationID', 'name']]
+    def __init__(self, INPUT_PATH, OUTPUT_PATH):
+        self.path_in = INPUT_PATH
+        self.path_out = OUTPUT_PATH
+        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
+        self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
+        self.locations = pd.read_csv(self.path_out + "location_table.csv", sep = "|")[['locationID', 'name']]
 
 
     def create_measure_df(self):
@@ -73,17 +83,25 @@ class ProductionTable:
         production = production[['factID', 'measureID', 'dateID', 'locationID', 'value']]
         return production
 
+    def date_today(self):
+        # Add today's date
+        todaysDate = time.strftime("%Y-%m-%d")
+        return todaysDate
+
     def export(self, df):
         '''
 
         :param df: The dataframe to export.
         :return: Exports table to a) parquet and b) csv format
         '''
+
         # Export to parquet
-        df.to_parquet(self.path + 'output/production_table_20200630.parquet',
-                                 compression='uncompressed', index=False) #TODO automatise date at the end of the name
+        date = self.date_today()
+        df.to_parquet(self.path_out + 'production_table_' + date +'.parquet', compression='uncompressed',
+                                 index=False)
+
         # Export to csv
-        df.to_csv(self.path + 'output/production_table_20200630.csv', sep='|', encoding='utf-8', index=False)
+        df.to_csv(self.path_out + 'production_table_' + date +'.csv', sep='|', encoding='utf-8', index=False)
 
         print("Production table exported")
 
@@ -92,9 +110,7 @@ if __name__ == '__main__':
 
     print("------- Extracting production table ---------")
 
-    path = r'./data/'
-
-    prod_table = ProductionTable(path)
+    prod_table = ProductionTable(INPUT_PATH, OUTPUT_PATH)
 
     # Create dataframe
     production_df = prod_table.add_ids_to_table()
