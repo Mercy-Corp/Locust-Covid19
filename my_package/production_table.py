@@ -28,6 +28,7 @@ class ProductionTable:
         self.path_out = OUTPUT_PATH
         self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
         self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
+        self.dates['date'] = pd.to_datetime(self.dates['date'])
         self.locations = pd.read_csv(self.path_out + "location_table.csv", sep = "|")[['locationID', 'name']]
 
 
@@ -45,18 +46,6 @@ class ProductionTable:
         return self.measure_df
 
 
-    def year_to_datetime(self, production_df, column):
-        '''
-
-        :param production_df: The production df
-        :param column: The column we want to apply the function
-        :return: The production df with the year column turned into datetime of  format yyyy-01-01.
-        '''
-        # Transform year column to datetime
-        self.production_df[column] = pd.to_datetime([f'{y}-01-01' for y in production_df[column]])
-        return production_df
-
-
     def add_ids_to_table(self):
         '''
         Merges with all other tables and extracts all ids.
@@ -70,7 +59,7 @@ class ProductionTable:
             'Item Code'].astype(str) + '_' + production['Year Code'].astype(str)
 
         # Merge with dates and add dateID
-        production['Year'] = self.year_to_datetime(production, 'Year')
+        production['Year'] = pd.to_datetime([f'{y}-01-01' for y in production.Year])
         production = production.merge(self.dates, left_on='Year', right_on='date', how='left')
 
         # Merge with locations and add locationID
