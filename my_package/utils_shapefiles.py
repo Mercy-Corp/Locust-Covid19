@@ -10,16 +10,27 @@ Created on Thu Jun 19 11:14:40 2020
 import geopandas as gpd
 import pandas as pd
 
+# S3 paths
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+
+# #local paths
+# INPUT_PATH = r'data/input/'
+# OUTPUT_PATH = r'data/output/'
+
 class Shapefiles:
     '''
     Functions related to shapefiles.
     '''
-    def __init__(self, path, hierarchy):
+    def __init__(self, INPUT_PATH, OUTPUT_PATH, hierarchy):
         '''
 
         :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
         '''
-        self.path = path
+
+        self.path_in = INPUT_PATH
+        self.path_out = OUTPUT_PATH
+
         if hierarchy > 3 or hierarchy < 0:
             raise ValueError("'hierarchy' should be an integer between 0 and 3, where 0 refers to the country level.")
         else:
@@ -32,7 +43,7 @@ class Shapefiles:
         :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
         :return: A shapefile
         '''
-        shp = gpd.read_file(self.path + "input/gadm36" + str(country) + str(self.hierarchy) + ".shp")
+        shp = gpd.read_file(self.path_in + "/gadm36" + str(country) + str(self.hierarchy) + ".shp")
         return shp
 
     def shapefiles_list(self):
@@ -96,17 +107,15 @@ class Shapefiles:
 
 if __name__ == '__main__':
 
-    path = r'./data/'
-
     print("------- Extracting lists of shapefiles geodataframes ---------")
-    countries_list = Shapefiles(path, 0).shapefiles_list()
-    regions1_list = Shapefiles(path, 1).shapefiles_list()
-    regions2_list = Shapefiles(path, 2).shapefiles_list()
-    regions3_list = Shapefiles(path, 3).shapefiles_list()
-    #regions4 = Shapefiles(path, 4).shapefiles_list() #only for testing, should raise value error
+    countries_list = Shapefiles(INPUT_PATH, OUTPUT_PATH, 0).shapefiles_list()
+    regions1_list = Shapefiles(INPUT_PATH, OUTPUT_PATH, 1).shapefiles_list()
+    regions2_list = Shapefiles(INPUT_PATH, OUTPUT_PATH, 2).shapefiles_list()
+    regions3_list = Shapefiles(INPUT_PATH, OUTPUT_PATH, 3).shapefiles_list()
+    #regions4 = Shapefiles(INPUT_PATH, OUTPUT_PATH, 4).shapefiles_list() #only for testing, should raise value error
     #print(regions3)
 
     print("------- Extracting geodataframes ---------")
-    countries = Shapefiles(path, 0).create_sub_tables(countries_list)
+    countries = Shapefiles(INPUT_PATH, OUTPUT_PATH, 0).create_sub_tables(countries_list)
     print(countries.head())
 

@@ -11,13 +11,22 @@ import pandas as pd
 import geopandas as gpd
 from my_package.utils_shapefiles import Shapefiles
 
+# #S3 paths
+# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
+# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+
+#local paths
+INPUT_PATH = r'data/input/'
+OUTPUT_PATH = r'data/output/'
+
 class ShapefileTable:
-    def __init__(self, path):
-        self.path = path
-        self.countries = Shapefiles(self.path,0).create_sub_tables(Shapefiles(self.path,0).shapefiles_list())[["locationID", "geometry"]]
-        self.regions1 = Shapefiles(self.path,1).create_sub_tables(Shapefiles(self.path,1).shapefiles_list())[["locationID", "geometry"]]
-        self.regions2 = Shapefiles(self.path,2).create_sub_tables(Shapefiles(self.path,2).shapefiles_list())[["locationID", "geometry"]]
-        self.regions3 = Shapefiles(self.path,3).create_sub_tables(Shapefiles(self.path,3).shapefiles_list())[["locationID", "geometry"]]
+    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+        self.path_in = path_in
+        self.path_out = path_out
+        self.countries = Shapefiles(self.path_in,0).create_sub_tables(Shapefiles(self.path_in,0).shapefiles_list())[["locationID", "geometry"]]
+        self.regions1 = Shapefiles(self.path_in,1).create_sub_tables(Shapefiles(self.path_in,1).shapefiles_list())[["locationID", "geometry"]]
+        self.regions2 = Shapefiles(self.path_in,2).create_sub_tables(Shapefiles(self.path_in,2).shapefiles_list())[["locationID", "geometry"]]
+        self.regions3 = Shapefiles(self.path_in,3).create_sub_tables(Shapefiles(self.path_in,3).shapefiles_list())[["locationID", "geometry"]]
 
     def concat_sub_tables(self):
         '''
@@ -39,7 +48,7 @@ class ShapefileTable:
         :param gdf: The geodataframe to be exported
         :param file_name: the name of the file to be exported
         '''
-        gdf.to_file(self.path+"output/"+file_name+".shp", driver='ESRI Shapefile')
+        gdf.to_file(self.path_out+file_name+".shp", driver='ESRI Shapefile')
         print("Shapefile table extracted")
 
 
@@ -47,9 +56,7 @@ if __name__ == '__main__':
 
     print("------- Extracting shapefile table ---------")
 
-    path = r'./data/'
-
-    shp_table = ShapefileTable(path)
+    shp_table = ShapefileTable()
     gdf_all = shp_table.concat_sub_tables()
     #Export table to shp
     shp_table.export_to_shp(gdf_all, 'shapefile_table')

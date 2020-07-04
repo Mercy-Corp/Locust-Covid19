@@ -9,16 +9,25 @@ Created on Thu Jun 30 15:36:40 2020
 
 # Imports
 import pandas as pd
+from utils_flat_files import FlatFiles
+
+# #S3 paths
+# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
+# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+
+#local paths
+INPUT_PATH = r'data/input/'
+OUTPUT_PATH = r'data/output/'
 
 class ProductionTable:
     '''
     This class creates the production table.
     '''
-    def __init__(self, path):
-        self.path = path
-        self.production_df = pd.read_csv(self.path + "input/FAOSTAT_data_6-30-2020.csv", sep=",") #TODO imports from parquet format?
-        self.dates = pd.read_csv(self.path + "output/date_23_06-2020.csv")
-        self.locations = pd.read_csv(self.path + "output/location_table.csv", sep="|")[['locationID', 'name']]
+    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+        self.path_in = path_in
+        self.path_out = path_out
+        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
+        self.locations = pd.read_csv(self.path_out + "location_table.csv", sep = "|")[['locationID', 'name']]
 
 
     def create_measure_df(self):
@@ -35,18 +44,6 @@ class ProductionTable:
         return self.measure_df
 
 
-    def year_to_datetime(self, production_df, column):
-        '''
-
-        :param production_df: The production df
-        :param column: The column we want to apply the function
-        :return: The production df with the year column turned into datetime of  format yyyy-01-01.
-        '''
-        # Transform year column to datetime
-        self.production_df[column] = pd.to_datetime([f'{y}-01-01' for y in production_df[column]])
-        return production_df
-
-
     def add_ids_to_table(self):
         '''
         Merges with all other tables and extracts all ids.
@@ -60,8 +57,7 @@ class ProductionTable:
             'Item Code'].astype(str) + '_' + production['Year Code'].astype(str)
 
         # Merge with dates and add dateID
-        production['Year'] = self.year_to_datetime(production, 'Year')
-        production = production.merge(self.dates, left_on='Year', right_on='date', how='left')
+        production = FlatFiles().add_date_id(production, 'Year')
 
         # Merge with locations and add locationID
         production = production.merge(self.locations, left_on='Area', right_on='name', how='left')
@@ -70,36 +66,20 @@ class ProductionTable:
         production['value'] = production['Value']
 
         # Filter only needed columns to export
-        production = production[['factID', 'measureID', 'dateID', 'locationID', 'value']]
+        production = FlatFiles().select_columns_fact_table(production)
         return production
-
-    def export(self, df):
-        '''
-
-        :param df: The dataframe to export.
-        :return: Exports table to a) parquet and b) csv format
-        '''
-        # Export to parquet
-        df.to_parquet(self.path + 'output/production_table_20200630.parquet',
-                                 compression='uncompressed', index=False) #TODO automatise date at the end of the name
-        # Export to csv
-        df.to_csv(self.path + 'output/production_table_20200630.csv', sep='|', encoding='utf-8', index=False)
-
-        print("Production table exported")
 
 
 if __name__ == '__main__':
 
     print("------- Extracting production table ---------")
 
-    path = r'./data/'
-
-    prod_table = ProductionTable(path)
+    prod_table = ProductionTable()
 
     # Create dataframe
     production_df = prod_table.add_ids_to_table()
 
     # Export
-    prod_table.export(production_df)
+    FlatFiles().export_output_w_date(production_df, 'production_table')
 
 
