@@ -13,6 +13,7 @@ import geopandas as gpd
 import rasterio
 from rasterstats import zonal_stats
 from utils_shapefiles import Shapefiles
+from utils_flat_files import FlatFiles
 
 #S3 paths
 # INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
@@ -26,12 +27,10 @@ class PopulationTable:
     '''
     This class creates the 2015 population table.
     '''
-    def __init__(self, INPUT_PATH, OUTPUT_PATH):
-        self.path_in = INPUT_PATH
-        self.path_out = OUTPUT_PATH
+    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+        self.path_in = path_in
+        self.path_out = path_out
         self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
-        self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep = ",")
-        self.dates['date'] = pd.to_datetime(self.dates['date'])
         self.shapefile_table = gpd.read_file(self.path_out + "shapefile_table.shp")
 
         self.gdf_Kenya = gpd.read_file(self.path_in + "gadm36_KEN_2.shp")[['GID_2', 'geometry']]
@@ -64,46 +63,39 @@ class PopulationTable:
 
         population_gdf = self.population_table()
 
+        # Add locationID
         population_gdf['locationID'] = population_gdf['GID_2']
+
+        # Add value column
         population_gdf['value'] = population_gdf['population']
+
+        # Add measureID
         population_gdf['measureID'] = 26
+
+        # Add year, to be transformed to dateId in later step
         population_gdf['year'] = 2015
+
+        # Add factID
         population_gdf['factID'] = 'Pop_' + population_gdf['locationID'].astype(str) + "_" + population_gdf[
             'year'].astype(str)
-        population_gdf['year'] = pd.to_datetime([f'{y}-01-01' for y in population_gdf.year])
-        population_gdf = population_gdf.merge(self.dates, left_on='year', right_on='date', how='left')
-        population_df = population_gdf[['factID', 'measureID', 'dateID', 'locationID', 'value']]
+
+        # Add dateID
+        population_gdf = FlatFiles().add_date_id(population_gdf, column = 'year')
+
+        # Select fact table columns
+        population_df = FlatFiles().select_columns_fact_table(df = population_gdf)
 
         return population_df
 
-    def export_to_parquet(self, df, file_name):
-        '''
-        Exports a dataframe to a parquet format.
-        :param df: The dataframe to be exported
-        :param file_name: the name of the file to be exported
-        '''
-        df.to_parquet(self.path_out+file_name+".parquet", compression='uncompressed', index=False)
-        print("Table extracted to parquet")
-
-    def export_to_csv(self, df, file_name):
-        '''
-        Exports a dataframe to a parquet format.
-        :param df: The dataframe to be exported
-        :param file_name: the name of the file to be exported
-        '''
-        # Export to csv
-        df.to_csv(self.path_out + file_name + '.csv', sep='|', encoding='utf-8', index=False)
-        print("Table extracted to csv")
 
 if __name__ == '__main__':
 
     print("------- Extracting population table ---------")
 
-    pop_table = PopulationTable(INPUT_PATH, OUTPUT_PATH)
+    pop_table = PopulationTable()
 
     # Create dataframe
     population_df = pop_table.add_ids_to_table()
 
     # Export
-    pop_table.export_to_parquet(population_df, 'population_table_2015')
-    pop_table.export_to_csv(population_df, 'population_table_2015')
+    FlatFiles().export_output(population_df, 'population_table_2015')

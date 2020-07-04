@@ -9,26 +9,24 @@ Created on Thu Jun 30 15:36:40 2020
 
 # Imports
 import pandas as pd
-import time
+from utils_flat_files import FlatFiles
 
-#S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+# #S3 paths
+# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
+# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
 
-# #local paths
-# INPUT_PATH = r'data/input/'
-# OUTPUT_PATH = r'data/output/'
+#local paths
+INPUT_PATH = r'data/input/'
+OUTPUT_PATH = r'data/output/'
 
 class ProductionTable:
     '''
     This class creates the production table.
     '''
-    def __init__(self, INPUT_PATH, OUTPUT_PATH):
-        self.path_in = INPUT_PATH
-        self.path_out = OUTPUT_PATH
+    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+        self.path_in = path_in
+        self.path_out = path_out
         self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
-        self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
-        self.dates['date'] = pd.to_datetime(self.dates['date'])
         self.locations = pd.read_csv(self.path_out + "location_table.csv", sep = "|")[['locationID', 'name']]
 
 
@@ -59,8 +57,7 @@ class ProductionTable:
             'Item Code'].astype(str) + '_' + production['Year Code'].astype(str)
 
         # Merge with dates and add dateID
-        production['Year'] = pd.to_datetime([f'{y}-01-01' for y in production.Year])
-        production = production.merge(self.dates, left_on='Year', right_on='date', how='left')
+        production = FlatFiles().add_date_id(production, 'Year')
 
         # Merge with locations and add locationID
         production = production.merge(self.locations, left_on='Area', right_on='name', how='left')
@@ -69,42 +66,20 @@ class ProductionTable:
         production['value'] = production['Value']
 
         # Filter only needed columns to export
-        production = production[['factID', 'measureID', 'dateID', 'locationID', 'value']]
+        production = FlatFiles().select_columns_fact_table(production)
         return production
-
-    def date_today(self):
-        # Add today's date
-        todaysDate = time.strftime("%Y-%m-%d")
-        return todaysDate
-
-    def export(self, df):
-        '''
-
-        :param df: The dataframe to export.
-        :return: Exports table to a) parquet and b) csv format
-        '''
-
-        # Export to parquet
-        date = self.date_today()
-        df.to_parquet(self.path_out + 'production_table_' + date +'.parquet', compression='uncompressed',
-                                 index=False)
-
-        # Export to csv
-        df.to_csv(self.path_out + 'production_table_' + date +'.csv', sep='|', encoding='utf-8', index=False)
-
-        print("Production table exported")
 
 
 if __name__ == '__main__':
 
     print("------- Extracting production table ---------")
 
-    prod_table = ProductionTable(INPUT_PATH, OUTPUT_PATH)
+    prod_table = ProductionTable()
 
     # Create dataframe
     production_df = prod_table.add_ids_to_table()
 
     # Export
-    prod_table.export(production_df)
+    FlatFiles().export_output_w_date(production_df, 'production_table')
 
 
