@@ -9,7 +9,7 @@ Created on Thu Jun 18 09:16:40 2020
 
 import pandas as pd
 import geopandas as gpd
-from my_package.utils_shapefiles import Shapefiles
+from utils_shapefiles import Shapefiles
 
 # S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
@@ -23,10 +23,9 @@ class LocationTable:
     '''
     This class creates the location table.
     '''
-    def __init__(self, INPUT_PATH, OUTPUT_PATH):
-
-        self.path_in = INPUT_PATH
-        self.path_out = OUTPUT_PATH
+    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+        self.path_in = path_in
+        self.path_out = path_out
 
         self.countries = Shapefiles(self.path_in, self.path_out, 0).create_sub_tables(Shapefiles(self.path_in, self.path_out, 0).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0"]]
         self.regions1 = Shapefiles(self.path_in, self.path_out, 1).create_sub_tables(Shapefiles(self.path_in, self.path_out, 1).shapefiles_list())[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0", "GID_1", "NAME_1"]]
