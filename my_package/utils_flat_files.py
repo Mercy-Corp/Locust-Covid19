@@ -20,7 +20,7 @@ OUTPUT_PATH = r'data/output/'
 
 class FlatFiles:
     '''
-      Functions related to flat files.
+      Functions to treat flat files.
       '''
 
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
@@ -30,16 +30,31 @@ class FlatFiles:
         self.dates['date'] = pd.to_datetime(self.dates['date'])
 
     def add_date_id(self, df, column):
+        '''
+
+        :param df: The dataframe that includes the column to be transform to datetime
+        :param column: The column to be transform to datetime
+        :return: The initial dataframe adding the dateID column
+        '''
         # Merge with dates and add dateID
         df[column] = pd.to_datetime([f'{y}-01-01' for y in df[column]])
         df = df.merge(self.dates, left_on=column, right_on='date', how='left')
         return df
 
     def select_columns_fact_table(self, df):
+        '''
+
+        :param df: The dataframe to be filtered
+        :return: A filtered dataframe including the columns of fact tables
+        '''
         df_filtered = df[['factID', 'measureID', 'dateID', 'locationID', 'value']]
         return df_filtered
 
     def _date_today(self):
+        '''
+
+        :return: Today's date
+        '''
         # Add today's date
         todays_date = time.strftime("%Y-%m-%d")
         return todays_date
@@ -66,14 +81,20 @@ class FlatFiles:
     def export_output(self, df, file_name):
         '''
 
-        :param df:
-        :param file_name:
-        :return:
+        :param df: The dataframe to be exported.
+        :param file_name: The name of the file we want to export to.
+        :return: Exports both to parquet and csv formats
         '''
         self.export_to_parquet(df, file_name)
         self.export_to_csv(df, file_name)
 
     def export_output_w_date(self, df, file_name):
+        '''
+
+        :param df: The dataframe to be exported.
+        :param file_name: The name of the file we want to export to.
+        :return: Exports both to parquet and csv formats including today's date in the name.
+        '''
         date = self._date_today()
         file_name = file_name + '_' + date
 
