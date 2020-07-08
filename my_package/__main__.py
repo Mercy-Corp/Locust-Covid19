@@ -5,6 +5,7 @@ from shapefile_table import ShapefileTable
 from production_table import ProductionTable
 from population_table import PopulationTable
 from utils_flat_files import FlatFiles
+from measure_table import MeasuresTable
 
 import os
 
@@ -13,8 +14,8 @@ INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
 OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
 
 # #local paths
-# INPUT_PATH = r'data/input/'
-# OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 if __name__ == '__main__':
 
@@ -61,3 +62,13 @@ if __name__ == '__main__':
     population_df = pop_table.add_ids_to_table()
     # Export
     flatfiles.export_output(population_df, 'population_table_2015')
+
+    # 5. Creation of measures table
+
+    #Load class
+    measure_table = MeasuresTable(INPUT_PATH,OUTPUT_PATH)
+    #Create dataframe
+    measures_df = measure_table.measures_df
+    #Export
+    FlatFiles().export_to_parquet(measures_df,"measures")
+    FlatFiles().export_to_csv(measures_df,"measures")
