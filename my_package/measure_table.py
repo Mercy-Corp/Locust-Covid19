@@ -1,3 +1,10 @@
+"""
+The aim of this module is to extract the measure table.
+
+Created on Thu Jul 06 17:16:40 2020
+
+@author: linnea.evanson@accenture.com
+"""
 import pandas as pd
 from utils_flat_files import FlatFiles
 
@@ -10,7 +17,7 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
 
 class MeasuresTable:
     '''
-    This class is the measures table
+    This class creates the measures table
     '''
 
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
