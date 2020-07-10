@@ -6,7 +6,7 @@ from production_table import ProductionTable
 from population_table import PopulationTable
 from utils_flat_files import FlatFiles
 from measure_table import MeasuresTable
-
+from demand import DemandTable
 import os
 
 # S3 paths
@@ -72,3 +72,12 @@ if __name__ == '__main__':
     #Export
     FlatFiles().export_to_parquet(measures_df,"measures")
     FlatFiles().export_to_csv(measures_df,"measures")
+
+    # 6. Creation of demand table
+    #Load class
+    demand_table = DemandTable(INPUT_PATH,OUTPUT_PATH)
+    #Create dataframe
+    demand_df = demand_table.create_demand_table()
+    #Export
+    FlatFiles().export_to_parquet(demand_df,"demand")
+    FlatFiles().export_to_csv(demand_df,"demand")
