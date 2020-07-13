@@ -55,13 +55,12 @@ if __name__ == '__main__':
 
     # 4. Creation of population table
 
-    print("------- Extracting population table ---------")
+    print("------- Extracting population tables ---------")
+    years = [2000, 2014, 2015, 2016, 2017, 2018, 2020]
 
-    pop_table = PopulationTable(INPUT_PATH, OUTPUT_PATH)
-    # Create dataframe
-    population_df = pop_table.add_ids_to_table()
-    # Export
-    flatfiles.export_output(population_df, 'population_table_2015')
+    for year in years:
+        print("Population {}:".format(year))
+        PopulationTable(year).export_population()
 
     # 5. Creation of measures table
 
