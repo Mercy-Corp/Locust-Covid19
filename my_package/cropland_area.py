@@ -35,7 +35,7 @@ class Cropland:
         self.shp2_Uganda = gpd.read_file(self.path_in + "gadm36_UGA_2.shp")[['GID_2', 'geometry']]
 
         # Import cropland vector
-        self.crops = gpd.read_file(self.path_in + "crops/Crops_vectorized.shp")
+        self.crops = gpd.read_file(self.path_in + "crops/Crops_vectorized.shp") #TODO point to the new 2015 vector
 
     def get_districts(self):
         '''
