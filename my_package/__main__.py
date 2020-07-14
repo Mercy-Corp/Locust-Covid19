@@ -7,7 +7,8 @@ from population_table import PopulationTable
 from utils_flat_files import FlatFiles
 from measure_table import MeasuresTable
 from demand import DemandTable
-import os
+from cropland_area import Cropland
+#import os
 
 # S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
@@ -27,7 +28,6 @@ if __name__ == '__main__':
     #         os.makedirs(directory)
 
     # 1. Creation of location table
-
     print("------- Extracting location table ---------")
 
     loc_table = LocationTable(INPUT_PATH, OUTPUT_PATH)
@@ -35,7 +35,6 @@ if __name__ == '__main__':
     loc_table.export_to_parquet(location_table, 'location_table')       # Export table to parquet format
 
     # 2. Creation of shapefile table
-
     print("------- Extracting shapefile table ---------")
 
     shp_table = ShapefileTable(INPUT_PATH, OUTPUT_PATH)
@@ -43,7 +42,6 @@ if __name__ == '__main__':
     shp_table.export_to_shp(gdf_all, 'shapefile_table')     # Export table to shp
 
     # 3. Creation of production table
-
     print("------- Extracting production table ---------")
     #Load class
     prod_table = ProductionTable(INPUT_PATH, OUTPUT_PATH)
@@ -54,7 +52,6 @@ if __name__ == '__main__':
     flatfiles.export_output_w_date(production_df, 'production_table')
 
     # 4. Creation of population table
-
     print("------- Extracting population tables ---------")
     years = [2000, 2014, 2015, 2016, 2017, 2018, 2020]
 
@@ -63,7 +60,6 @@ if __name__ == '__main__':
         PopulationTable(year).export_population()
 
     # 5. Creation of measures table
-
     #Load class
     measure_table = MeasuresTable(INPUT_PATH,OUTPUT_PATH)
     #Create dataframe
@@ -80,3 +76,6 @@ if __name__ == '__main__':
     #Export
     FlatFiles().export_to_parquet(demand_df,"demand")
     FlatFiles().export_to_csv(demand_df,"demand")
+
+    # 7. Calculation of cropland
+    Cropland(INPUT_PATH, OUTPUT_PATH).export_table()
