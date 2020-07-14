@@ -38,30 +38,50 @@ class Cropland:
         self.crops = gpd.read_file(self.path_in + "crops/Crops_vectorized.shp")
 
     def get_districts(self):
+        '''
+        
+        :return: A geodataframe with all districts of the 4 countries concatenated.
+        '''
         district_level = [self.shp2_Kenya, self.shp2_Ethiopia, self.shp2_Somalia, self.shp2_Uganda]
         gdf_districts = gpd.GeoDataFrame(pd.concat(district_level, ignore_index=True))
         gdf_districts.crs = {"init": "epsg:4326"}
         return gdf_districts
 
     def filter_crops(self):
-        # Filter for crops id
+        '''
+
+        :return: The crops vector filtered by the crops id.
+        '''
+
         crops = self.crops
         crops = crops[crops['Crops'] == 1]
         crops.Crops = 12
         return crops
 
     def crops_district(self):
+        '''
+
+        :return: A geodataframe with the crops intersected by district.
+        '''
         crops = gpd.GeoDataFrame(self.filter_crops())
         gdf_districts = self.get_districts()
         crops_district = gpd.overlay(crops, gdf_districts, how='intersection')
         return crops_district
 
     def crops_area(self):
+        '''
+
+        :return: A geodataframe with the area of crops per district calculated.
+        '''
         crops_district = gpd.GeoDataFrame(self.crops_district())
         crops_district['area_inter'] = crops_district.geometry.area
         return crops_district
 
     def add_fact_ids(self):
+        '''
+        Adds the fact tables ids
+        :return:  A filtered dataframe by the columns we need for fact tables.
+        '''
         crops_district = gpd.GeoDataFrame(self.crops_area())
         crops_district['measureID'] = 27
         crops_district['factID'] = 'CROP_'
@@ -80,6 +100,10 @@ class Cropland:
         return crops_df
 
     def export_table(self):
+        '''
+
+        :return: The Cropland table in both a parquet and csv format with the date added in the name.
+        '''
         crops_df = self.add_fact_ids()
         FlatFiles().export_output_w_date(crops_df, 'Cropland')
         
