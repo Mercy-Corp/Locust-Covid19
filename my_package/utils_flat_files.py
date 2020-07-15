@@ -65,7 +65,7 @@ class FlatFiles:
         :param df: The dataframe to be exported
         :param file_name: the name of the file to be exported
         '''
-        df.to_parquet(self.path_out+file_name+".parquet", compression='None', index=False)
+        df.to_parquet(self.path_out+file_name+".parquet", compression = 'UNCOMPRESSED', index=False)
         print("Dataframe exported to parquet format")
 
     def export_to_csv(self, df, file_name):
@@ -100,3 +100,27 @@ class FlatFiles:
 
         self.export_to_parquet(df, file_name)
         self.export_to_csv(df, file_name)
+
+    def export_csv_w_date(self, df, file_name):
+        '''
+
+        :param df: The dataframe to be exported.
+        :param file_name: The name of the file we want to export to.
+        :return: Exports both to parquet and csv formats including today's date in the name.
+        '''
+        date = self._date_today()
+        file_name = file_name + '_' + date
+
+        self.export_to_csv(df, file_name)
+
+    def export_parquet_w_date(self, df, file_name):
+        '''
+
+        :param df: The dataframe to be exported.
+        :param file_name: The name of the file we want to export to.
+        :return: Exports both to parquet and csv formats including today's date in the name.
+        '''
+        date = self._date_today()
+        file_name = file_name + '_' + date
+
+        self.export_to_parquet(df, file_name)

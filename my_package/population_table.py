@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The aim of this module is to extract the production table.
+The aim of this module is to extract the population table.
 
 Created on Thu Jul 02 17:16:40 2020
 
@@ -10,9 +10,7 @@ Created on Thu Jul 02 17:16:40 2020
 #imports
 import pandas as pd
 import geopandas as gpd
-import rasterio
 from rasterstats import zonal_stats
-from utils_shapefiles import Shapefiles
 from utils_flat_files import FlatFiles
 
 #S3 paths
@@ -27,9 +25,10 @@ class PopulationTable:
     '''
     This class creates the 2015 population table.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, year, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
+        self.year = year
         self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
         self.shapefile_table = gpd.read_file(self.path_out + "shapefile_table.shp")
 
@@ -38,10 +37,10 @@ class PopulationTable:
         self.gdf_Ethiopia = gpd.read_file(self.path_in + "gadm36_ETH_2.shp")[['GID_2', 'geometry']]
         self.gdf_Uganda = gpd.read_file(self.path_in + "gadm36_UGA_2.shp")[['GID_2', 'geometry']]
 
-        self.raster_Uganda = self.path_in + "population/UGA_ppp_v2b_2015_UNadj.tif"
-        self.raster_Kenya = self.path_in + "population/KEN_popmap15adj_v2b.tif"
-        self.raster_Somalia = self.path_in + "population/SOM15adjv2.tif"
-        self.raster_Ethiopia = self.path_in + "population/ETH15adjv5.tif"
+        self.raster_Uganda = self.path_in + "population/UGA_pop_" + str(self.year) + ".tif"
+        self.raster_Kenya = self.path_in + "population/KEN_pop_" + str(self.year) + ".tif"
+        self.raster_Somalia = self.path_in + "population/SOM_pop_" + str(self.year) + ".tif"
+        self.raster_Ethiopia = self.path_in + "population/ETH_pop_" + str(self.year) + ".tif"
 
         self.pop_density_Uganda = zonal_stats(self.gdf_Uganda.geometry, self.raster_Uganda, layer="polygons", stats=['sum'])
         self.pop_density_Kenya = zonal_stats(self.gdf_Kenya.geometry, self.raster_Kenya, layer="polygons", stats=['sum'])
@@ -49,7 +48,11 @@ class PopulationTable:
         self.pop_density_Ethiopia = zonal_stats(self.gdf_Ethiopia.geometry, self.raster_Ethiopia, layer="polygons", stats=['sum'])
 
     def population_table(self):
-        # Add it as a column in our geodataframe
+        '''
+
+        :return: the geodataframe with the population column
+        '''
+        # Add population as a column in our geodataframe
         self.gdf_Uganda['population'] = pd.DataFrame(self.pop_density_Uganda)
         self.gdf_Kenya['population'] = pd.DataFrame(self.pop_density_Kenya)
         self.gdf_Somalia['population'] = pd.DataFrame(self.pop_density_Somalia)
@@ -73,7 +76,7 @@ class PopulationTable:
         population_gdf['measureID'] = 26
 
         # Add year, to be transformed to dateId in later step
-        population_gdf['year'] = 2015
+        population_gdf['year'] = self.year
 
         # Add factID
         population_gdf['factID'] = 'Pop_' + population_gdf['locationID'].astype(str) + "_" + population_gdf[
@@ -87,15 +90,18 @@ class PopulationTable:
 
         return population_df
 
+    def export_population(self):
+        population_df = self.add_ids_to_table()
+        filename = 'population_table_' + str(self.year)
+        FlatFiles().export_output(population_df, filename)
 
 if __name__ == '__main__':
 
-    print("------- Extracting population table ---------")
-
-    pop_table = PopulationTable()
-
-    # Create dataframe
-    population_df = pop_table.add_ids_to_table()
-
-    # Export
-    FlatFiles().export_output(population_df, 'population_table_2015')
+    print("------- Extracting population tables ---------")
+    PopulationTable(2000).export_population()
+    PopulationTable(2014).export_population()
+    PopulationTable(2015).export_population()
+    PopulationTable(2016).export_population()
+    PopulationTable(2017).export_population()
+    PopulationTable(2018).export_population()
+    PopulationTable(2020).export_population()
