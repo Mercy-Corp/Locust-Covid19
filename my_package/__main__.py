@@ -8,6 +8,7 @@ from utils_flat_files import FlatFiles
 from measure_table import MeasuresTable
 from demand import DemandTable
 from cropland_area import Cropland
+from forageland_area import Forageland
 #import os
 
 # S3 paths
@@ -78,4 +79,9 @@ if __name__ == '__main__':
     FlatFiles().export_to_csv(demand_df,"demand")
 
     # 7. Calculation of cropland
-    Cropland(INPUT_PATH, OUTPUT_PATH).export_table()
+    print("------- Extracting cropland area per district table ---------")
+    Cropland(INPUT_PATH, OUTPUT_PATH).export_table("Cropland")
+
+    # 8. Calculation of forageland
+    print("------- Extracting forageland area per district table ---------")
+    Forageland(INPUT_PATH, OUTPUT_PATH).export_table("Forageland")
