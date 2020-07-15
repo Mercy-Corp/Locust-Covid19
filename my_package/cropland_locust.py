@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The aim of this module is to extract the forageland area affected by locust per district.
+The aim of this module is to extract the cropland area affected by locust per district.
 
 Created on Wed Jul 15 11:29:40 2020
 
@@ -23,7 +23,7 @@ OUTPUT_PATH = r'data/output/'
 
 class CroplandLocust:
     '''
-    This class calculates the forageland area affected by locust per district.
+    This class calculates the cropland area affected by locust per district.
     '''
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
@@ -108,7 +108,7 @@ class CroplandLocust:
     def groupby_month(self):
         '''
 
-        :return: A gdf grouped by month and year
+        :return: A gdf grouped by month and year.
         '''
 
         locust_grouped = self.calc_buffer()
@@ -156,8 +156,8 @@ class CroplandLocust:
 
     def intersect(self):
         '''
-        Intersects the buffers with the districts and the forageland.
-        :return: A gdf with locust affected foragelands per district
+        Intersects the buffers with the districts and the cropland.
+        :return: A gdf with locust affected croplands per district
         '''
         gdf_districts = self.get_districts()
         locust_buffers_gdf = self.loc_buffers_to_gdf()
@@ -202,14 +202,14 @@ class CroplandLocust:
     def export_table(self, filename):
         '''
 
-        :return: The Forageland table in both a parquet and csv format with the date added in the name.
+        :return: The Cropland table in both a parquet and csv format with the date added in the name.
         '''
         crops_loc_df = self.add_fact_ids()
         FlatFiles().export_output_w_date(crops_loc_df, filename)
 
 if __name__ == '__main__':
 
-    print("------- Extracting forageland area affected by locust per district table ---------")
+    print("------- Extracting cropland area affected by locust per district table ---------")
     CroplandLocust().export_table('Crops_impact_locust_district')
 
 
