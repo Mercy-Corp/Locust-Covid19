@@ -85,3 +85,7 @@ if __name__ == '__main__':
     # 8. Calculation of forageland
     print("------- Extracting forageland area per district table ---------")
     Forageland(INPUT_PATH, OUTPUT_PATH).export_table("Forageland")
+
+    # 9. Calculation of forageland affected by locust
+    print("------- Extracting forageland area affected by locust per district table ---------")
+    Forageland().export_table('Forage_impact_locust_district')
