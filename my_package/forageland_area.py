@@ -77,7 +77,7 @@ class Forageland:
         forageland_district['measureID'] = 28
         forageland_district['factID'] = 'FOR_' + forageland_district['fid'].astype(str)
         forageland_district['year'] = 2015
-        forageland_district['date'] = pd.to_datetime([f'{y}-01-01' for y in forageland_district.year])
+        #forageland_district['date'] = pd.to_datetime([f'{y}-01-01' for y in forageland_district.year])
         forageland_district['locationID'] = forageland_district['GID_2']
         forageland_district['value'] = forageland_district['area_inter']
 

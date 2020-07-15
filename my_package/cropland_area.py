@@ -86,7 +86,7 @@ class Cropland:
         crops_district['measureID'] = 27
         crops_district['factID'] = 'CROP_' + crops_district['fid'].astype(str)
         crops_district['year'] = 2015
-        crops_district['date'] = pd.to_datetime([f'{y}-01-01' for y in crops_district.year])
+        #crops_district['date'] = pd.to_datetime([f'{y}-01-01' for y in crops_district.year])
         crops_district['locationID'] = crops_district['GID_2']
         crops_district['value'] = crops_district['area_inter']
 
