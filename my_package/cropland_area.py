@@ -22,7 +22,7 @@ OUTPUT_PATH = r'data/output/'
 
 class Cropland:
     '''
-    This class creates the 2015 population table.
+    This class calculates the cropland area per district.
     '''
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
@@ -84,8 +84,7 @@ class Cropland:
         '''
         crops_district = gpd.GeoDataFrame(self.crops_area())
         crops_district['measureID'] = 27
-        crops_district['factID'] = 'CROP_'
-        crops_district['factID'] = crops_district['factID'] + crops_district['fid'].astype(str)
+        crops_district['factID'] = 'CROP_' + crops_district['fid'].astype(str)
         crops_district['year'] = 2015
         crops_district['date'] = pd.to_datetime([f'{y}-01-01' for y in crops_district.year])
         crops_district['locationID'] = crops_district['GID_2']
@@ -99,15 +98,15 @@ class Cropland:
         
         return crops_df
 
-    def export_table(self):
+    def export_table(self, filename):
         '''
 
         :return: The Cropland table in both a parquet and csv format with the date added in the name.
         '''
         crops_df = self.add_fact_ids()
-        FlatFiles().export_output_w_date(crops_df, 'Cropland')
+        FlatFiles().export_output_w_date(crops_df, filename)
         
 if __name__ == '__main__':
 
     print("------- Extracting cropland area per district table ---------")
-    Cropland().export_table()
+    Cropland().export_table("Cropland")
