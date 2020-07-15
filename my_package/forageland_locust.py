@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-The aim of this module is to extract the cropland area affected by locust per district.
+The aim of this module is to extract the forageland area affected by locust per district.
 
 Created on Wed Jul 15 08:54:40 2020
 
@@ -21,7 +21,7 @@ from utils_flat_files import FlatFiles
 INPUT_PATH = r'data/input/'
 OUTPUT_PATH = r'data/output/'
 
-class Forageland:
+class ForagelandLocust:
     '''
     This class calculates the forageland area affected by locust per district.
     '''
@@ -199,6 +199,6 @@ class Forageland:
 if __name__ == '__main__':
 
     print("------- Extracting forageland area affected by locust per district table ---------")
-    Forageland().export_table('Forage_impact_locust_district')
+    ForagelandLocust().export_table('Forage_impact_locust_district')
 
 
