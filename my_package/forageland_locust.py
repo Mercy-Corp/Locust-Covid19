@@ -11,7 +11,6 @@ Created on Wed Jul 15 08:54:40 2020
 import pandas as pd
 import geopandas as gpd
 import geopandas
-from datetime import datetime
 from utils_flat_files import FlatFiles
 
 #S3 paths
@@ -56,10 +55,14 @@ class Forageland:
         return gdf_districts
 
     def filter_data(self):
+        '''
+
+        :return: A gdf filtered by countries, dates and columns.
+        '''
 
         locust_gdf = self.locust_gdf
         # Filter dates
-        locust_gdf['STARTDATE'] = pd.to_datetime(locust_gdf['STARTDATE'])
+        locust_gdf['STARTDATE'] = pd.to_datetime(locust_gdf['STARTDATE'], format='%Y-%m-%d')
         locust_gdf_filtered = locust_gdf[(locust_gdf['STARTDATE'] > pd.Timestamp(2000, 1, 1)) & (locust_gdf['STARTDATE'] < pd.Timestamp.today())]
 
         # Filter countries
@@ -74,6 +77,10 @@ class Forageland:
         return locust_gdf_filtered
 
     def calc_buffer(self):
+        '''
+
+        :return: A gdf with locust buffers of 25km reprojected and calculated in degrees.
+        '''
         locust_gdf_filtered = self.filter_data()
         # Reproject to calculate in meters
         cpr_gdf = locust_gdf_filtered.to_crs({'init': 'epsg:32636'})
@@ -89,6 +96,10 @@ class Forageland:
         return cpr_gdf
 
     def groupby_month(self):
+        '''
+
+        :return: A gdf grouped by month and year
+        '''
 
         locust_grouped = self.calc_buffer()
         locust_grouped.index = pd.to_datetime(locust_grouped['STARTDATE'], format='%Y-%m-%d')
@@ -97,6 +108,10 @@ class Forageland:
         return locust_grouped
 
     def overlapping_buffers(self):
+        '''
+        Unions the overlapping buffers grouped by month and year.
+        :return: A df with the final buffer geometries and dates
+        '''
         locust_grouped = self.groupby_month()
 
         # Initialise empty df
@@ -110,8 +125,8 @@ class Forageland:
             df_group = df_group.explode().reset_index(drop=True)
 
             # add date column
-            df_group['date'] = str(group_name[1]) + str(group_name[0]) + '01'
-            df_group['date'] = pd.to_datetime(df_group['date'], format='%Y%m%d')
+            df_group['date'] = str(group_name[1]) + '-' + str(group_name[0]) + '-01'
+            df_group['date'] = pd.to_datetime(df_group['date'], format='%Y-%m-%d')
 
             # append to dataframe
             locust_buffers = locust_buffers.append(df_group)
@@ -119,6 +134,10 @@ class Forageland:
         return locust_buffers
 
     def loc_buffers_to_gdf(self):
+        '''
+        Transforms df to gdf.
+        :return: A gdf of the locust final buffers.
+        '''
         locust_buffer = self.overlapping_buffers()
         crs = {'init': 'epsg:4326'}
         geometry = locust_buffer['geometry']
@@ -126,6 +145,10 @@ class Forageland:
         return locust_buffers_gdf
 
     def intersect(self):
+        '''
+        Intersects the buffers with the districts and the forageland.
+        :return: A gdf with locust affected foragelands per district
+        '''
         gdf_districts = self.get_districts()
         locust_buffers_gdf = self.loc_buffers_to_gdf()
 
@@ -137,12 +160,20 @@ class Forageland:
         return forage_locust_district
 
     def area_forage_affected_locust(self):
+        '''
+        Calculates the area affected by locust
+        :return: A gdf including the area in degrees
+        '''
         forage_locust_district = self.intersect()
         forage_locust_district['forage_locust_area'] = forage_locust_district.geometry.area
 
         return forage_locust_district
 
     def add_fact_ids(self):
+        '''
+        Adds ids of fact tables
+        :return: A df with the standardised columns of fact tables.
+        '''
         forage_locust_district = self.area_forage_affected_locust()
         forage_locust_district['measureID'] = 29
         forage_locust_district['factID'] = 'FOR_LOC_DIS' + forage_locust_district.index.astype(str)
@@ -154,7 +185,7 @@ class Forageland:
 
         # Select fact table columns
         forageland_loc_df = FlatFiles().select_columns_fact_table(df=forageland_loc_gdf)
-        print(forageland_loc_df.head())
+
         return forageland_loc_df
 
     def export_table(self, filename):
