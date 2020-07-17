@@ -1,5 +1,6 @@
 # Basic template for python projects
 
+
 There are several files in the root folder. The code goes in *my_package" (change the name to something meaningful).
 
 - *README.md* (this file) has a description of what the code does. It also shows up in the repository web interface.
