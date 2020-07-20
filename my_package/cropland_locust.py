@@ -165,12 +165,12 @@ class CroplandLocust:
 
         # intersect with districts
         locust_distr = gpd.overlay(locust_buffers_gdf, gdf_districts, how='intersection')
-        # intersect with forageland
+        # intersect with cropland
         crops_locust_district = gpd.overlay(crops_v, locust_distr, how='intersection')
 
         return crops_locust_district
 
-    def area_forage_affected_locust(self):
+    def area_crops_affected_locust(self):
         '''
         Calculates the area affected by locust
         :return: A gdf including the area in degrees
@@ -185,7 +185,7 @@ class CroplandLocust:
         Adds ids of fact tables
         :return: A df with the standardised columns of fact tables.
         '''
-        crops_locust_district = self.area_forage_affected_locust()
+        crops_locust_district = self.area_crops_affected_locust()
         crops_locust_district['measureID'] = 30
         crops_locust_district['factID'] = 'CROP_LOC_DIS' + crops_locust_district.index.astype(str)
         crops_locust_district['locationID'] = crops_locust_district['GID_2']
