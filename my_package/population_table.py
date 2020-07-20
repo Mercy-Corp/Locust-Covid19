@@ -90,8 +90,9 @@ class PopulationTable:
 
     def export_population(self):
         population_df = self.add_ids_to_table()
-        filename = 'population_fact/population_table_' + str(self.year)
-        FlatFiles().export_to_parquet(population_df, filename)
+        file_name = 'population_fact/population_table_' + str(self.year)
+        population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
+        print("Dataframe exported to parquet format")
 
 if __name__ == '__main__':
 
