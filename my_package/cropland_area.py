@@ -15,7 +15,7 @@ from rasterstats import zonal_stats
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
@@ -143,4 +143,4 @@ if __name__ == '__main__':
     print(gdf.shape)
     print(gdf.columns)
 
-    Cropland().export_table("Cropland")
+    Cropland().export_table("cropland_fact/Cropland")
