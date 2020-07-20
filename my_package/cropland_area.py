@@ -14,15 +14,15 @@ from utils_flat_files import FlatFiles
 from rasterstats import zonal_stats
 
 #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
-#RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-RASTER_NAMES = ["N00E30", "S10E40", "N00E50"]
+RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
+#RASTER_NAMES = ["N00E30", "S10E40", "N00E50"]
 
 class Cropland:
     '''
@@ -31,6 +31,7 @@ class Cropland:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
+
 
         # Import districts
         self.shp2_Kenya = gpd.read_file(self.path_in + "gadm36_KEN_2.shp")[['GID_2', 'geometry']]
