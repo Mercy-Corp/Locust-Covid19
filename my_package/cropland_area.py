@@ -12,6 +12,7 @@ import pandas as pd
 import geopandas as gpd
 from utils_flat_files import FlatFiles
 from rasterstats import zonal_stats
+import glob
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
@@ -21,8 +22,8 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
 
-#RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-RASTER_NAMES = ["N00E30", "S10E40", "N00E50"]
+RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
+#RASTER_NAMES = ["N00E30", "S10E40", "N00E50"]
 
 class Cropland:
     '''
@@ -31,7 +32,6 @@ class Cropland:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-
 
         # Import districts
         self.shp2_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
@@ -54,27 +54,47 @@ class Cropland:
         gdf_districts.crs = {"init": "epsg:4326"}
         return gdf_districts
 
-    def get_stats(self):
-        gdf = gpd.GeoDataFrame()
+    def get_stats(self, raster):
+
+        raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
+        gdf_districts = self.get_districts()
+
+        stats = zonal_stats(gdf_districts.geometry, raster_path, stats="count", categorical=True)
+
+        if raster == "N00E50":
+            gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
+        else:
+            gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[2]
+        print(raster)
+        gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"]
+        gdf_districts = gdf_districts[gdf_districts['croplands_count'].notnull()]
+        gdf_districts['croplands_area'] = gdf_districts['croplands_count'] * gdf_districts['area'] / gdf_districts[
+            'area_count']
+        print(gdf_districts.shape)
+        print(gdf_districts.head())
+
+        df_districts = gdf_districts[['GID_2', 'croplands_area']]
+        file_name = "/cropland/crops_" + raster
+        df_districts.to_csv(self.path_in + file_name + '.csv', sep='|', encoding='utf-8', index=False)
+
+        return df_districts
+
+    def extract_crops(self):
+        df = pd.DataFrame()
 
         for raster in RASTER_NAMES:
-            raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
-            gdf_districts = self.get_districts()
+            df_of_raster = self.get_stats(raster)
+            df = df.append(df_of_raster)
 
-            stats = zonal_stats(gdf_districts.geometry, raster_path, stats="count", categorical=True)
-
-            if raster == "N00E50":
-                gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
-            else:
-                gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[2]
-            print(raster)
-            gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"]
-            gdf_districts = gdf_districts[gdf_districts['croplands_count'].notnull()]
-            gdf_districts['croplands_area'] = gdf_districts['croplands_count'] * gdf_districts['area'] / gdf_districts['area_count']
-            print(gdf_districts.shape)
-            gdf = gdf.append(gdf_districts)
-            print(gdf.head())
         return gdf
+
+    def load_extracted_crops(self):
+        all_files = glob.glob(self.path_in + "cropland/crops_*.csv")
+
+        df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
+        concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
+        return concatenated_df
+
 
     # def filter_crops(self):
     #     '''
@@ -111,11 +131,10 @@ class Cropland:
         Adds the fact tables ids
         :return:  A filtered dataframe by the columns we need for fact tables.
         '''
-        crops_district = (self.get_stats())
+        crops_district = self.load_extracted_crops()
         crops_district['measureID'] = 27
-        crops_district['factID'] = 'CROP_' + crops_district.index
+        crops_district['factID'] = 'CROP_' + str(crops_district.index)
         crops_district['year'] = 2015
-        #crops_district['date'] = pd.to_datetime([f'{y}-01-01' for y in crops_district.year])
         crops_district['locationID'] = crops_district['GID_2']
         crops_district['value'] = crops_district['croplands_area']
 
@@ -139,8 +158,9 @@ if __name__ == '__main__':
 
     print("------- Extracting cropland area per district table ---------")
 
-    gdf = Cropland().get_stats()
-    print(gdf.shape)
-    print(gdf.columns)
+    #for raster in RASTER_NAMES:
+     #   gdf = Cropland().get_stats(raster)
+      #  print(gdf.shape)
+       # print(gdf.columns)
 
     Cropland().export_table("cropland_fact/Cropland")
