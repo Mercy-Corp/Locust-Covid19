@@ -21,8 +21,8 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
 
-RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-#RASTER_NAMES = ["N00E30", "S10E40", "N00E50"]
+#RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
+RASTER_NAMES = ["N00E30", "S10E40", "N00E50"]
 
 class Cropland:
     '''
