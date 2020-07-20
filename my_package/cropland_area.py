@@ -55,6 +55,11 @@ class Cropland:
         return gdf_districts
 
     def get_stats(self, raster):
+        '''
+
+        :param raster: The geotiff indicating the cropland area
+        :return: A df with two columns, district id and cropland area.
+        '''
 
         raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
         gdf_districts = self.get_districts()
@@ -65,13 +70,11 @@ class Cropland:
             gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
         else:
             gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[2]
-        print(raster)
+        #print(raster)
         gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"]
         gdf_districts = gdf_districts[gdf_districts['croplands_count'].notnull()]
         gdf_districts['croplands_area'] = gdf_districts['croplands_count'] * gdf_districts['area'] / gdf_districts[
             'area_count']
-        print(gdf_districts.shape)
-        print(gdf_districts.head())
 
         df_districts = gdf_districts[['GID_2', 'croplands_area']]
         file_name = "/cropland/crops_" + raster
@@ -89,7 +92,7 @@ class Cropland:
         return gdf
 
     def load_extracted_crops(self):
-        all_files = glob.glob(self.path_in + "cropland/crops_*.csv")
+        all_files = glob.glob(self.path_in + "cropland/crops_*" + ".csv")
 
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
         concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
