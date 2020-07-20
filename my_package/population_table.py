@@ -14,12 +14,12 @@ from rasterstats import zonal_stats
 from utils_flat_files import FlatFiles
 
 #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 class PopulationTable:
     '''
@@ -90,8 +90,8 @@ class PopulationTable:
 
     def export_population(self):
         population_df = self.add_ids_to_table()
-        filename = 'population_table_' + str(self.year)
-        FlatFiles().export_output(population_df, filename)
+        filename = 'population_fact/population_table_' + str(self.year)
+        FlatFiles().export_to_parquet(population_df, filename)
 
 if __name__ == '__main__':
 
