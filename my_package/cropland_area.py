@@ -13,6 +13,8 @@ import geopandas as gpd
 from utils_flat_files import FlatFiles
 from rasterstats import zonal_stats
 import glob
+import boto3
+client = boto3.client('s3')
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'

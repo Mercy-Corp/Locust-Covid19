@@ -12,6 +12,8 @@ import pandas as pd
 import geopandas as gpd
 import geopandas
 from utils_flat_files import FlatFiles
+import boto3
+client = boto3.client('s3')
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
