@@ -10,8 +10,8 @@ import csv
 import pickle
 import pyarrow.parquet as pq
 import pyarrow.csv as pv
-import pyarrow as pa
-import pandas as pd
+#import pyarrow as pa
+#import pandas as pd
 import boto3
 client = boto3.client('s3')
 
