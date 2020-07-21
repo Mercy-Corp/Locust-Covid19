@@ -24,6 +24,7 @@ OUTPUT_PATH = r'data/output/'
 
 geolocator = Nominatim(user_agent="custom-application", timeout=10)
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia']
 
 class ExtractCoordinates:
@@ -90,7 +91,7 @@ class ExtractCoordinates:
 
         df['point'] = df['geo_location'].apply(lambda loc: tuple(loc.point) if loc else None)
 
-        df.to_pickle(self.path_in + country + '_geopy.pickle')
+        df.to_pickle(self.path_in + "location/" + country + "_geopy.pickle")
 
         return df
 
@@ -99,9 +100,7 @@ class ExtractCoordinates:
         for country in COUNTRY_LIST:
             self.market_country_geolocations(country)
 
-
-
-
+        return "Pickles per country exported"
 
 
 
@@ -115,8 +114,6 @@ class ExtractCoordinates:
             r"data/hotosm_som_populated_places_polygons_shp/hotosm_som_populated_places_polygons.shp")
 
 
-
-
 if __name__ == '__main__':
 
     print("------- Extracting coordinates for locations ---------")
@@ -128,6 +125,9 @@ if __name__ == '__main__':
     print(prices.isna().sum())
 
     Kenya = ExtractCoordinates().market_country_geolocations('Kenya')
+    print("Kenya:")
     print(Kenya.shape)
     print(Kenya.columns)
     print(Kenya.head())
+
+    ExtractCoordinates().markets_geolocations()
