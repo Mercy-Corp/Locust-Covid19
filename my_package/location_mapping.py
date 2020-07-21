@@ -63,19 +63,19 @@ class ExtractCoordinates:
 
         mkt_replacements = {}
         adm1_replacements = {}
-        if country = 'Kenya':
+        if country == 'Kenya':
             adm1_replacements = {'Coast': 'Coastal Kenya', 'Eastern': 'East Kenya', 'North Eastern': 'Northeast Kenya',
                              'Rift Valley': ' '}
-        elif country = 'Uganda':
+        elif country == 'Uganda':
             mkt_replacements = {'Makaratin': ''}
-        elif country = 'Ethiopia':
+        elif country == 'Ethiopia':
             mkt_replacements = {'Abaala': 'Abala', 'Robit': 'Shoa Robit', 'Asayta': 'Asaita', 'Wonago': 'Wenago',
                                 'Karati': 'Konso',
                                 'Haromaya': 'Alemaya', 'Nazareth': 'Adama', 'Beddenno': 'Bedeno', 'Wekro': 'Wukro',
                                 'Punido': 'Gog',
                                 'Ebinat': 'Ebbenat', 'Wolenchiti': 'Welenchete', 'Ajeber': 'Jedo', 'Bedessa': 'Wachu'}
             adm1_replacements = {'Beneshangul Gumu': 'Benishangul-Gumuz', 'Hareri': 'Harari'}
-        elif country = 'Somalia':
+        elif country == 'Somalia':
             df.loc[df['mkt_name'] == 'Wadajir', 'adm1_name'] = 'Shabelle Hoose'
             mkt_replacements = {'Buloburto': 'Bulo Burto', 'Qorioley': 'Qoryooley'}
             adm1_replacements = {'Hiraan': 'Hiiraan'}
@@ -99,8 +99,9 @@ class ExtractCoordinates:
 
         for country in COUNTRY_LIST:
             self.market_country_geolocations(country)
+            print("Pickle exported for " + country)
 
-        return "Pickles per country exported"
+        return "All pickles exported."
 
 
 
