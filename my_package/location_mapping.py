@@ -37,7 +37,7 @@ class ExtractCoordinates:
         self.path_out = path_out
 
         #prices
-        self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
+        #self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
 
         # #Settlement locations per country
         # self.ethiopia_gdf = gpd.read_file(self.path_in + "location/eth_pplp_multiplesources_20160205.shp")
@@ -54,7 +54,8 @@ class ExtractCoordinates:
         prices.to_pickle(self.path_in + "prices.pickle")
 
     def filter_prices(self):
-        prices = pickle.load(open(self.path_in + 'prices.pickle', 'rb'))
+        #Load prices
+        prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
         print(prices.columns)
         #Filter countries
         prices = prices[prices['adm0_name'].isin(COUNTRY_LIST)]
@@ -67,11 +68,17 @@ class ExtractCoordinates:
                    'Beans - Retail', 'Beans (dry) - Retail', 'Beans (fava, dry) - Retail']
         prices = prices[prices['cm_name'].isin(cm_name)]
 
+        prices.to_pickle(self.path_in + "prices_filtered.pickle")
+
+        return prices
+
+    def load_prices_pickle(self):
+        prices = pickle.load(open(self.path_in + 'prices.pickle', 'rb'))
         return prices
 
     def market_country_geolocations(self, country):
-        prices = self.filter_prices()
-
+        prices = self.load_prices_pickle()
+        #Filter for country
         df = prices[prices['adm0_name'].isin([country])]
         #df_kenya_test = df_kenya[:20]
         #df_kenya_test['geo_location'] = df_kenya_test['mkt_name'].apply(geocode)
@@ -108,8 +115,6 @@ class ExtractCoordinates:
 
         df.to_pickle(self.path_in + "location/" + country + "_geopy.pickle")
 
-        return df
-
     def markets_geolocations(self):
 
         for country in COUNTRY_LIST:
@@ -124,12 +129,12 @@ if __name__ == '__main__':
 
     print("------- Extracting coordinates for locations ---------")
     #PopulationTable(2000).export_population()
-    ExtractCoordinates().prices_to_pickle()
+    #ExtractCoordinates().filter_prices()
 
-    prices = ExtractCoordinates().filter_prices()
-    print(prices.shape)
-    print(prices.head())
-    print(prices.isna().sum())
+    # prices = ExtractCoordinates().filter_prices()
+    # print(prices.shape)
+    # print(prices.head())
+    # print(prices.isna().sum())
 
     # Kenya = ExtractCoordinates().market_country_geolocations('Kenya')
     # print("Kenya:")
@@ -137,4 +142,4 @@ if __name__ == '__main__':
     # print(Kenya.columns)
     # print(Kenya.head())
 
-    #ExtractCoordinates().markets_geolocations()
+    ExtractCoordinates().markets_geolocations()
