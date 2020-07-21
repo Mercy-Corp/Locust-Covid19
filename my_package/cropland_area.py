@@ -66,7 +66,7 @@ class Cropland:
         raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
         gdf_districts = self.get_districts()
 
-        stats = zonal_stats(gdf_districts.geometry, raster_path, stats="count", categorical=True)
+        stats = zonal_stats(gdf_districts.geometry, raster_path,  layer="polygons", stats="count", categorical=True)
 
         if raster == "N00E50":
             gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
