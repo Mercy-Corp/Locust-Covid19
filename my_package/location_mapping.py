@@ -13,6 +13,7 @@ import pandas as pd
 from geopy.geocoders import Nominatim
 from functools import partial
 from geopy.extra.rate_limiter import RateLimiter
+import pickle
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
@@ -36,10 +37,24 @@ class ExtractCoordinates:
         self.path_out = path_out
 
         #prices
-        self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',', low_memory=False)
+        self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
+
+        #Settlement locations per country
+        self.ethiopia_gdf = gpd.read_file(self.path_in + "location/eth_pplp_multiplesources_20160205.shp")
+        self.kenya_gdf = gpd.read_file(self.path_in + "location/KEN_Populated places_2002_DEPHA.shp")
+        self.somalia_gdf_1 = gpd.read_file(self.path_in + "location/somalia_settlements_p_coded_v3.shp")
+        self.uganda_gdf = gpd.read_file(self.path_in + "location/uga_villages_jan_2009_pcodedb.shp")
+        self.somalia_gdf_2 = gpd.read_file(
+            self.path_in + "location/hotosm_som_populated_places_points.shp")
+        self.somalia_gdf_3 = gpd.read_file(
+            self.path_in + "location/hotosm_som_populated_places_polygons.shp")
+
+    def prices_to_pickle(self):
+        prices = self.prices
+        prices.to_pickle(self.path_in + "prices.pickle")
 
     def filter_prices(self):
-        prices = self.prices
+        prices = pickle.load(open(self.path_in + 'prices.pickle', 'rb'))
         print(prices.columns)
         #Filter countries
         prices = prices[prices['adm0_name'].isin(COUNTRY_LIST)]
@@ -105,20 +120,11 @@ class ExtractCoordinates:
 
 
 
-        ethiopia_gdf = gpd.read_file(r"data/eth_pplp_multiplesources_20160205/eth_pplp_multiplesources_20160205.shp")
-        kenYa_gdf = gpd.read_file(r"data/KEN_Populated places_2002_DEPHA/KEN_Populated places_2002_DEPHA.shp")
-        somalia_gdf_1 = gpd.read_file(r"data/somalia_settlements_p_coded_v3/somalia_settlements_p_coded_v3.shp")
-        uganda_gdf = gpd.read_file(r"data/uga_villages_jan_2009_pcodedb/uga_villages_jan_2009_pcodedb.shp")
-        somalia_gdf_2 = gpd.read_file(
-            r"data/hotosm_som_populated_places_points_shp/hotosm_som_populated_places_points.shp")
-        somalia_gdf_3 = gpd.read_file(
-            r"data/hotosm_som_populated_places_polygons_shp/hotosm_som_populated_places_polygons.shp")
-
-
 if __name__ == '__main__':
 
     print("------- Extracting coordinates for locations ---------")
     #PopulationTable(2000).export_population()
+    ExtractCoordinates().prices_to_pickle()
 
     prices = ExtractCoordinates().filter_prices()
     print(prices.shape)
@@ -131,4 +137,4 @@ if __name__ == '__main__':
     # print(Kenya.columns)
     # print(Kenya.head())
 
-    ExtractCoordinates().markets_geolocations()
+    #ExtractCoordinates().markets_geolocations()
