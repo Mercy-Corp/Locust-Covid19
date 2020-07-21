@@ -15,12 +15,12 @@ from functools import partial
 from geopy.extra.rate_limiter import RateLimiter
 
 #S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 geolocator = Nominatim(user_agent="custom-application", timeout=10)
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
@@ -125,10 +125,10 @@ if __name__ == '__main__':
     print(prices.head())
     print(prices.isna().sum())
 
-    Kenya = ExtractCoordinates().market_country_geolocations('Kenya')
-    print("Kenya:")
-    print(Kenya.shape)
-    print(Kenya.columns)
-    print(Kenya.head())
+    # Kenya = ExtractCoordinates().market_country_geolocations('Kenya')
+    # print("Kenya:")
+    # print(Kenya.shape)
+    # print(Kenya.columns)
+    # print(Kenya.head())
 
     ExtractCoordinates().markets_geolocations()
