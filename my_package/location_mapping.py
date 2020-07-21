@@ -39,15 +39,15 @@ class ExtractCoordinates:
         #prices
         self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
 
-        #Settlement locations per country
-        self.ethiopia_gdf = gpd.read_file(self.path_in + "location/eth_pplp_multiplesources_20160205.shp")
-        self.kenya_gdf = gpd.read_file(self.path_in + "location/KEN_Populated places_2002_DEPHA.shp")
-        self.somalia_gdf_1 = gpd.read_file(self.path_in + "location/somalia_settlements_p_coded_v3.shp")
-        self.uganda_gdf = gpd.read_file(self.path_in + "location/uga_villages_jan_2009_pcodedb.shp")
-        self.somalia_gdf_2 = gpd.read_file(
-            self.path_in + "location/hotosm_som_populated_places_points.shp")
-        self.somalia_gdf_3 = gpd.read_file(
-            self.path_in + "location/hotosm_som_populated_places_polygons.shp")
+        # #Settlement locations per country
+        # self.ethiopia_gdf = gpd.read_file(self.path_in + "location/eth_pplp_multiplesources_20160205.shp")
+        # self.kenya_gdf = gpd.read_file(self.path_in + "location/KEN_Populated places_2002_DEPHA.shp")
+        # self.somalia_gdf_1 = gpd.read_file(self.path_in + "location/somalia_settlements_p_coded_v3.shp")
+        # self.uganda_gdf = gpd.read_file(self.path_in + "location/uga_villages_jan_2009_pcodedb.shp")
+        # self.somalia_gdf_2 = gpd.read_file(
+        #     self.path_in + "location/hotosm_som_populated_places_points.shp")
+        # self.somalia_gdf_3 = gpd.read_file(
+        #     self.path_in + "location/hotosm_som_populated_places_polygons.shp")
 
     def prices_to_pickle(self):
         prices = self.prices
