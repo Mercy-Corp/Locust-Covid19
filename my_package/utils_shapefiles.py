@@ -39,6 +39,7 @@ class Shapefiles:
     def import_shapefile(self, country):
         '''
         Imports a shp with the boundaries.
+
         :param country: the referring country of the shp. Choose between: "_KEN_", "_ETH_", "_SOM_" or "_UGA_"
         :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
         :return: A shapefile
@@ -49,6 +50,7 @@ class Shapefiles:
     def shapefiles_list(self):
         '''
         Creates a list of shapefiles according to hierarchy.
+
         :return: A list of geodataframes for all three countries (KEN, ETH, SOM) per hierarchy.
         '''
 
@@ -84,6 +86,7 @@ class Shapefiles:
     def create_sub_tables(self, shp_list):
         """
         Creates sub-tables per hierarchy to be used for the final location table.
+
         :param shp_list: A list of shapefiles
         :return: A geodataframe of all location data for the selected hierarchy
         """

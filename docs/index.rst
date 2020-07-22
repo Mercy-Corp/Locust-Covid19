@@ -10,10 +10,14 @@ Welcome to Mercy Corps's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
 
 MercyCorp main
 ===========================
-.. automodule:: my_package.main
+.. automodule:: my_package.__main__
    :members:
 
 MercyCorp demand table
@@ -51,6 +55,4 @@ MercyCorp utils shapefiles
 .. automodule:: my_package.utils_shapefiles
    :members:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+

@@ -62,6 +62,7 @@ class FlatFiles:
     def export_to_parquet(self, df, file_name):
         '''
         Exports a dataframe to a parquet format.
+
         :param df: The dataframe to be exported
         :param file_name: the name of the file to be exported
         '''
@@ -71,6 +72,7 @@ class FlatFiles:
     def export_to_csv(self, df, file_name):
         '''
         Exports a dataframe to a parquet format.
+
         :param df: The dataframe to be exported
         :param file_name: the name of the file to be exported
         '''

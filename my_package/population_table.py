@@ -11,7 +11,7 @@ Created on Thu Jul 02 17:16:40 2020
 import pandas as pd
 import geopandas as gpd
 from rasterstats import zonal_stats
-from utils_flat_files import FlatFiles
+from my_package.utils_flat_files import FlatFiles
 
 #S3 paths
 # INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'

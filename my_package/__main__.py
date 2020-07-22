@@ -1,9 +1,19 @@
-# This file is executed when the module is run from the command line:
-# python -m my_package
-# from location_table import LocationTable
-# from shapefile_table import ShapefileTable
-# from production_table import ProductionTable
-# from population_table import PopulationTable
+"""
+This file is executed when the module is run from the command line.
+This file runs the following:
+-Extracts location table-
+-Extracts shapefile table-
+-Extracts production table-
+-Extracts population tables-
+-Extracts measures table-
+-Extracts demand table-
+
+"""
+python -m my_package
+from location_table import LocationTable
+from shapefile_table import ShapefileTable
+from production_table import ProductionTable
+from population_table import PopulationTable
 from utils_flat_files import FlatFiles
 from measure_table import MeasuresTable
 from demand import DemandTable
@@ -63,6 +73,7 @@ if __name__ == '__main__':
         PopulationTable(year).export_population()
 
     # 5. Creation of measures table
+    print("------- Extracting measure table ---------")
 
     #Load class
     measure_table = MeasuresTable(INPUT_PATH,OUTPUT_PATH)
@@ -73,6 +84,8 @@ if __name__ == '__main__':
     FlatFiles().export_to_csv(measures_df,"measures")
 
     # 6. Creation of demand table
+    print("------- Extracting demand table ---------")
+
     #Load class
     demand_table = DemandTable(INPUT_PATH,OUTPUT_PATH)
     #Create dataframe
