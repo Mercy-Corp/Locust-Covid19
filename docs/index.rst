@@ -20,34 +20,9 @@ MercyCorp main
 .. automodule:: my_package.__main__
    :members:
 
-MercyCorp demand table
-===========================
-.. automodule:: my_package.demand
-   :members:
-
 MercyCorp location table
 ===========================
 .. automodule:: my_package.location_table
-   :members:
-
-MercyCorp measure table
-===========================
-.. automodule:: my_package.measure_table
-   :members:
-
-MercyCorp population table
-===========================
-.. automodule:: my_package.population_table
-   :members:
-
-MercyCorp production table
-===========================
-.. automodule:: my_package.production_table
-   :members:
-
-MercyCorp utils flat files
-===========================
-.. automodule:: my_package.utils_flat_files
    :members:
 
 MercyCorp utils shapefiles
@@ -55,4 +30,27 @@ MercyCorp utils shapefiles
 .. automodule:: my_package.utils_shapefiles
    :members:
 
+MercyCorp production table
+===========================
+.. automodule:: my_package.production_table
+   :members:
 
+MercyCorp population table
+===========================
+.. automodule:: my_package.population_table
+   :members:
+
+MercyCorp measures table
+===========================
+.. automodule:: my_package.measure_table
+   :members:
+
+MercyCorp demand table
+===========================
+.. automodule:: my_package.demand
+   :members:
+
+MercyCorp utils flat files
+===========================
+.. automodule:: my_package.utils_flat_files
+   :members:

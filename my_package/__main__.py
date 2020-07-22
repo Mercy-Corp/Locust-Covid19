@@ -1,22 +1,22 @@
 """
 This file is executed when the module is run from the command line.
 This file runs the following:
--Extracts location table-
--Extracts shapefile table-
--Extracts production table-
--Extracts population tables-
--Extracts measures table-
--Extracts demand table-
+\n-Extracts location table-
+\n-Extracts shapefile table-
+\n-Extracts production table-
+\n-Extracts population tables-
+\n-Extracts measures table-
+\n-Extracts demand table-
 
 """
-python -m my_package
-from location_table import LocationTable
-from shapefile_table import ShapefileTable
-from production_table import ProductionTable
-from population_table import PopulationTable
-from utils_flat_files import FlatFiles
-from measure_table import MeasuresTable
-from demand import DemandTable
+#python -m my_package
+from my_package.location_table import LocationTable
+from my_package.shapefile_table import ShapefileTable
+from my_package.production_table import ProductionTable
+from my_package.population_table import PopulationTable
+from my_package.utils_flat_files import FlatFiles
+from my_package.measure_table import MeasuresTable
+from my_package.demand import DemandTable
 import os
 
 # S3 paths
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     #     if not os.path.exists(directory):
     #         os.makedirs(directory)
 
-    1. Creation of location table
+    # 1. Creation of location table
 
     print("------- Extracting location table ---------")
 
