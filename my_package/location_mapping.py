@@ -194,6 +194,7 @@ class ExtractLocations:
             tupples_country = [self.add_points(x, locations, 'FULL_NAME') for x in tupples_country]
 
         elif country == 'Kenya':
+            markets = [x.split()[0] for x in markets]
             locations = self.kenya_gdf
             tupples_country = [
                 (x, self.is_in_column(x, locations, 'FULL_NAME_'), self.is_in_column(x, locations, 'SUB_LOCATI'),
@@ -228,12 +229,10 @@ class ExtractLocations:
         else:
             print(country + " not in scope. Please choose from: Uganda, Ethiopia, Somalia or Kenya.")
 
-
         return tupples_country
 
     def get_country_df_w_points(self, country):
         tupples_country = self.get_tupples_w_points(country)
-        df_country = None
 
         if country == 'Somalia':
             df_country = pd.DataFrame(tupples_country,
@@ -259,6 +258,157 @@ class ExtractLocations:
 
         return "All pickles exported."
 
+class CrossResults:
+    '''
+    This class crosses the results between the 2 methods, based on geolocations and location shapefiles.
+    '''
+    def __init__(self, path_in=INPUT_PATH, path_out=OUTPUT_PATH):
+        self.path_in = path_in
+        self.path_out = path_out
+
+        # load country pickles
+
+    def load_df_country_pickle(self, country):
+        df = pickle.load(open(self.path_in + 'location/df_' + country + '.pickle', 'rb'))
+        return df
+
+    def coor_to_points(self, coordinates):
+        l = list(zip(*coordinates))
+        if len(l) == 0:
+            return []
+        if len(l) == 3:
+            l = l[:2]
+        lats = list(l[0])
+        lons = list(l[1])
+        points = gpd.points_from_xy(lats, lons)
+        return points
+
+    def revert_points(self, point_list):
+        lons = list(map(lambda point: point.x, point_list))
+        lats = list(map(lambda point: point.y, point_list))
+        points = gpd.points_from_xy(lats, lons)
+        return points
+
+    def cross_results(self, actual_df, reference_gdf, new, changes, manual):
+        n = actual_df.shape[0]
+        points = []
+        for i in range(n):
+            market = actual_df.loc[i, 'mkt_name']
+            if market in new:
+                point = self.revert_points(reference_gdf[reference_gdf['mkt_name'] == market]['geometry'].tolist())[0]
+            elif market in changes.keys():
+                point = \
+                    self.revert_points(reference_gdf[reference_gdf['mkt_name'] == changes[market]]['geometry'].tolist())[0]
+            elif market in manual.keys():
+                point = self.revert_points(self.coor_to_points([manual[market]]))[0]
+            else:
+                points = actual_df.loc[i, 'possible_points']
+                if len(points) == 1:
+                    point = points[0]
+                else:
+                    market_list = reference_gdf[reference_gdf['mkt_name'] == market]
+                    if len(market_list) > 0:
+                        point = self.revert_points(market_list['geometry'].tolist())[0]
+                    else:
+                        point = None
+            points.append(point)
+        gdf = gpd.GeoDataFrame(actual_df, geometry=points)
+        return gdf
+
+    def get_Kenya_final_points(self):
+
+        df_kenya = pickle.load(open(self.path_in + 'location/df_kenya.pickle', 'rb'))
+        print("df Kenya")
+        print(df_kenya)
+        #points = df_kenya['possible_points'].tolist()
+        #points = [x[0] for x in points]
+        df_kenya['geometry'] = df_kenya['possible_points']
+        gdf_kenya = gpd.GeoDataFrame(
+            df_kenya, crs={'init': 'epsg:4326'})
+        del gdf_kenya['possible_points']
+
+        #save to pickle
+        with open(self.path_in + 'location/gdf_kenya.pickle', 'wb') as file:
+            pickle.dump(gdf_kenya, file)
+            print("Kenya gdf saved to pickle")
+
+        return gdf_kenya
+
+    def get_Somalia_final_points(self):
+
+        df_somalia = pickle.load(open(self.path_in + 'location/df_somalia.pickle', 'rb'))
+        df_somalia2 = pickle.load(open(self.path_in + 'location/somalia_geopy.pickle', 'rb'))
+        df_somalia2 = df_somalia2.loc[:, ['adm1_name', 'mkt_name', 'point']]
+        df_somalia2 = df_somalia2.drop_duplicates()
+        df_somalia2 = df_somalia2.sort_values('mkt_name')
+        gdf_somalia2 = gpd.GeoDataFrame(df_somalia2, geometry=self.coor_to_points(df_somalia2['point']))
+
+        new_somalia = []
+        changes_somalia = {'Qorioley': 'Qoryooley', 'Buloburto': 'Bulo Burto'}
+        manual_somalia = {'Qardho': (9.50694, 49.08608), 'Dinsoor': (2.24144, 42.58688)}
+
+        gdf_somalia = self.cross_results(df_somalia, gdf_somalia2, new_somalia, changes_somalia, manual_somalia)
+        del gdf_somalia['possible_points']
+
+        with open(self.path_in + 'location/gdf_somalia.pickle', 'wb') as file:
+            pickle.dump(gdf_somalia, file)
+
+        return gdf_somalia
+
+    def get_Uganda_final_points(self):
+        df_uganda = pickle.load(open(self.path_in + 'location/df_uganda.pickle', 'rb'))
+        df_uganda2 = pickle.load(open(self.path_in + 'location/uganda_geopy.pickle', 'rb'))
+        df_uganda2 = df_uganda2.loc[:, ['adm1_name', 'mkt_name', 'point']]
+        df_uganda2 = df_uganda2.drop_duplicates()
+        df_uganda2 = df_uganda2.sort_values('mkt_name')
+
+        gdf_uganda2 = gpd.GeoDataFrame(df_uganda2, geometry=self.coor_to_points(df_uganda2['point']))
+
+        new_uganda = []
+        changes_uganda = dict()
+        # failing_uganda = ['Busia', 'Kabale', 'Kapchorwa', 'Makaratin', 'Mbale']
+        manual_uganda = {'Busia': (0.464315, 34.100959), 'Kabale': (-1.259330, 29.990903),
+                         'Kapchorwa': (1.398665, 34.445282), 'Mbale': (1.070686, 34.178467)}
+
+        gdf_uganda = self.cross_results(df_uganda, gdf_uganda2, new_uganda, changes_uganda, manual_uganda)
+        del gdf_uganda['possible_points']
+
+        with open(self.path_in + 'location/gdf_uganda.pickle', 'wb') as file:
+            pickle.dump(gdf_uganda, file)
+
+        return gdf_uganda
+
+    def get_Ethiopia_final_points(self):
+        df_ethiopia = pickle.load(open(self.path_in + 'location/df_ethiopia.pickle', 'rb'))
+        df_ethiopia2 = pickle.load(open(self.path_in + 'location/ethiopia_geopy.pickle', 'rb'))
+
+        df_ethiopia2 = df_ethiopia2.loc[:, ['adm1_name', 'mkt_name', 'point']]
+        df_ethiopia2 = df_ethiopia2.drop_duplicates()
+
+        df_ethiopia2 = df_ethiopia2.sort_values('mkt_name')
+
+        gdf_ethiopia2 = gpd.GeoDataFrame(df_ethiopia2, geometry=self.coor_to_points(df_ethiopia2['point']))
+
+        new_ethiopia = ['Kobo', 'Meti']
+        changes_ethiopia = {'Abaala': 'Abala', 'Ajeber': 'Jedo', 'Asayta': 'Asaita', 'Beddenno': 'Bedeno',
+                            'Bedessa': 'Wachu', 'Ebinat': 'Ebbenat', 'Wekro': 'Wukro', 'Wolenchiti': 'Welenchete',
+                            'Wonago': 'Wenago'}
+        # failing_ethiopia = ['Abi Adi', 'Abomsa', 'Addis Ababa', 'Alaba', 'Ambo', 'Assela', 'Assosa', 'Baher Dar', 'Bitchena', 'Bure', 'Debre Birhan', 'Debre Markos', 'Delo', 'Derashe', 'Eteya', 'Gonder', 'Gordamole', 'Haromaya', 'Humera', 'Jijiga', 'Karati', 'Korem', 'Mekele', 'Merti', 'Woliso', 'Yabelo', 'Ziway']
+        manual_ethiopia = {'Abomsa': (8.489248, 39.827752), 'Addis Ababa': (9.030492, 38.738864),
+                           'Assosa': (10.057507, 34.542267), 'Baher Dar': (11.588808, 37.386951),
+                           'Debre Birhan': (9.664792, 39.516591), 'Debre Markos': (10.336315, 37.742438),
+                           'Gonder': (12.587218, 37.437590), 'Humera': (14.290656, 36.606580),
+                           'Jijiga': (9.350723, 42.820830), 'Karati': (5.25, 37.4833333), 'Korem': (12.5, 39.5166667),
+                           'Mekele': (13.497682, 39.463978), 'Woliso': (8.531432, 37.971069),
+                           'Yabelo': (4.894945, 38.100220), 'Ziway': (7.935381, 38.714283)}
+
+        gdf_ethiopia = self.cross_results(df_ethiopia, gdf_ethiopia2, new_ethiopia, changes_ethiopia, manual_ethiopia)
+        del gdf_ethiopia['possible_points']
+
+        with open(self.path_in + 'location/gdf_ethiopia.pickle', 'wb') as file:
+            pickle.dump(gdf_ethiopia, file)
+
+        return gdf_ethiopia
 
 
 if __name__ == '__main__':
@@ -284,4 +434,9 @@ if __name__ == '__main__':
     #print(Uganda.columns)
     #print(Uganda.head())
 
-    ExtractLocations().markets_locations()
+    #ExtractLocations().markets_locations()
+
+    Kenya = CrossResults().get_Kenya_final_points()
+    Uganda = CrossResults().get_Uganda_final_points()
+    Somalia = CrossResults().get_Somalia_final_points()
+    Ethiopia = CrossResults().get_Ethiopia_final_points()
