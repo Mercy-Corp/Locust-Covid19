@@ -11,17 +11,17 @@ Created on Thu Jul 21 17:14:40 2020
 import geopandas as gpd
 import pandas as pd
 from geopy.geocoders import Nominatim
-from functools import partial
+#from functools import partial
 from geopy.extra.rate_limiter import RateLimiter
 import pickle
 
 #S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 geolocator = Nominatim(user_agent="custom-application", timeout=10)
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
@@ -266,7 +266,11 @@ class CrossResults:
         self.path_in = path_in
         self.path_out = path_out
 
-        # load country pickles
+        # load districts
+        self.shp2_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
 
     def load_df_country_pickle(self, country):
         df = pickle.load(open(self.path_in + 'location/df_' + country + '.pickle', 'rb'))
@@ -289,42 +293,38 @@ class CrossResults:
         points = gpd.points_from_xy(lats, lons)
         return points
 
-    def cross_results(self, actual_df, reference_gdf, new, changes, manual):
-        n = actual_df.shape[0]
+    def cross_results(self, df_actual, gdf_referencia, nuevos, cambios, manual):
+        n = df_actual.shape[0]
         points = []
         for i in range(n):
-            market = actual_df.loc[i, 'mkt_name']
-            if market in new:
-                point = self.revert_points(reference_gdf[reference_gdf['mkt_name'] == market]['geometry'].tolist())[0]
-            elif market in changes.keys():
-                point = \
-                    self.revert_points(reference_gdf[reference_gdf['mkt_name'] == changes[market]]['geometry'].tolist())[0]
-            elif market in manual.keys():
-                point = self.revert_points(self.coor_to_points([manual[market]]))[0]
+            mercado = df_actual.loc[i, 'mkt_name']
+            if mercado in nuevos:
+                punto = self.revert_points(gdf_referencia[gdf_referencia['mkt_name'] == mercado]['geometry'].tolist())[0]
+            elif mercado in cambios.keys():
+                punto = \
+                self.revert_points(gdf_referencia[gdf_referencia['mkt_name'] == cambios[mercado]]['geometry'].tolist())[0]
+            elif mercado in manual.keys():
+                punto = self.revert_points(self.coor_to_points([manual[mercado]]))[0]
             else:
-                points = actual_df.loc[i, 'possible_points']
-                if len(points) == 1:
-                    point = points[0]
+                puntos = df_actual.loc[i, 'possible_points']
+                if len(puntos) == 1:
+                    punto = puntos[0]
                 else:
-                    market_list = reference_gdf[reference_gdf['mkt_name'] == market]
-                    if len(market_list) > 0:
-                        point = self.revert_points(market_list['geometry'].tolist())[0]
+                    lista = gdf_referencia[gdf_referencia['mkt_name'] == mercado]
+                    if len(lista) > 0:
+                        punto = self.revert_points(lista['geometry'].tolist())[0]
                     else:
-                        point = None
-            points.append(point)
-        gdf = gpd.GeoDataFrame(actual_df, geometry=points)
+                        punto = None
+            points.append(punto)
+        gdf = gpd.GeoDataFrame(df_actual, geometry=points)
         return gdf
 
     def get_Kenya_final_points(self):
 
         df_kenya = pickle.load(open(self.path_in + 'location/df_kenya.pickle', 'rb'))
-        print("df Kenya")
-        print(df_kenya)
-        #points = df_kenya['possible_points'].tolist()
-        #points = [x[0] for x in points]
-        df_kenya['geometry'] = df_kenya['possible_points']
-        gdf_kenya = gpd.GeoDataFrame(
-            df_kenya, crs={'init': 'epsg:4326'})
+        points = list(df_kenya['possible_points'])
+        points = [x[0] for x in points]
+        gdf_kenya = gpd.GeoDataFrame(df_kenya, geometry=points)
         del gdf_kenya['possible_points']
 
         #save to pickle
@@ -410,6 +410,53 @@ class CrossResults:
 
         return gdf_ethiopia
 
+    def get_districts(self):
+        '''
+
+        :return: A geodataframe with all districts of the 4 countries concatenated.
+        '''
+        district_level = [self.shp2_Kenya, self.shp2_Ethiopia, self.shp2_Somalia, self.shp2_Uganda]
+        gdf_districts = gpd.GeoDataFrame(pd.concat(district_level, ignore_index=True))
+        gdf_districts.crs = {"init": "epsg:4326"}
+        return gdf_districts
+
+
+    def spatial_join_districts(self):
+        Kenya = gpd.GeoDataFrame(self.get_Kenya_final_points()[['mkt_name', 'geometry']])
+        print('Kenya:')
+        print(Kenya)
+        #Kenya['country'] = 'Kenya'
+        Uganda = gpd.GeoDataFrame(self.get_Uganda_final_points()[['mkt_name', 'geometry']])
+        #Uganda['country'] = 'Uganda'
+        Somalia = gpd.GeoDataFrame(self.get_Somalia_final_points()[['mkt_name', 'geometry']])
+        #Somalia['country'] = 'Somalia'
+        Ethiopia = gpd.GeoDataFrame(self.get_Ethiopia_final_points()[['mkt_name', 'geometry']])
+        #Ethiopia['country'] = 'Ethiopia'
+
+        countries = [Kenya, Uganda, Somalia, Ethiopia]
+        markets_gdf = gpd.GeoDataFrame(pd.concat(countries, ignore_index=True, sort=False))
+        markets_gdf = markets_gdf.dropna()
+        markets_gdf.crs = {"init": "epsg:4326"}
+
+        districts = self.get_districts()
+
+        sjoined_markets = gpd.sjoin(markets_gdf, districts, op="within")
+        sjoined_markets['locationID'] = sjoined_markets['GID_2']
+        sjoined_markets = sjoined_markets.drop(['geometry', 'index_right', 'GID_2'], axis=1)
+        sjoined_markets.head()
+        return sjoined_markets
+
+    def export_markets_district_csv(self, file_name):
+        '''
+        Exports a dataframe to a parquet format.
+        :param df: The dataframe to be exported
+        :param file_name: the name of the file to be exported
+        '''
+        df = self.spatial_join_districts()
+        # Export to csv
+        df.to_csv(self.path_in + file_name + '.csv', sep='|', encoding='utf-8', index=False)
+        print("Dataframe exported to csv format")
+
 
 if __name__ == '__main__':
 
@@ -436,7 +483,15 @@ if __name__ == '__main__':
 
     #ExtractLocations().markets_locations()
 
-    Kenya = CrossResults().get_Kenya_final_points()
-    Uganda = CrossResults().get_Uganda_final_points()
-    Somalia = CrossResults().get_Somalia_final_points()
-    Ethiopia = CrossResults().get_Ethiopia_final_points()
+    #Kenya = CrossResults().get_Kenya_final_points()
+    #Uganda = CrossResults().get_Uganda_final_points()
+    #print("Uganda:")
+    #print(Uganda)
+    #Somalia = CrossResults().get_Somalia_final_points()
+    #Ethiopia = CrossResults().get_Ethiopia_final_points()
+
+    #markets_district = CrossResults().spatial_join_districts()
+    #print(markets_district.columns)
+    #print(markets_district.head())
+
+    CrossResults().export_markets_district_csv('markets_district')
