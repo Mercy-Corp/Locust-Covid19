@@ -13,6 +13,8 @@ import numpy as np
 from utils_flat_files import FlatFiles
 from scipy.optimize import curve_fit
 import re
+#import boto3
+#client = boto3.client('s3')
 
 # #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
@@ -38,12 +40,12 @@ class DemandTable:
 
         self.location = pd.read_csv(self.path_in + 'cities_mapping_all_countries.csv', sep='|')
 
-        self.popfile00 = str(self.path_in + "population_table_2000.csv")
-        self.popfile14 = str(self.path_in + "population_table_2014.csv")
-        self.popfile16 = str(self.path_in + "population_table_2016.csv")
-        self.popfile17 = str(self.path_in + "population_table_2017.csv")
-        self.popfile18 = str(self.path_in + "population_table_2018.csv")
-        self.popfile20 = str(self.path_in + "population_table_2020.csv")
+        self.popfile00 = str(self.path_out + "population_table_2000.csv")
+        self.popfile14 = str(self.path_out + "population_table_2014.csv")
+        self.popfile16 = str(self.path_out + "population_table_2016.csv")
+        self.popfile17 = str(self.path_out + "population_table_2017.csv")
+        self.popfile18 = str(self.path_out + "population_table_2018.csv")
+        self.popfile20 = str(self.path_out + "population_table_2020.csv")
 
     def filter_input_tables(self):
         '''
@@ -317,13 +319,13 @@ class DemandTable:
 
         return demand_final
 
-    if __name__ == '__main__':
-        print("------- Extracting demand table ---------")
+if __name__ == '__main__':
+    print("------- Extracting demand table ---------")
 
-        dem_table = DemandTable()
+    dem_table = DemandTable()
 
-        # Create dataframe
-        demand_df = dem_table.create_demand_table()
+    # Create dataframe
+    demand_df = dem_table.create_demand_table()
 
-        # Export files: use utils function to add today's date to the filename
-        out = FlatFiles().export_output_w_date(demand_final, "Demand")
+    # Export files: use utils function to add today's date to the filename
+    out = FlatFiles().export_output_w_date(demand_final, "Demand")
