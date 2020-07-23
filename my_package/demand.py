@@ -17,11 +17,11 @@ import re
 #client = boto3.client('s3')
 
 # #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+INPUT_PATH = r'data/input/'
+OUTPUT_PATH = r'data/output/'
 
 class DemandTable:
     '''
