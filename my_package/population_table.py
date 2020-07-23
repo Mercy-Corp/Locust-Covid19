@@ -11,31 +11,29 @@ Created on Thu Jul 02 17:16:40 2020
 import pandas as pd
 import geopandas as gpd
 from rasterstats import zonal_stats
-from my_package.utils_flat_files import FlatFiles
+from utils_flat_files import FlatFiles
 
 #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 class PopulationTable:
     '''
-    This class creates the 2015 population table.
+    This class creates the population table for the expected year.
     '''
     def __init__(self, year, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
         self.year = year
-        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
-        self.shapefile_table = gpd.read_file(self.path_out + "shapefile_table.shp")
 
-        self.gdf_Kenya = gpd.read_file(self.path_in + "gadm36_KEN_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Somalia = gpd.read_file(self.path_in + "gadm36_SOM_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Ethiopia = gpd.read_file(self.path_in + "gadm36_ETH_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Uganda = gpd.read_file(self.path_in + "gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+        self.gdf_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
+        self.gdf_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
+        self.gdf_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
+        self.gdf_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
 
         self.raster_Uganda = self.path_in + "population/UGA_pop_" + str(self.year) + ".tif"
         self.raster_Kenya = self.path_in + "population/KEN_pop_" + str(self.year) + ".tif"
@@ -92,8 +90,9 @@ class PopulationTable:
 
     def export_population(self):
         population_df = self.add_ids_to_table()
-        filename = 'population_table_' + str(self.year)
-        FlatFiles().export_output(population_df, filename)
+        file_name = 'population_fact/population_table_' + str(self.year)
+        population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
+        print("Dataframe exported to parquet format")
 
 if __name__ == '__main__':
 
@@ -104,4 +103,5 @@ if __name__ == '__main__':
     PopulationTable(2016).export_population()
     PopulationTable(2017).export_population()
     PopulationTable(2018).export_population()
+    PopulationTable(2019).export_population()
     PopulationTable(2020).export_population()
