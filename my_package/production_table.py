@@ -26,7 +26,7 @@ class ProductionTable:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data_6-30-2020.csv", sep=",")
+        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data.csv", sep=",")
         self.locations = pd.read_csv(self.path_out + "location_table.csv", sep = "|")[['locationID', 'name']]
 
 
