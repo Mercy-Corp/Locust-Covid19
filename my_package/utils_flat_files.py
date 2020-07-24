@@ -9,14 +9,16 @@ Created on Sat Jun 04 09:36:40 2020
 # Imports
 import time
 import pandas as pd
+import boto3
+client = boto3.client('s3')
 
 #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 class FlatFiles:
     '''
@@ -26,8 +28,8 @@ class FlatFiles:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-        self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
-        self.dates['date'] = pd.to_datetime(self.dates['date'])
+        #self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
+        #self.dates['date'] = pd.to_datetime(self.dates['date'])
 
     def add_date_id(self, df, column):
         '''
@@ -37,6 +39,8 @@ class FlatFiles:
         :return: The initial dataframe adding the dateID column
         '''
         # Merge with dates and add dateID
+        self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
+        self.dates['date'] = pd.to_datetime(self.dates['date'])
         df[column] = pd.to_datetime([f'{y}-01-01' for y in df[column]])
         df = df.merge(self.dates, left_on=column, right_on='date', how='left')
         return df
@@ -66,7 +70,7 @@ class FlatFiles:
         :param df: The dataframe to be exported
         :param file_name: the name of the file to be exported
         '''
-        df.to_parquet(self.path_out+file_name+".parquet", compression = 'UNCOMPRESSED', index=False)
+        df.to_parquet(self.path_out+file_name+".parquet", index=False)
         print("Dataframe exported to parquet format")
 
     def export_to_csv(self, df, file_name):
