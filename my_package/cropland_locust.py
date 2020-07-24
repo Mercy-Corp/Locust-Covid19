@@ -11,8 +11,12 @@ Created on Wed Jul 15 11:29:40 2020
 import pandas as pd
 import geopandas as gpd
 import geopandas
+from datetime import datetime
 from rasterstats import zonal_stats
 from utils_flat_files import FlatFiles
+import glob
+import warnings
+warnings.filterwarnings("ignore")
 import boto3
 client = boto3.client('s3')
 
@@ -21,11 +25,11 @@ INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
 OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-#RASTER_NAMES = ["N00E30"]
+#RASTER_NAMES = ["S10E40", "S10E20", "N00E50", "N00E20"]
 
 class CroplandLocust:
     '''
@@ -34,7 +38,7 @@ class CroplandLocust:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-        self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
+        self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
         self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%d-%m-%Y')
 
         # Import districts
@@ -86,9 +90,7 @@ class CroplandLocust:
         locust_gdf_filtered = locust_gdf_filtered[locust_gdf_filtered.COUNTRYID.isin(selected_countries)]
 
         # Filter columns
-        locust_gdf_filtered = locust_gdf_filtered[
-            ['OBJECTID', 'STARTDATE', 'LOCNAME', 'AREAHA', 'LOCRELIAB', 'COUNTRYID', 'LOCUSTID', 'REPORTID', 'ACOMMENT',
-             'LOCPRESENT', 'geometry']]
+        locust_gdf_filtered = locust_gdf_filtered[['OBJECTID', 'STARTDATE', 'geometry']]
 
         return locust_gdf_filtered
 
@@ -141,8 +143,8 @@ class CroplandLocust:
             df_group = df_group.explode().reset_index(drop=True)
 
             # add date column
-            df_group['date'] = str(group_name[1]) + '-' + str(group_name[0]) + '-01'
-            df_group['date'] = pd.to_datetime(df_group['date'], format='%Y-%m-%d')
+            df_group['date'] = '01-' + str(group_name[0]) + '-' + str(group_name[1])
+            df_group['date'] = pd.to_datetime(df_group['date'], format='%d-%m-%Y')
 
             # append to dataframe
             locust_buffers = locust_buffers.append(df_group)
@@ -196,35 +198,47 @@ class CroplandLocust:
         raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
         locust_distr = self.area_districts_affected_locust()
 
-        stats = zonal_stats(locust_distr.geometry, raster_path, layer="polygons", stats="count", categorical=True)
+        stats = zonal_stats(locust_distr.geometry, raster_path, stats="count", categorical=True)
 
         if raster == "N00E50":
-            locust_distr['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
+            try:
+                locust_distr['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
+            except:
+                print("Raster " + raster + " does not contain any croplands impacted by locust for the selected districts and dates.")
+                return
+        elif raster in RASTER_NAMES:
+            try:
+                locust_distr['croplands_count'] = pd.DataFrame.from_dict(stats)[2]
+            except:
+                print("Raster " + raster + " does not contain any croplands impacted by locust for the selected districts and dates.")
+                return
         else:
-            locust_distr['croplands_count'] = pd.DataFrame.from_dict(stats)[2]
-        #print(raster)
+            print("Raster not in RASTER_NAMES.")
+            return
+
         locust_distr['area_count'] = pd.DataFrame.from_dict(stats)["count"]
         locust_distr = locust_distr[locust_distr['croplands_count'].notnull()]
-        locust_distr['croplands_area'] = locust_distr['croplands_count'] * locust_distr['area'] / locust_distr[
+        locust_distr['crops_locust_area'] = locust_distr['croplands_count'] * locust_distr['area'] / locust_distr[
             'area_count']
-
-        crops_locust_district = locust_distr[['GID_2', 'croplands_area']]
-        file_name = "/cropland/crops_locust_distr" + raster
+        print(locust_distr.columns)
+        crops_locust_district = locust_distr[['GID_2', 'crops_locust_area', 'date']]
+        file_name = "/cropland/crops_locust_distr_" + raster
         crops_locust_district.to_csv(self.path_in + file_name + '.csv', sep='|', encoding='utf-8', index=False)
-
+        print(raster + " exported.")
         return crops_locust_district
 
     def extract_crops_locust(self):
         df = pd.DataFrame()
 
         for raster in RASTER_NAMES:
+            print(raster + " raster being processed.")
             df_of_raster = self.get_stats(raster)
             df = df.append(df_of_raster)
 
         return gdf
 
     def load_extracted_crops(self):
-        all_files = glob.glob(self.path_in + "cropland/crops_locust_distr*" + ".csv")
+        all_files = glob.glob(self.path_in + "cropland/crops_locust_distr_*" + ".csv")
 
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
         concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
@@ -250,14 +264,19 @@ class CroplandLocust:
         crops_locust_district['factID'] = 'CROP_LOC_DIS' + crops_locust_district.index.astype(str)
         crops_locust_district['locationID'] = crops_locust_district['GID_2']
         crops_locust_district['value'] = crops_locust_district['crops_locust_area']
+        #crops_locust_district['date'] = pd.to_datetime(crops_locust_district['date'], format = '%Y-%m-%d')
+
+        crops_locust_district['date'] = crops_locust_district['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+        crops_locust_district['dateID'] = crops_locust_district['date'].apply(lambda x: datetime.strftime(x, '%Y%m%d'))
+        #print(crops_locust_district[['date', 'dateID']].head())
 
         # Add dateID
-        crops_loc_gdf = crops_locust_district.merge(self.dates, on='date', how='left')
+        #crops_loc_df = crops_locust_district.merge(self.dates, on='date', how='left')
 
         # Select fact table columns
-        crops_loc_df = FlatFiles().select_columns_fact_table(df=crops_loc_gdf)
+        crops_locust_district = crops_locust_district[['factID', 'measureID', 'dateID', 'locationID', 'value']]
 
-        return crops_loc_df
+        return crops_locust_district
 
     def export_table(self, filename):
         '''
@@ -270,12 +289,8 @@ class CroplandLocust:
 if __name__ == '__main__':
 
     print("------- Extracting cropland area affected by locust per district table ---------")
-
-    for raster in RASTER_NAMES:
-        gdf = CroplandLocust().get_stats(raster)
-        print(gdf.shape)
-        print(gdf.columns)
-
-    CroplandLocust().export_table('Crops_impact_locust_district')
+    crop_loc = CroplandLocust()
+    #crop_loc.extract_crops_locust()
+    crop_loc.export_table('Crops_impact_locust_district')
 
 
