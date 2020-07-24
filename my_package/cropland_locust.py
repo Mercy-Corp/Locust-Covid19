@@ -11,6 +11,7 @@ Created on Wed Jul 15 11:29:40 2020
 import pandas as pd
 import geopandas as gpd
 import geopandas
+from rasterstats import zonal_stats
 from utils_flat_files import FlatFiles
 import boto3
 client = boto3.client('s3')
@@ -20,8 +21,11 @@ INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
 OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+INPUT_PATH = r'data/input/'
+OUTPUT_PATH = r'data/output/'
+
+RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
+#RASTER_NAMES = ["N00E30"]
 
 class CroplandLocust:
     '''
@@ -39,22 +43,22 @@ class CroplandLocust:
         self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
         self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
 
-        # Import cropland vector
-        self.crops = gpd.read_file(self.path_in + "cropland/Crops_vectorized.shp")  # TODO point to the new 2015 vector
+        # # Import cropland vector
+        # self.crops = gpd.read_file(self.path_in + "cropland/Crops_vectorized.shp")
 
         # Import locust gdf
         self.locust_gdf = gpd.read_file(self.path_in + "Swarm_Master.shp")
 
-    def filter_crops(self):
-        '''
-
-        :return: The crops vector filtered by the crops id.
-        '''
-
-        crops = self.crops
-        crops = crops[crops['Crops'] == 1]
-        crops.Crops = 12
-        return crops
+    # def filter_crops(self):
+    #     '''
+    #
+    #     :return: The crops vector filtered by the crops id.
+    #     '''
+    #
+    #     crops = self.crops
+    #     crops = crops[crops['Crops'] == 1]
+    #     crops.Crops = 12
+    #     return crops
 
     def get_districts(self):
         '''
@@ -163,31 +167,85 @@ class CroplandLocust:
         '''
         gdf_districts = self.get_districts()
         locust_buffers_gdf = self.loc_buffers_to_gdf()
-        crops_v = self.filter_crops()
+        #crops_v = self.filter_crops()
 
         # intersect with districts
         locust_distr = gpd.overlay(locust_buffers_gdf, gdf_districts, how='intersection')
-        # intersect with cropland
-        crops_locust_district = gpd.overlay(crops_v, locust_distr, how='intersection')
+        ## intersect with cropland
+        #crops_locust_district = gpd.overlay(crops_v, locust_distr, how='intersection')
 
-        return crops_locust_district
+        return locust_distr
 
-    def area_crops_affected_locust(self):
+    def area_districts_affected_locust(self):
         '''
         Calculates the area affected by locust
         :return: A gdf including the area in degrees
         '''
-        crops_locust_district = self.intersect()
-        crops_locust_district['crops_locust_area'] = crops_locust_district.geometry.area
+        locust_district = self.intersect()
+        locust_district['area'] = locust_district.geometry.area
+
+        return locust_district
+
+    def get_stats(self, raster):
+        '''
+
+        :param raster: The geotiff indicating the cropland area
+        :return: A df with two columns, district id and cropland area.
+        '''
+
+        raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
+        locust_distr = self.area_districts_affected_locust()
+
+        stats = zonal_stats(locust_distr.geometry, raster_path, layer="polygons", stats="count", categorical=True)
+
+        if raster == "N00E50":
+            locust_distr['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
+        else:
+            locust_distr['croplands_count'] = pd.DataFrame.from_dict(stats)[2]
+        #print(raster)
+        locust_distr['area_count'] = pd.DataFrame.from_dict(stats)["count"]
+        locust_distr = locust_distr[locust_distr['croplands_count'].notnull()]
+        locust_distr['croplands_area'] = locust_distr['croplands_count'] * locust_distr['area'] / locust_distr[
+            'area_count']
+
+        crops_locust_district = locust_distr[['GID_2', 'croplands_area']]
+        file_name = "/cropland/crops_locust_distr" + raster
+        crops_locust_district.to_csv(self.path_in + file_name + '.csv', sep='|', encoding='utf-8', index=False)
 
         return crops_locust_district
+
+    def extract_crops_locust(self):
+        df = pd.DataFrame()
+
+        for raster in RASTER_NAMES:
+            df_of_raster = self.get_stats(raster)
+            df = df.append(df_of_raster)
+
+        return gdf
+
+    def load_extracted_crops(self):
+        all_files = glob.glob(self.path_in + "cropland/crops_locust_distr*" + ".csv")
+
+        df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
+        concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
+        return concatenated_df
+
+    # def area_crops_affected_locust(self):
+    #     '''
+    #     Calculates the area affected by locust
+    #     :return: A gdf including the area in degrees
+    #     '''
+    #     crops_locust_district = self.intersect()
+    #     crops_locust_district['crops_locust_area'] = crops_locust_district.geometry.area
+    #
+    #     return crops_locust_district
 
     def add_fact_ids(self):
         '''
         Adds ids of fact tables
         :return: A df with the standardised columns of fact tables.
         '''
-        crops_locust_district = self.area_crops_affected_locust()
+        crops_locust_district = self.load_extracted_crops()
         crops_locust_district['measureID'] = 30
         crops_locust_district['factID'] = 'CROP_LOC_DIS' + crops_locust_district.index.astype(str)
         crops_locust_district['locationID'] = crops_locust_district['GID_2']
@@ -212,6 +270,12 @@ class CroplandLocust:
 if __name__ == '__main__':
 
     print("------- Extracting cropland area affected by locust per district table ---------")
+
+    for raster in RASTER_NAMES:
+        gdf = CroplandLocust().get_stats(raster)
+        print(gdf.shape)
+        print(gdf.columns)
+
     CroplandLocust().export_table('Crops_impact_locust_district')
 
 
