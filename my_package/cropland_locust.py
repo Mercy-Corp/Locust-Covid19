@@ -291,6 +291,6 @@ if __name__ == '__main__':
     print("------- Extracting cropland area affected by locust per district table ---------")
     crop_loc = CroplandLocust()
     crop_loc.extract_crops_locust()
-    crop_loc.export_table('Crops_impact_locust_district')
+    crop_loc.export_table('cropland_locust_fact/Crops_impact_locust_district')
 
 
