@@ -163,9 +163,9 @@ if __name__ == '__main__':
 
     print("------- Extracting cropland area per district table ---------")
 
-    #for raster in RASTER_NAMES:
-     #   gdf = Cropland().get_stats(raster)
-      #  print(gdf.shape)
-       # print(gdf.columns)
+    for raster in RASTER_NAMES:
+        gdf = Cropland().get_stats(raster)
+        print(gdf.shape)
+        print(gdf.columns)
 
     Cropland().export_table("cropland_fact/Cropland")
