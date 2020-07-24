@@ -284,7 +284,7 @@ class CroplandLocust:
         :return: The Cropland table in both a parquet and csv format with the date added in the name.
         '''
         crops_loc_df = self.add_fact_ids()
-        FlatFiles().export_output_w_date(crops_loc_df, filename)
+        FlatFiles(INPUT_PATH, OUTPUT_PATH).export_output_w_date(crops_loc_df, filename)
 
 if __name__ == '__main__':
 
