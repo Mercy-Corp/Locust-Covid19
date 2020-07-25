@@ -38,19 +38,29 @@
 </div>
 <div class="section" id="module-my_package.Python_script_for_date_table">
 <span id="my-package-python-script-for-date-table-module"></span><h2>my_package.Python_script_for_date_table module<a class="headerlink" href="#module-my_package.Python_script_for_date_table" title="Permalink to this headline">¶</a></h2>
+<p>Script to create the calendar (date table).</p>
+<p>&#64;author: <a class="reference external" href="mailto:alicja&#46;grochocka&#37;&#52;&#48;gmail&#46;com">alicja<span>&#46;</span>grochocka<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
 <dl class="py class">
 <dt id="my_package.Python_script_for_date_table.DataGenerator">
 <em class="property">class </em><code class="sig-prename descclassname">my_package.Python_script_for_date_table.</code><code class="sig-name descname">DataGenerator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">range_start</span></em>, <em class="sig-param"><span class="n">range_end</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.Python_script_for_date_table.DataGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class generates the Date Dimension table.</p>
 <dl class="py method">
 <dt id="my_package.Python_script_for_date_table.DataGenerator.daterange">
 <code class="sig-name descname">daterange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.Python_script_for_date_table.DataGenerator.daterange" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Function to establish the date range.
+:return:</p>
+</dd></dl>
 
 <dl class="py method">
 <dt id="my_package.Python_script_for_date_table.DataGenerator.generate">
 <code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.Python_script_for_date_table.DataGenerator.generate" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A df with two date columns.</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -67,7 +77,7 @@ values from 2014-2020.</p>
 <p>&#64;author: <a class="reference external" href="mailto:linnea&#46;evanson&#37;&#52;&#48;accenture&#46;com">linnea<span>&#46;</span>evanson<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
 <dl class="py class">
 <dt id="my_package.demand.DemandTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.demand.</code><code class="sig-name descname">DemandTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/location_dim/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.demand.DemandTable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">my_package.demand.</code><code class="sig-name descname">DemandTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.demand.DemandTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class creates the 2020 demand table.</p>
 <dl class="py method">
@@ -191,12 +201,8 @@ consumption in 2000 as the initial value</p>
 <dl class="py method">
 <dt id="my_package.location_table.LocationTable.concat_sub_tables">
 <code class="sig-name descname">concat_sub_tables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable.concat_sub_tables" title="Permalink to this definition">¶</a></dt>
-<dd><p>Concatenates the list of geodataframes into a single geodataframe.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A geodataframe of all hierarchies containing only the necessary columns.</p>
-</dd>
-</dl>
+<dd><p>Concatenates the list of geodataframes into a single geodataframe.
+:return: A geodataframe of all hierarchies containing only the necessary columns.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -207,15 +213,9 @@ consumption in 2000 as the initial value</p>
 <dl class="py method">
 <dt id="my_package.location_table.LocationTable.export_to_parquet">
 <code class="sig-name descname">export_to_parquet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gdf</span></em>, <em class="sig-param"><span class="n">file_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable.export_to_parquet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Exports a geodataframe to a parquet format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>gdf</strong> – The geodataframe to be exported</p></li>
-<li><p><strong>file_name</strong> – the name of the file to be exported</p></li>
-</ul>
-</dd>
-</dl>
+<dd><p>Exports a geodataframe to a parquet format.
+:param gdf: The geodataframe to be exported
+:param file_name: the name of the file to be exported</p>
 </dd></dl>
 
 </dd></dl>
@@ -228,44 +228,14 @@ consumption in 2000 as the initial value</p>
 <p>&#64;author: <a class="reference external" href="mailto:linnea&#46;evanson&#37;&#52;&#48;accenture&#46;com">linnea<span>&#46;</span>evanson<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
 <dl class="py class">
 <dt id="my_package.measure_table.MeasuresTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.measure_table.</code><code class="sig-name descname">MeasuresTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/location_dim/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.measure_table.MeasuresTable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">my_package.measure_table.</code><code class="sig-name descname">MeasuresTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.measure_table.MeasuresTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class creates the measures table</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-my_package.population_table">
-<span id="my-package-population-table-module"></span><h2>my_package.population_table module<a class="headerlink" href="#module-my_package.population_table" title="Permalink to this headline">¶</a></h2>
-<p>The aim of this module is to extract the population table.</p>
-<p>Created on Thu Jul 02 17:16:40 2020</p>
-<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
-<dl class="py class">
-<dt id="my_package.population_table.PopulationTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.population_table.</code><code class="sig-name descname">PopulationTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em>, <em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.population_table.PopulationTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>This class creates the 2015 population table.</p>
-<dl class="py method">
-<dt id="my_package.population_table.PopulationTable.add_ids_to_table">
-<code class="sig-name descname">add_ids_to_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.population_table.PopulationTable.add_ids_to_table" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="my_package.population_table.PopulationTable.export_population">
-<code class="sig-name descname">export_population</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.population_table.PopulationTable.export_population" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt id="my_package.population_table.PopulationTable.population_table">
-<code class="sig-name descname">population_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.population_table.PopulationTable.population_table" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the geodataframe with the population column</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="my-package-population-table-module">
+<h2>my_package.population_table module<a class="headerlink" href="#my-package-population-table-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-my_package.production_table">
 <span id="my-package-production-table-module"></span><h2>my_package.production_table module<a class="headerlink" href="#module-my_package.production_table" title="Permalink to this headline">¶</a></h2>
@@ -308,8 +278,9 @@ consumption in 2000 as the initial value</p>
 <p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
 <dl class="py class">
 <dt id="my_package.shapefile_table.ShapefileTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.shapefile_table.</code><code class="sig-name descname">ShapefileTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.shapefile_table.ShapefileTable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">my_package.shapefile_table.</code><code class="sig-name descname">ShapefileTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/location_dim/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.shapefile_table.ShapefileTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class creates the shapefile table.</p>
 <dl class="py method">
 <dt id="my_package.shapefile_table.ShapefileTable.concat_sub_tables">
 <code class="sig-name descname">concat_sub_tables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.shapefile_table.ShapefileTable.concat_sub_tables" title="Permalink to this definition">¶</a></dt>
@@ -345,9 +316,9 @@ consumption in 2000 as the initial value</p>
 <p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
 <dl class="py class">
 <dt id="my_package.utils_flat_files.FlatFiles">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.utils_flat_files.</code><code class="sig-name descname">FlatFiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_flat_files.FlatFiles" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">my_package.utils_flat_files.</code><code class="sig-name descname">FlatFiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_flat_files.FlatFiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Functions to treat flat files.</p>
+<p>Functions to treat flat files and create fact tables.</p>
 <dl class="py method">
 <dt id="my_package.utils_flat_files.FlatFiles.add_date_id">
 <code class="sig-name descname">add_date_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">column</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_flat_files.FlatFiles.add_date_id" title="Permalink to this definition">¶</a></dt>
