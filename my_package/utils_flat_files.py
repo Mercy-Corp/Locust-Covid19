@@ -9,8 +9,8 @@ Created on Sat Jun 04 09:36:40 2020
 # Imports
 import time
 import pandas as pd
-#import boto3
-#client = boto3.client('s3')
+import boto3
+client = boto3.client('s3')
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
@@ -22,7 +22,7 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 class FlatFiles:
     '''
-      Functions to treat flat files.
+      Functions to treat flat files and create fact tables.
       '''
 
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
