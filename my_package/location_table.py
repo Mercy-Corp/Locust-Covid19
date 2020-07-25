@@ -27,7 +27,6 @@ class LocationTable:
     def concat_sub_tables(self):
         '''
         Concatenates the list of geodataframes into a single geodataframe.
-
         :return: A geodataframe of all hierarchies containing only the necessary columns.
         '''
         gdf_all_list = [self.countries, self.regions1, self.regions2, self.regions3]
@@ -41,7 +40,6 @@ class LocationTable:
     def export_to_parquet(self, gdf, file_name):
         '''
         Exports a geodataframe to a parquet format.
-
         :param gdf: The geodataframe to be exported
         :param file_name: the name of the file to be exported
         '''
