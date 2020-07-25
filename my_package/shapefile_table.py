@@ -11,15 +11,18 @@ import pandas as pd
 import geopandas as gpd
 from my_package.utils_shapefiles import Shapefiles
 
-# #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+#S3 paths
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
 
-#local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+# #local paths
+# INPUT_PATH = r'data/input/'
+# OUTPUT_PATH = r'data/output/'
 
 class ShapefileTable:
+    '''
+    This class creates the shapefile table.
+    '''
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
