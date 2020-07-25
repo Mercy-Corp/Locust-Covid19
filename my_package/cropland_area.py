@@ -95,7 +95,7 @@ class Cropland:
             df_of_raster = self.get_stats(raster)
             df = df.append(df_of_raster)
 
-        return gdf
+        return df
 
     def load_extracted_crops(self):
         '''
