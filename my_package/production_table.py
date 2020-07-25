@@ -9,7 +9,7 @@ Created on Thu Jun 30 15:36:40 2020
 
 # Imports
 import pandas as pd
-from utils_flat_files import FlatFiles
+from my_package.utils_flat_files import FlatFiles
 
 # #S3 paths
 # INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
@@ -47,6 +47,7 @@ class ProductionTable:
     def add_ids_to_table(self):
         '''
         Merges with all other tables and extracts all ids.
+
         :return: The production dataframe with all columns as defined in the data model.
         '''
         # Merge production with measure and add measureID

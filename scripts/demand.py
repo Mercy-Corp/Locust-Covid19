@@ -1,8 +1,5 @@
 """
 The aim of this module is to extract the demand table.
-It predicts current demand (consumption) based on the consumption in 2000 and that predicted in 2030.
-A new script has been written that predicts current demand based on demand in 2000 and population
-values from 2014-2020, which is considered a more accurate method.
 
 Created on Fri Jul 10 17:34:50 2020
 
@@ -29,18 +26,15 @@ class DemandTable:
         self.path_in = path_in
         self.path_out = path_out
 
-        self.df_egg = pd.read_excel(self.path_in + 'UA_Eggs_AF.xlsx')
-        self.df_milk = pd.read_excel(self.path_in + 'UA_Milk_AF.xlsx')
-        self.df_mutt = pd.read_excel(self.path_in + 'UA_Mutt_AF.xlsx')
-        self.df_pork = pd.read_excel(self.path_in + 'UA_Pork_AF.xlsx')
-        self.df_pou = pd.read_excel(self.path_in + 'UA_Pou_AF.xlsx')
-        self.df_beef = pd.read_excel(self.path_in + 'UrbanAreas_Beef_Africa.xlsx')
+        self.df_egg = pd.read_excel(INPUT_PATH + 'UA_Eggs_AF.xlsx')
+        self.df_milk = pd.read_excel(INPUT_PATH + 'UA_Milk_AF.xlsx')
+        self.df_mutt = pd.read_excel(INPUT_PATH + 'UA_Mutt_AF.xlsx')
+        self.df_pork = pd.read_excel(INPUT_PATH + 'UA_Pork_AF.xlsx')
+        self.df_pou = pd.read_excel(INPUT_PATH + 'UA_Pou_AF.xlsx')
+        self.df_beef = pd.read_excel(INPUT_PATH + 'UrbanAreas_Beef_Africa.xlsx')
 
 
-    def filter_input_tables(self):
-        '''
-        Filter input tables for desired columns
-        ''''
+    def filter_input_tables(self): #Filter for desired columns
         self.df_egg= self.df_egg.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL'], axis=1)
         self.df_milk= self.df_milk.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL','WB_Region_2010'], axis=1)
         self.df_mutt= self.df_mutt.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL','WB_Region_2010'], axis=1)
@@ -152,6 +146,6 @@ class DemandTable:
         demand_df = dem_table.create_demand_table()
 
         #Export files
-        demand.to_csv(self.path_out + 'Demand_csv.csv', index = False) #TODO: use utils function to add today's date to output file
-        demand.to_parquet(self.path_out + 'Demand_parquet.parquet', index = False)
+        demand.to_csv(OUTPUT_PATH + 'Demand_csv.csv', index = False)
+        demand.to_parquet(OUTPUT_PATH + 'Demand_parquet.parquet', index = False)
 

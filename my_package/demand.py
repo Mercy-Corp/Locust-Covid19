@@ -10,7 +10,7 @@ Created on Fri Jul 17 10:59:01 2020
 
 import pandas as pd
 import numpy as np
-from utils_flat_files import FlatFiles
+from my_package.utils_flat_files import FlatFiles
 from scipy.optimize import curve_fit
 import re
 #import boto3
@@ -50,6 +50,7 @@ class DemandTable:
     def filter_input_tables(self):
         '''
         Filter for desired columns.
+
         :return: filtered, concatenated table from the 6 input files
         '''
         self.df_egg= self.df_egg.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL'], axis=1)
@@ -104,6 +105,7 @@ class DemandTable:
     def create_locationIDs(self,frames):
         '''
         Map locations within countries to their location ID and insert locationID column.
+
         :param frames: the dataframe of all filtered and concatenated input files.
         :return: the dataframe with additional column locationID.
         '''
@@ -136,7 +138,9 @@ class DemandTable:
         return frames
 
     def split_locationID(self,locationID):
-        '''Splits the locationID into its country, area, district, and region components.
+        '''
+        Splits the locationID into its country, area, district, and region components.
+
         :param locationID: the locationID for one row.
         :returns country, area, district, and region strings.
         '''
@@ -150,6 +154,7 @@ class DemandTable:
     def sum_regions(self,filename):
         '''
         Function to sum population of all districts within a region.
+
         :param filename: name of the file containing population data down to district level for all
         regions in all countries of interest for a particular year.
         :return the sum of the population on a region level and the locationIDs for those regions.
@@ -188,6 +193,7 @@ class DemandTable:
     def func(self, x, r, initial):
         '''
         The exponential growth function used to predict consumption and population growth.
+
         :param x: the year for which we want a prediction.
         :param r: the growth rate.
         :param initial: the initial value of consumption
@@ -199,6 +205,7 @@ class DemandTable:
         '''
         Predict consumption in 2014-2020 based on population values from the same period, and
         consumption in 2000 as the initial value
+
         :param frames: the current dataframe with all locations and consumption types.
         :returns the consumption predictions for 2014-2020 per region and an updated dataframe with no null values.
         '''
@@ -251,6 +258,7 @@ class DemandTable:
         '''
         Create the demand table by filtering input files, creating locationIDs, FactIDs, DateIDs,
         and predictions for consumption per region for the years 2014-2020.
+
         :return: demand_final: the final dataframe, with a value for consumption for each year.
         '''
 

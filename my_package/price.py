@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+The aim of this module is to extract the price table.
+
 Created on Tue Jul 21 10:35:13 2020
 
-@author: rashmi.upreti
+@author: rashmi.upreti@accenture.com
 """
 
 import os

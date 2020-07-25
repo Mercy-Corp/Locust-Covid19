@@ -63,6 +63,10 @@ class PopulationTable:
         return population_gdf
 
     def add_ids_to_table(self):
+        '''
+
+        :return: The population fact table
+        '''
 
         population_gdf = self.population_table()
 
@@ -91,6 +95,10 @@ class PopulationTable:
         return population_df
 
     def export_population(self):
+        '''
+
+        :return: Exports population fact table to parquet format.
+        '''
         population_df = self.add_ids_to_table()
         file_name = 'population_fact/population_table_' + str(self.year)
         population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
@@ -99,11 +107,11 @@ class PopulationTable:
 if __name__ == '__main__':
 
     print("------- Extracting population tables ---------")
-    #PopulationTable(2000).export_population()
-    #PopulationTable(2014).export_population()
-    #PopulationTable(2015).export_population()
-    #PopulationTable(2016).export_population()
-    #PopulationTable(2017).export_population()
-    #PopulationTable(2018).export_population()
+    PopulationTable(2000).export_population()
+    PopulationTable(2014).export_population()
+    PopulationTable(2015).export_population()
+    PopulationTable(2016).export_population()
+    PopulationTable(2017).export_population()
+    PopulationTable(2018).export_population()
     PopulationTable(2019).export_population()
-    #PopulationTable(2020).export_population()
+    PopulationTable(2020).export_population()

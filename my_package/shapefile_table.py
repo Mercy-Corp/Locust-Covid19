@@ -9,17 +9,20 @@ Created on Thu Jun 19 11:04:40 2020
 
 import pandas as pd
 import geopandas as gpd
-from utils_shapefiles import Shapefiles
+from my_package.utils_shapefiles import Shapefiles
 
-# #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+#S3 paths
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
 
-#local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+# #local paths
+# INPUT_PATH = r'data/input/'
+# OUTPUT_PATH = r'data/output/'
 
 class ShapefileTable:
+    '''
+    This class creates the shapefile table.
+    '''
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
@@ -31,6 +34,7 @@ class ShapefileTable:
     def concat_sub_tables(self):
         '''
         Concatenates the list of geodataframes into a single geodataframe.
+
         :return: A geodataframe of all hierarchies containing only the necessary columns.
         '''
         gdf_all_list = [self.countries, self.regions1, self.regions2, self.regions3]
@@ -45,6 +49,7 @@ class ShapefileTable:
     def export_to_shp(self, gdf, file_name):
         '''
         Exports a geodataframe to a shp format.
+
         :param gdf: The geodataframe to be exported
         :param file_name: the name of the file to be exported
         '''

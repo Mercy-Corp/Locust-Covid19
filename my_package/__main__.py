@@ -1,4 +1,14 @@
-# This file is executed when the module is run from the command line:
+"""
+This file is executed when the module is run from the command line.
+This file runs the following:
+\n-Extracts location table-
+\n-Extracts shapefile table-
+\n-Extracts production table-
+\n-Extracts population tables-
+\n-Extracts measures table-
+\n-Extracts demand table-
+
+"""
 # python -m my_package
 from location_table import LocationTable
 from shapefile_table import ShapefileTable
@@ -11,7 +21,7 @@ from cropland_area import Cropland
 from forageland_area import Forageland
 from forageland_locust import ForagelandLocust
 from cropland_locust import CroplandLocust
-#import os
+import os
 
 # S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
@@ -63,6 +73,7 @@ if __name__ == '__main__':
         PopulationTable(year).export_population()
 
     # 5. Creation of measures table
+    print("------- Extracting measure table ---------")
     #Load class
     measure_table = MeasuresTable(INPUT_PATH,OUTPUT_PATH)
     #Create dataframe
@@ -72,6 +83,7 @@ if __name__ == '__main__':
     FlatFiles().export_to_csv(measures_df,"measures")
 
     # 6. Creation of demand table
+    print("------- Extracting demand table ---------")
     #Load class
     demand_table = DemandTable(INPUT_PATH,OUTPUT_PATH)
     #Create dataframe

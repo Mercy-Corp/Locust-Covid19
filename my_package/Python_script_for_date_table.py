@@ -1,20 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
-#author: alicja.grochocka@gmail.com
-#Script for creating the calendar (date table)
+"""
+Script to create the calendar (date table).
 
-# In[2]:
+@author: alicja.grochocka@gmail.com
+"""
 
-
-import datetime
+#Imports
+#import datetime
 import pandas as pd
 from datetime import timedelta, date
 
-
-# In[9]:
-
-
 class DataGenerator:
+    '''
+    This class generates the Date Dimension table.
+    '''
     
     def __init__ (self, range_start, range_end):
         self.range_start = range_start
@@ -22,10 +22,18 @@ class DataGenerator:
         self.generate()
               
     def daterange(self):
+        '''
+        Function to establish the date range.
+        :return:
+        '''
         for n in range(int ((self.range_end - self.range_start).days)+1):
             yield self.range_start + timedelta(n)
             
     def generate(self):
+        '''
+
+        :return: A df with two date columns.
+        '''
         self.rows_list = []
         for dt in self.daterange():
             self.rows_list.append([dt.strftime("%Y%m%d"),dt.strftime("%Y-%m-%d")])
@@ -39,10 +47,3 @@ df2=datagenerator.df
 df2.rename(columns={0: "dateID", 1: "date"}, inplace=True)
 df2.to_parquet('data_parquet',
               index = False)
-
-
-# In[ ]:
-
-
-
-
