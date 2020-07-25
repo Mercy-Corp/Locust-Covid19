@@ -9,7 +9,7 @@ This file runs the following:
 \n-Extracts demand table-
 
 """
-#python -m my_package
+# python -m my_package
 from location_table import LocationTable
 from shapefile_table import ShapefileTable
 from production_table import ProductionTable
@@ -73,6 +73,7 @@ if __name__ == '__main__':
         PopulationTable(year).export_population()
 
     # 5. Creation of measures table
+    print("------- Extracting measure table ---------")
     #Load class
     measure_table = MeasuresTable(INPUT_PATH,OUTPUT_PATH)
     #Create dataframe
