@@ -66,7 +66,7 @@ class Cropland:
         raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
         gdf_districts = self.get_districts()
 
-        stats = zonal_stats(gdf_districts.geometry, raster_path, stats="count", categorical=True)
+        stats = zonal_stats(gdf_districts.geometry, raster_path,  layer="polygons", stats="count", categorical=True)
 
         if raster == "N00E50":
             gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
@@ -85,15 +85,23 @@ class Cropland:
         return df_districts
 
     def extract_crops(self):
+        '''
+        Function to run all zonal statistics for all rasters by calling get_stats.
+        :return: An appended df of all zonal statistics.
+        '''
         df = pd.DataFrame()
 
         for raster in RASTER_NAMES:
             df_of_raster = self.get_stats(raster)
             df = df.append(df_of_raster)
 
-        return gdf
+        return df
 
     def load_extracted_crops(self):
+        '''
+        Loads all intermediate files (csvs) on zonal statistics per raster.
+        :return: A concatenated df of all zonal statistics.
+        '''
         all_files = glob.glob(self.path_in + "cropland/crops_*" + ".csv")
 
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
@@ -162,10 +170,9 @@ class Cropland:
 if __name__ == '__main__':
 
     print("------- Extracting cropland area per district table ---------")
-
-    for raster in RASTER_NAMES:
-        gdf = Cropland().get_stats(raster)
-        print(gdf.shape)
-        print(gdf.columns)
-
-    Cropland().export_table("cropland_fact/Cropland")
+    #Call the class
+    cropland_area = Cropland()
+    #Extract all zonal statistics per raster
+    cropland_area.extract_crops()
+    #Load zonal statistics and prepare & export the cropland fact table
+    cropland_area.export_table("cropland_fact/Cropland")

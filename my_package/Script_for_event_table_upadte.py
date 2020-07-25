@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
+"""
+Script to prepare the event table.
 
-# In[ ]:
-
+@author: alicja.grochocka@gmail.com
+"""
 
 import pandas as pd
 

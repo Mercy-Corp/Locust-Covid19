@@ -22,7 +22,7 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 class FlatFiles:
     '''
-      Functions to treat flat files.
+      Functions to treat flat files and create fact tables.
       '''
 
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):

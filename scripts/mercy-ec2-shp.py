@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+@author: rashmi.upreti@accenture.com
+"""
+
 import pandas as pd
 import geopandas as gpd
 # Read East Africa geo location data from S3 bucket

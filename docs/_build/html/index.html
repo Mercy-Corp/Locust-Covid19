@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Mercy Corps’s documentation! &#8212; Mercy Corps 0.0.01 documentation</title>
+    <title>Welcome to Mercy Corps’s documentation &#8212; Mercy Corps 0.0.01 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -32,7 +32,7 @@
           <div class="body" role="main">
             
   <div class="section" id="welcome-to-mercy-corps-s-documentation">
-<h1>Welcome to Mercy Corps’s documentation!<a class="headerlink" href="#welcome-to-mercy-corps-s-documentation" title="Permalink to this headline">¶</a></h1>
+<h1>Welcome to Mercy Corps’s documentation<a class="headerlink" href="#welcome-to-mercy-corps-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
 <ul class="simple">
@@ -41,177 +41,17 @@
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
 </div>
-<div class="section" id="module-my_package.__main__">
-<span id="mercycorp-main"></span><h1>MercyCorp main<a class="headerlink" href="#module-my_package.__main__" title="Permalink to this headline">¶</a></h1>
-<p>This file is executed when the module is run from the command line.
-This file runs the following:</p>
-<p>-Extracts location table-</p>
-<p>-Extracts shapefile table-</p>
-<p>-Extracts production table-</p>
-<p>-Extracts population tables-</p>
-<p>-Extracts measures table-</p>
-<p>-Extracts demand table-</p>
+<div class="section" id="mercycorps-main">
+<h1>MercyCorps main<a class="headerlink" href="#mercycorps-main" title="Permalink to this headline">¶</a></h1>
 </div>
-<div class="section" id="module-my_package.location_table">
-<span id="mercycorp-location-table"></span><h1>MercyCorp location table<a class="headerlink" href="#module-my_package.location_table" title="Permalink to this headline">¶</a></h1>
-<p>The aim of this module is to prepare the location table.</p>
-<p>Created on Thu Jun 18 09:16:40 2020</p>
-<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
-<dl class="py class">
-<dt id="my_package.location_table.LocationTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.location_table.</code><code class="sig-name descname">LocationTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class creates the location table.</p>
-<dl class="py method">
-<dt id="my_package.location_table.LocationTable.concat_sub_tables">
-<code class="sig-name descname">concat_sub_tables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable.concat_sub_tables" title="Permalink to this definition">¶</a></dt>
-<dd><p>Concatenates the list of geodataframes into a single geodataframe.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A geodataframe of all hierarchies containing only the necessary columns.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="my_package.location_table.LocationTable.export_to_parquet">
-<code class="sig-name descname">export_to_parquet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gdf</span></em>, <em class="sig-param"><span class="n">file_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable.export_to_parquet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Exports a geodataframe to a parquet format.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>gdf</strong> – The geodataframe to be exported</p></li>
-<li><p><strong>file_name</strong> – the name of the file to be exported</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<div class="section" id="mercycorps-cropland-area">
+<h1>MercyCorps cropland area<a class="headerlink" href="#mercycorps-cropland-area" title="Permalink to this headline">¶</a></h1>
 </div>
-<div class="section" id="module-my_package.utils_shapefiles">
-<span id="mercycorp-utils-shapefiles"></span><h1>MercyCorp utils shapefiles<a class="headerlink" href="#module-my_package.utils_shapefiles" title="Permalink to this headline">¶</a></h1>
-<p>The aim of this module is to list functions related to shapefiles.</p>
-<p>Created on Thu Jun 19 11:14:40 2020</p>
-<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
-<dl class="py class">
-<dt id="my_package.utils_shapefiles.Shapefiles">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.utils_shapefiles.</code><code class="sig-name descname">Shapefiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">INPUT_PATH</span></em>, <em class="sig-param"><span class="n">OUTPUT_PATH</span></em>, <em class="sig-param"><span class="n">hierarchy</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_shapefiles.Shapefiles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Functions related to shapefiles.</p>
-<dl class="py method">
-<dt id="my_package.utils_shapefiles.Shapefiles.create_sub_tables">
-<code class="sig-name descname">create_sub_tables</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">shp_list</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_shapefiles.Shapefiles.create_sub_tables" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates sub-tables per hierarchy to be used for the final location table.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>shp_list</strong> – A list of shapefiles</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A geodataframe of all location data for the selected hierarchy</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="my_package.utils_shapefiles.Shapefiles.import_shapefile">
-<code class="sig-name descname">import_shapefile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">country</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_shapefiles.Shapefiles.import_shapefile" title="Permalink to this definition">¶</a></dt>
-<dd><p>Imports a shp with the boundaries.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>country</strong> – the referring country of the shp. Choose between: “_KEN_”, “_ETH_”, “_SOM_” or “_UGA_”</p></li>
-<li><p><strong>hierarchy</strong> – 0 for the country level, 1-3 for the rest of regional levels</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A shapefile</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="my_package.utils_shapefiles.Shapefiles.shapefiles_list">
-<code class="sig-name descname">shapefiles_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_shapefiles.Shapefiles.shapefiles_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a list of shapefiles according to hierarchy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A list of geodataframes for all three countries (KEN, ETH, SOM) per hierarchy.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-my_package.production_table">
-<span id="mercycorp-production-table"></span><h1>MercyCorp production table<a class="headerlink" href="#module-my_package.production_table" title="Permalink to this headline">¶</a></h1>
-<p>The aim of this module is to extract the production table.</p>
-<p>Created on Thu Jun 30 15:36:40 2020</p>
-<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
-<dl class="py class">
-<dt id="my_package.production_table.ProductionTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.production_table.</code><code class="sig-name descname">ProductionTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.production_table.ProductionTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class creates the production table.</p>
-<dl class="py method">
-<dt id="my_package.production_table.ProductionTable.add_ids_to_table">
-<code class="sig-name descname">add_ids_to_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.production_table.ProductionTable.add_ids_to_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>Merges with all other tables and extracts all ids.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The production dataframe with all columns as defined in the data model.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="my_package.production_table.ProductionTable.create_measure_df">
-<code class="sig-name descname">create_measure_df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.production_table.ProductionTable.create_measure_df" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A dataframe with the 5 measure ids and types we need.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-my_package.population_table">
-<span id="mercycorp-population-table"></span><h1>MercyCorp population table<a class="headerlink" href="#module-my_package.population_table" title="Permalink to this headline">¶</a></h1>
-<p>The aim of this module is to extract the population table.</p>
-<p>Created on Thu Jul 02 17:16:40 2020</p>
-<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
-<dl class="py class">
-<dt id="my_package.population_table.PopulationTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.population_table.</code><code class="sig-name descname">PopulationTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">year</span></em>, <em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.population_table.PopulationTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class creates the 2015 population table.</p>
-<dl class="py method">
-<dt id="my_package.population_table.PopulationTable.population_table">
-<code class="sig-name descname">population_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.population_table.PopulationTable.population_table" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the geodataframe with the population column</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-my_package.measure_table">
-<span id="mercycorp-measures-table"></span><h1>MercyCorp measures table<a class="headerlink" href="#module-my_package.measure_table" title="Permalink to this headline">¶</a></h1>
-<p>The aim of this module is to extract the measure table.</p>
-<p>Created on Thu Jul 06 17:16:40 2020</p>
-<p>&#64;author: <a class="reference external" href="mailto:linnea&#46;evanson&#37;&#52;&#48;accenture&#46;com">linnea<span>&#46;</span>evanson<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
-<dl class="py class">
-<dt id="my_package.measure_table.MeasuresTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.measure_table.</code><code class="sig-name descname">MeasuresTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/location_dim/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.measure_table.MeasuresTable" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class creates the measures table</p>
-</dd></dl>
-
+<div class="section" id="mercycorps-croplands-impacted-by-locust">
+<h1>MercyCorps croplands impacted by locust<a class="headerlink" href="#mercycorps-croplands-impacted-by-locust" title="Permalink to this headline">¶</a></h1>
 </div>
 <div class="section" id="module-my_package.demand">
-<span id="mercycorp-demand-table"></span><h1>MercyCorp demand table<a class="headerlink" href="#module-my_package.demand" title="Permalink to this headline">¶</a></h1>
+<span id="mercycorps-demand"></span><h1>MercyCorps demand<a class="headerlink" href="#module-my_package.demand" title="Permalink to this headline">¶</a></h1>
 <p>The aim of this module is to extract the demand table.
 The prediction of current demand is based on demand in 2000 and population
 values from 2014-2020.</p>
@@ -219,7 +59,7 @@ values from 2014-2020.</p>
 <p>&#64;author: <a class="reference external" href="mailto:linnea&#46;evanson&#37;&#52;&#48;accenture&#46;com">linnea<span>&#46;</span>evanson<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
 <dl class="py class">
 <dt id="my_package.demand.DemandTable">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.demand.</code><code class="sig-name descname">DemandTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/location_dim/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.demand.DemandTable" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">my_package.demand.</code><code class="sig-name descname">DemandTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.demand.DemandTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class creates the 2020 demand table.</p>
 <dl class="py method">
 <dt id="my_package.demand.DemandTable.create_demand_table">
@@ -317,15 +157,215 @@ consumption in 2000 as the initial value</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-my_package.utils_flat_files">
-<span id="mercycorp-utils-flat-files"></span><h1>MercyCorp utils flat files<a class="headerlink" href="#module-my_package.utils_flat_files" title="Permalink to this headline">¶</a></h1>
-<p>The aim of this module is to to list useful functions related to flat files.</p>
+<div class="section" id="mercycorps-rangerland-area">
+<h1>MercyCorps rangerland area<a class="headerlink" href="#mercycorps-rangerland-area" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="mercycorps-rangerland-impacted-by-locust">
+<h1>MercyCorps rangerland impacted by locust<a class="headerlink" href="#mercycorps-rangerland-impacted-by-locust" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="mercycorps-market-location-mapping">
+<h1>MercyCorps market location mapping<a class="headerlink" href="#mercycorps-market-location-mapping" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-my_package.location_mapping"></span><p>The aim of this module is to map the markets to the districts.</p>
+<p>Created on Thu Jul 21 17:14:40 2020</p>
+<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt id="my_package.location_mapping.CrossResults">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.location_mapping.</code><code class="sig-name descname">CrossResults</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_mapping.CrossResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class crosses the results between the 2 methods, based on geolocations and location shapefiles.</p>
+<dl class="py method">
+<dt id="my_package.location_mapping.CrossResults.export_markets_district_csv">
+<code class="sig-name descname">export_markets_district_csv</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_mapping.CrossResults.export_markets_district_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports a dataframe to a parquet format.
+:param df: The dataframe to be exported
+:param file_name: the name of the file to be exported</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="my_package.location_mapping.CrossResults.get_districts">
+<code class="sig-name descname">get_districts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_mapping.CrossResults.get_districts" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A geodataframe with all districts of the 4 countries concatenated.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="my_package.location_mapping.ExtractCoordinates">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.location_mapping.</code><code class="sig-name descname">ExtractCoordinates</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_mapping.ExtractCoordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class extracts coordinates from locations using geopy.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="my_package.location_mapping.ExtractLocations">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.location_mapping.</code><code class="sig-name descname">ExtractLocations</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_mapping.ExtractLocations" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class extracts locations from shapefiles that include locations of cities, towns and villages per country.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt id="my_package.location_mapping.ExtractMarkets">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.location_mapping.</code><code class="sig-name descname">ExtractMarkets</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_mapping.ExtractMarkets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class extracts the markets of the prices and demand dfs. # TODO extract markets from demand df. Currently only working on prices.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="mercycorps-location-dimension-table">
+<h1>MercyCorps location dimension table<a class="headerlink" href="#mercycorps-location-dimension-table" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-my_package.location_table"></span><p>The aim of this module is to prepare the location table.</p>
+<p>Created on Thu Jun 18 09:16:40 2020</p>
+<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt id="my_package.location_table.LocationTable">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.location_table.</code><code class="sig-name descname">LocationTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class creates the location table.</p>
+<dl class="py method">
+<dt id="my_package.location_table.LocationTable.concat_sub_tables">
+<code class="sig-name descname">concat_sub_tables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable.concat_sub_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenates the list of geodataframes into a single geodataframe.
+:return: A geodataframe of all hierarchies containing only the necessary columns.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="my_package.location_table.LocationTable.export_to_parquet">
+<code class="sig-name descname">export_to_parquet</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gdf</span></em>, <em class="sig-param"><span class="n">file_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.location_table.LocationTable.export_to_parquet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports a geodataframe to a parquet format.
+:param gdf: The geodataframe to be exported
+:param file_name: the name of the file to be exported</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mercycorps-measure-dimension-table">
+<h1>MercyCorps measure dimension table<a class="headerlink" href="#mercycorps-measure-dimension-table" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-my_package.measure_table"></span><p>The aim of this module is to extract the measure table.</p>
+<p>Created on Thu Jul 06 17:16:40 2020</p>
+<p>&#64;author: <a class="reference external" href="mailto:linnea&#46;evanson&#37;&#52;&#48;accenture&#46;com">linnea<span>&#46;</span>evanson<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt id="my_package.measure_table.MeasuresTable">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.measure_table.</code><code class="sig-name descname">MeasuresTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.measure_table.MeasuresTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class creates the measures table</p>
+</dd></dl>
+
+</div>
+<div class="section" id="mercycorps-population-fact-table">
+<h1>MercyCorps population fact table<a class="headerlink" href="#mercycorps-population-fact-table" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="mercycorps-price-fact-table">
+<h1>MercyCorps price fact table<a class="headerlink" href="#mercycorps-price-fact-table" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="mercycorps-production-fact-table">
+<h1>MercyCorps production fact table<a class="headerlink" href="#mercycorps-production-fact-table" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-my_package.production_table"></span><p>The aim of this module is to extract the production table.</p>
+<p>Created on Thu Jun 30 15:36:40 2020</p>
+<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt id="my_package.production_table.ProductionTable">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.production_table.</code><code class="sig-name descname">ProductionTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.production_table.ProductionTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class creates the production table.</p>
+<dl class="py method">
+<dt id="my_package.production_table.ProductionTable.add_ids_to_table">
+<code class="sig-name descname">add_ids_to_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.production_table.ProductionTable.add_ids_to_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merges with all other tables and extracts all ids.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The production dataframe with all columns as defined in the data model.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="my_package.production_table.ProductionTable.create_measure_df">
+<code class="sig-name descname">create_measure_df</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.production_table.ProductionTable.create_measure_df" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A dataframe with the 5 measure ids and types we need.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mercycorps-date-dimension-table">
+<h1>MercyCorps date dimension table<a class="headerlink" href="#mercycorps-date-dimension-table" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-my_package.Python_script_for_date_table"></span><p>Script to create the calendar (date table).</p>
+<p>&#64;author: <a class="reference external" href="mailto:alicja&#46;grochocka&#37;&#52;&#48;gmail&#46;com">alicja<span>&#46;</span>grochocka<span>&#64;</span>gmail<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt id="my_package.Python_script_for_date_table.DataGenerator">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.Python_script_for_date_table.</code><code class="sig-name descname">DataGenerator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">range_start</span></em>, <em class="sig-param"><span class="n">range_end</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.Python_script_for_date_table.DataGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class generates the Date Dimension table.</p>
+<dl class="py method">
+<dt id="my_package.Python_script_for_date_table.DataGenerator.daterange">
+<code class="sig-name descname">daterange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.Python_script_for_date_table.DataGenerator.daterange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to establish the date range.
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="my_package.Python_script_for_date_table.DataGenerator.generate">
+<code class="sig-name descname">generate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.Python_script_for_date_table.DataGenerator.generate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A df with two date columns.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mercycorps-event-table">
+<h1>MercyCorps event table<a class="headerlink" href="#mercycorps-event-table" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="mercycorps-shapefile-dimension-table">
+<h1>MercyCorps shapefile dimension table<a class="headerlink" href="#mercycorps-shapefile-dimension-table" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-my_package.shapefile_table"></span><p>The aim of this module is to prepare the shapefile table.</p>
+<p>Created on Thu Jun 19 11:04:40 2020</p>
+<p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
+<dl class="py class">
+<dt id="my_package.shapefile_table.ShapefileTable">
+<em class="property">class </em><code class="sig-prename descclassname">my_package.shapefile_table.</code><code class="sig-name descname">ShapefileTable</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/location_dim/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.shapefile_table.ShapefileTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class creates the shapefile table.</p>
+<dl class="py method">
+<dt id="my_package.shapefile_table.ShapefileTable.concat_sub_tables">
+<code class="sig-name descname">concat_sub_tables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#my_package.shapefile_table.ShapefileTable.concat_sub_tables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenates the list of geodataframes into a single geodataframe.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A geodataframe of all hierarchies containing only the necessary columns.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="my_package.shapefile_table.ShapefileTable.export_to_shp">
+<code class="sig-name descname">export_to_shp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">gdf</span></em>, <em class="sig-param"><span class="n">file_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.shapefile_table.ShapefileTable.export_to_shp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exports a geodataframe to a shp format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gdf</strong> – The geodataframe to be exported</p></li>
+<li><p><strong>file_name</strong> – the name of the file to be exported</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="mercycorps-util-functions-for-flat-files-and-fact-tables">
+<h1>MercyCorps util functions for flat files and fact tables<a class="headerlink" href="#mercycorps-util-functions-for-flat-files-and-fact-tables" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-my_package.utils_flat_files"></span><p>The aim of this module is to to list useful functions related to flat files.</p>
 <p>Created on Sat Jun 04 09:36:40 2020</p>
 <p>&#64;author: <a class="reference external" href="mailto:ioanna&#46;papachristou&#37;&#52;&#48;accenture&#46;com">ioanna<span>&#46;</span>papachristou<span>&#64;</span>accenture<span>&#46;</span>com</a></p>
 <dl class="py class">
 <dt id="my_package.utils_flat_files.FlatFiles">
-<em class="property">class </em><code class="sig-prename descclassname">my_package.utils_flat_files.</code><code class="sig-name descname">FlatFiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'data/input/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'data/output/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_flat_files.FlatFiles" title="Permalink to this definition">¶</a></dt>
-<dd><p>Functions to treat flat files.</p>
+<em class="property">class </em><code class="sig-prename descclassname">my_package.utils_flat_files.</code><code class="sig-name descname">FlatFiles</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path_in</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-in-dev/inbound/sourcedata/'</span></em>, <em class="sig-param"><span class="n">path_out</span><span class="o">=</span><span class="default_value">'s3://mercy-locust-covid19-out-dev/'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_flat_files.FlatFiles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Functions to treat flat files and create fact tables.</p>
 <dl class="py method">
 <dt id="my_package.utils_flat_files.FlatFiles.add_date_id">
 <code class="sig-name descname">add_date_id</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">df</span></em>, <em class="sig-param"><span class="n">column</span></em><span class="sig-paren">)</span><a class="headerlink" href="#my_package.utils_flat_files.FlatFiles.add_date_id" title="Permalink to this definition">¶</a></dt>

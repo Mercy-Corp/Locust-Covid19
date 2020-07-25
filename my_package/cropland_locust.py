@@ -164,8 +164,8 @@ class CroplandLocust:
 
     def intersect(self):
         '''
-        Intersects the buffers with the districts and the cropland.
-        :return: A gdf with locust affected croplands per district
+        Intersects the buffers with the districts.
+        :return: A gdf with locust affected districts.
         '''
         gdf_districts = self.get_districts()
         locust_buffers_gdf = self.loc_buffers_to_gdf()
@@ -180,8 +180,8 @@ class CroplandLocust:
 
     def area_districts_affected_locust(self):
         '''
-        Calculates the area affected by locust
-        :return: A gdf including the area in degrees
+        Calculates the area affected by locusts per district.
+        :return: A gdf including the area in degrees.
         '''
         locust_district = self.intersect()
         locust_district['area'] = locust_district.geometry.area
@@ -190,7 +190,7 @@ class CroplandLocust:
 
     def get_stats(self, raster):
         '''
-
+        Calculates the croplands affected by locust per district, using the method count of zonal_stats.
         :param raster: The geotiff indicating the cropland area
         :return: A df with two columns, district id and cropland area.
         '''
@@ -216,11 +216,12 @@ class CroplandLocust:
             print("Raster not in RASTER_NAMES.")
             return
 
+        # Calculating the area affected by locust per district
         locust_distr['area_count'] = pd.DataFrame.from_dict(stats)["count"]
         locust_distr = locust_distr[locust_distr['croplands_count'].notnull()]
         locust_distr['crops_locust_area'] = locust_distr['croplands_count'] * locust_distr['area'] / locust_distr[
             'area_count']
-        print(locust_distr.columns)
+        #print(locust_distr.columns)
         crops_locust_district = locust_distr[['GID_2', 'crops_locust_area', 'date']]
         file_name = "/cropland/crops_locust_distr_" + raster
         crops_locust_district.to_csv(self.path_in + file_name + '.csv', sep='|', encoding='utf-8', index=False)
@@ -228,6 +229,10 @@ class CroplandLocust:
         return crops_locust_district
 
     def extract_crops_locust(self):
+        '''
+        Function to run all zonal statistics for all rasters by calling get_stats.
+        :return: An appended df of all zonal statistics.
+        '''
         df = pd.DataFrame()
 
         for raster in RASTER_NAMES:
@@ -235,9 +240,13 @@ class CroplandLocust:
             df_of_raster = self.get_stats(raster)
             df = df.append(df_of_raster)
 
-        return gdf
+        return df
 
     def load_extracted_crops(self):
+        '''
+        Loads all intermediate files (csvs) on zonal statistics per raster.
+        :return: A concatenated df of all zonal statistics.
+        '''
         all_files = glob.glob(self.path_in + "cropland/crops_locust_distr_*" + ".csv")
 
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
@@ -256,7 +265,7 @@ class CroplandLocust:
 
     def add_fact_ids(self):
         '''
-        Adds ids of fact tables
+        Adds fact tables' ids to our df.
         :return: A df with the standardised columns of fact tables.
         '''
         crops_locust_district = self.load_extracted_crops()

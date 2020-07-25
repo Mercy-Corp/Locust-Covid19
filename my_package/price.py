@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+The aim of this module is to extract the price table.
+
 Created on Tue Jul 21 10:35:13 2020
 
-@author: rashmi.upreti
+@author: rashmi.upreti@accenture.com
 """
 
 import os
@@ -10,8 +12,8 @@ import csv
 import pickle
 import pyarrow.parquet as pq
 import pyarrow.csv as pv
-import pyarrow as pa
-import pandas as pd
+#import pyarrow as pa
+#import pandas as pd
 import boto3
 client = boto3.client('s3')
 

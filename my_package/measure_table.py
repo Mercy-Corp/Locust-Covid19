@@ -8,9 +8,10 @@ Created on Thu Jul 06 17:16:40 2020
 import pandas as pd
 from my_package.utils_flat_files import FlatFiles
 
-# #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+#S3 paths
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+
 #local paths
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
