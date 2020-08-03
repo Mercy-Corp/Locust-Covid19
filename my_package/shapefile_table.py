@@ -12,8 +12,8 @@ import geopandas as gpd
 from my_package.utils_shapefiles import Shapefiles
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 # #local paths
 # INPUT_PATH = r'data/input/'
