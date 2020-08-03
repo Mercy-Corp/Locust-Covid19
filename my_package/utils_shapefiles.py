@@ -11,8 +11,8 @@ import geopandas as gpd
 import pandas as pd
 
 # S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 # #local paths
 # INPUT_PATH = r'data/input/'
@@ -40,11 +40,11 @@ class Shapefiles:
         '''
         Imports a shp with the boundaries.
 
-        :param country: the referring country of the shp. Choose between: "_KEN_", "_ETH_", "_SOM_" or "_UGA_"
+        :param country: the referring country of the shp. Choose between: "_KEN_", "_ETH_", "_SOM_", "_UGA_", "_SDN_" or "_SSD_".
         :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
         :return: A shapefile
         '''
-        shp = gpd.read_file(self.path_in + "/gadm36" + str(country) + str(self.hierarchy) + ".shp")
+        shp = gpd.read_file(self.path_in + "Spatial/gadm36" + str(country) + str(self.hierarchy) + ".shp")
         return shp
 
     def shapefiles_list(self):
@@ -59,37 +59,46 @@ class Shapefiles:
             Ethiopia_0 = self.import_shapefile(country="_ETH_")
             Somalia_0 = self.import_shapefile(country="_SOM_")
             Uganda_0 = self.import_shapefile(country="_UGA_")
-            gdf_list = [Kenya_0, Ethiopia_0, Somalia_0, Uganda_0]
+            Sudan_0 = self.import_shapefile(country="_SDN_")
+            SSudan_0 = self.import_shapefile(country="_SSD_")
+            gdf_list = [Kenya_0, Ethiopia_0, Somalia_0, Uganda_0, Sudan_0, SSudan_0]
 
         elif self.hierarchy == 1:
             Kenya_1 = self.import_shapefile(country="_KEN_")
             Ethiopia_1 = self.import_shapefile(country="_ETH_")
             Somalia_1 = self.import_shapefile(country="_SOM_")
             Uganda_1 = self.import_shapefile(country="_UGA_")
-            gdf_list = [Kenya_1, Ethiopia_1, Somalia_1, Uganda_1]
+            Sudan_1 = self.import_shapefile(country="_SDN_")
+            SSudan_1 = self.import_shapefile(country="_SSD_")
+            gdf_list = [Kenya_1, Ethiopia_1, Somalia_1, Uganda_1, Sudan_1, SSudan_1]
 
         elif self.hierarchy == 2:
             Kenya_2 = self.import_shapefile(country="_KEN_")
             Ethiopia_2 = self.import_shapefile(country="_ETH_")
             Somalia_2 = self.import_shapefile(country="_SOM_")
             Uganda_2 = self.import_shapefile(country="_UGA_")
-            gdf_list = [Kenya_2, Ethiopia_2, Somalia_2, Uganda_2]
+            Sudan_2 = self.import_shapefile(country="_SDN_")
+            SSudan_2 = self.import_shapefile(country="_SSD_")
+            gdf_list = [Kenya_2, Ethiopia_2, Somalia_2, Uganda_2, Sudan_2, SSudan_2]
 
         elif self.hierarchy == 3:
             Kenya_3 = self.import_shapefile(country="_KEN_")
             Ethiopia_3 = self.import_shapefile(country="_ETH_")
             Uganda_3 = self.import_shapefile(country="_UGA_")
-            gdf_list = [Kenya_3, Ethiopia_3, Uganda_3]
+            Sudan_3 = self.import_shapefile(country="_SDN_")
+            SSudan_3 = self.import_shapefile(country="_SSD_")
+            gdf_list = [Kenya_3, Ethiopia_3, Uganda_3, Sudan_3, SSudan_3]
 
         return gdf_list
 
-    def create_sub_tables(self, shp_list):
+    def create_sub_tables(self):
         """
         Creates sub-tables per hierarchy to be used for the final location table.
 
         :param shp_list: A list of shapefiles
         :return: A geodataframe of all location data for the selected hierarchy
         """
+        shp_list = self.shapefiles_list()
         # Concatenate shp
         gdf = gpd.GeoDataFrame(pd.concat(shp_list, ignore_index=True, sort=False))
         # Add new columns
