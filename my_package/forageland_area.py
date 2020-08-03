@@ -13,12 +13,12 @@ import geopandas as gpd
 from utils_flat_files import FlatFiles
 
 #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 class Forageland:
     '''
@@ -27,12 +27,15 @@ class Forageland:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
+        self.flats = FlatFiles(path_in, path_out)
 
         # Import districts
-        self.shp2_Kenya = gpd.read_file(self.path_in + "gadm36_KEN_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Somalia = gpd.read_file(self.path_in + "gadm36_SOM_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Ethiopia = gpd.read_file(self.path_in + "gadm36_ETH_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Uganda = gpd.read_file(self.path_in + "gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Sudan = gpd.read_file(self.path_in + "Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_SSudan = gpd.read_file(self.path_in + "Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
 
         # Import forageland vector
         self.forageland_v = gpd.read_file(self.path_in + "forageland/forageland_vector.shp")
@@ -43,7 +46,7 @@ class Forageland:
         
         :return: A geodataframe with all districts of the 4 countries concatenated.
         '''
-        district_level = [self.shp2_Kenya, self.shp2_Ethiopia, self.shp2_Somalia, self.shp2_Uganda]
+        district_level = [self.shp2_Kenya, self.shp2_Ethiopia, self.shp2_Somalia, self.shp2_Uganda, self.shp2_Sudan, self.shp2_SSudan]
         gdf_districts = gpd.GeoDataFrame(pd.concat(district_level, ignore_index=True))
         gdf_districts.crs = {"init": "epsg:4326"}
         return gdf_districts
@@ -82,10 +85,10 @@ class Forageland:
         forageland_district['value'] = forageland_district['area_inter']
 
         # Add dateID
-        forageland_gdf = FlatFiles().add_date_id(forageland_district, column = 'year')
+        forageland_gdf = self.flats.add_date_id(forageland_district, column = 'year')
 
         # Select fact table columns
-        forageland_df = FlatFiles().select_columns_fact_table(df = forageland_gdf)
+        forageland_df = self.flats.select_columns_fact_table(df = forageland_gdf)
         
         return forageland_df
 
@@ -95,9 +98,9 @@ class Forageland:
         :return: The Forageland table in both a parquet and csv format with the date added in the name.
         '''
         forageland_df = self.add_fact_ids()
-        FlatFiles().export_output_w_date(forageland_df, filename)
+        self.flats.export_output_w_date(forageland_df, filename)
         
 if __name__ == '__main__':
 
     print("------- Extracting forageland area per district table ---------")
-    Forageland().export_table('Forageland')
+    Forageland().export_table('forageland_fact/Forageland')
