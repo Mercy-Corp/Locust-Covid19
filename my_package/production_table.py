@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the production table.
+Data available from: http://www.fao.org/faostat/en/#data/QC
 
 Created on Thu Jun 30 15:36:40 2020
 

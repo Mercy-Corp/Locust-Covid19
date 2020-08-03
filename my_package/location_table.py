@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to prepare the location table.
+Data available from: https://gadm.org/download_country_v3.html
 
 Created on Thu Jun 18 09:16:40 2020
 
