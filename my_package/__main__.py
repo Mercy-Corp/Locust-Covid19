@@ -24,8 +24,8 @@ from cropland_locust import CroplandLocust
 import os
 
 # S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 # #local paths
 #INPUT_PATH = r'data/input/'
@@ -44,14 +44,12 @@ if __name__ == '__main__':
     print("------- Extracting location table ---------")
 
     loc_table = LocationTable(INPUT_PATH, OUTPUT_PATH)
-    location_table = loc_table.concat_sub_tables()      # Create geodataframe
-    loc_table.export_to_parquet(location_table, 'location_table')       # Export table to parquet format
+    loc_table.export_to_parquet('location_table')       # Export table to parquet format
 
     # 2. Creation of shapefile table
     print("------- Extracting shapefile table ---------")
 
     shp_table = ShapefileTable(INPUT_PATH, OUTPUT_PATH)
-    gdf_all = shp_table.concat_sub_tables()
     shp_table.export_to_shp(gdf_all, 'shapefile_table')     # Export table to shp
 
     # 3. Creation of production table
