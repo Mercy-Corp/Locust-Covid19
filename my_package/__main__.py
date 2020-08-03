@@ -56,11 +56,8 @@ if __name__ == '__main__':
     print("------- Extracting production table ---------")
     #Load class
     prod_table = ProductionTable(INPUT_PATH, OUTPUT_PATH)
-    # Create dataframe
-    production_df = prod_table.add_ids_to_table()
     # Export
-    flatfiles = FlatFiles(INPUT_PATH, OUTPUT_PATH)
-    flatfiles.export_output_w_date(production_df, 'production_table')
+    prod_table.export_files()
 
     # 4. Creation of population table
     print("------- Extracting population tables ---------")
