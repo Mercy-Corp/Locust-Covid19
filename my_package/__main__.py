@@ -44,7 +44,7 @@ if __name__ == '__main__':
     print("------- Extracting location table ---------")
 
     loc_table = LocationTable(INPUT_PATH, OUTPUT_PATH)
-    loc_table.export_to_parquet('location_table')       # Export table to parquet format
+    loc_table.export_to_csv('location_table')       # Export table to parquet format
 
     # 2. Creation of shapefile table
     print("------- Extracting shapefile table ---------")
@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     # 9. Calculation of forageland affected by locust
     print("------- Extracting forageland area affected by locust per district table ---------")
-    ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('Forage_impact_locust_district')
+    ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('forageland_locust_fact/Forage_impact_locust_district')
 
     # 10 Calculation of cropland affected by locust
     print("------- Extracting cropland area affected by locust per district table ---------")
