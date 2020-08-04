@@ -11,6 +11,7 @@ Created on Thu Jun 30 15:36:40 2020
 # Imports
 import pandas as pd
 from utils_flat_files import FlatFiles
+import numpy as np
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
@@ -67,6 +68,8 @@ class ProductionTable:
 
         # Add value column (production units = tonnes)
         production['value'] = production['Value']
+        #Drop NA (located in Sudan)
+        production.dropna(subset=['value'], inplace=True)
 
         # Filter only needed columns to export
         production = self.flats.select_columns_fact_table(production)
@@ -77,6 +80,7 @@ class ProductionTable:
         Exports to parquet format.
         '''
         production_df = self.add_ids_to_table()
+        #self.flats.export_csv_w_date(production_df, 'production_table')
         self.flats.export_parquet_w_date(production_df, 'production_fact/production_table')
 
 if __name__ == '__main__':
