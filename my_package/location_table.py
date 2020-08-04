@@ -72,6 +72,5 @@ if __name__ == '__main__':
     loc_table = LocationTable()
     # Create geodataframe
     gdf_all = loc_table.concat_sub_tables()
-    # Export table to parquet
-    loc_table.export_to_parquet('location_table')
+    # Export table to csv
     loc_table.export_to_csv('location_table')
