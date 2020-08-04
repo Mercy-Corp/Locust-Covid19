@@ -10,7 +10,7 @@ Created on Thu Jun 30 15:36:40 2020
 
 # Imports
 import pandas as pd
-from my_package.utils_flat_files import FlatFiles
+from utils_flat_files import FlatFiles
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
