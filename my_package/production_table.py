@@ -74,10 +74,10 @@ class ProductionTable:
 
     def export_files(self):
         '''
-        Exports to csv and parquet format.
+        Exports to parquet format.
         '''
         production_df = self.add_ids_to_table()
-        self.flats.export_output_w_date(production_df, 'production_fact/production_table')
+        self.flats.export_parquet_w_date(production_df, 'production_fact/production_table')
 
 if __name__ == '__main__':
 
