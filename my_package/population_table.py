@@ -23,6 +23,8 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
 
+COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
+
 class PopulationTable:
     '''
     This class creates the population table for the expected year.
@@ -32,33 +34,32 @@ class PopulationTable:
         self.path_out = path_out
         self.year = year
 
-        self.gdf_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+    def read_district_shp(self, country):
+        gdf_country = gdp.read_file(self.path_in + "Spatial/gadm36_" + country + "_2.shp")[['GID_2', 'geometry']]
+        return gdf_country
 
-        self.raster_Uganda = self.path_in + "population/UGA_pop_" + str(self.year) + ".tif"
-        self.raster_Kenya = self.path_in + "population/KEN_pop_" + str(self.year) + ".tif"
-        self.raster_Somalia = self.path_in + "population/SOM_pop_" + str(self.year) + ".tif"
-        self.raster_Ethiopia = self.path_in + "population/ETH_pop_" + str(self.year) + ".tif"
+    def read_population_raster(self, country):
+        raster_country = self.path_in + "population/" + country + "_pop_" + str(self.year) + ".tif"
+        return raster_country
 
-        self.pop_density_Uganda = zonal_stats(self.gdf_Uganda.geometry, self.raster_Uganda, layer="polygons", stats=['sum'])
-        self.pop_density_Kenya = zonal_stats(self.gdf_Kenya.geometry, self.raster_Kenya, layer="polygons", stats=['sum'])
-        self.pop_density_Somalia = zonal_stats(self.gdf_Somalia.geometry, self.raster_Somalia, layer="polygons", stats=['sum'])
-        self.pop_density_Ethiopia = zonal_stats(self.gdf_Ethiopia.geometry, self.raster_Ethiopia, layer="polygons", stats=['sum'])
+    def calc_pop_density(self, country):
+        gdf_country = self.read_district_shp(country)
+        raster_country = self.read_population_raster(country)
+        pop_density_country = zonal_stats(gdf_country.geometry, raster_country, layer="polygons", stats=['sum'])
+        return pop_density_country
 
     def population_table(self):
         '''
 
         :return: the geodataframe with the population column
         '''
-        # Add population as a column in our geodataframe
-        self.gdf_Uganda['population'] = pd.DataFrame(self.pop_density_Uganda)
-        self.gdf_Kenya['population'] = pd.DataFrame(self.pop_density_Kenya)
-        self.gdf_Somalia['population'] = pd.DataFrame(self.pop_density_Somalia)
-        self.gdf_Ethiopia['population'] = pd.DataFrame(self.pop_density_Ethiopia)
+        countries_list = []
+        for country in COUNTRIES:
+            print(country)
+            gdf_country = self.read_district_shp(country)
+            gdf_country['population'] = self.calc_pop_density(country)
+            countries_list.append(gdf_country)
 
-        countries_list = [self.gdf_Ethiopia, self.gdf_Somalia, self.gdf_Kenya, self.gdf_Uganda]
         population_gdf = gpd.GeoDataFrame(pd.concat(countries_list, ignore_index=True))
         return population_gdf
 
@@ -108,10 +109,10 @@ if __name__ == '__main__':
 
     print("------- Extracting population tables ---------")
     PopulationTable(2000).export_population()
-    PopulationTable(2014).export_population()
-    PopulationTable(2015).export_population()
-    PopulationTable(2016).export_population()
-    PopulationTable(2017).export_population()
-    PopulationTable(2018).export_population()
-    PopulationTable(2019).export_population()
-    PopulationTable(2020).export_population()
+    #PopulationTable(2014).export_population()
+    #PopulationTable(2015).export_population()
+    #PopulationTable(2016).export_population()
+    #PopulationTable(2017).export_population()
+    #PopulationTable(2018).export_population()
+    #PopulationTable(2019).export_population()
+    #PopulationTable(2020).export_population()
