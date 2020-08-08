@@ -22,8 +22,8 @@ warnings.filterwarnings("ignore")
 #OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+INPUT_PATH = r'../my_package/data/input/'
+OUTPUT_PATH = r'../my_package/data/output/'
 
 geolocator = Nominatim(user_agent="custom-application", timeout=10)
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
