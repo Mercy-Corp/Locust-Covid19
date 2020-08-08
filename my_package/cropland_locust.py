@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the cropland area affected by locust per district.
+Locust data source: https://locust-hub-hqfao.hub.arcgis.com/datasets/swarms-1/data?geometry=-91.702%2C-8.959%2C143.142%2C46.416&showData=true
+
 
 Created on Wed Jul 15 11:29:40 2020
 
@@ -28,8 +30,8 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
 
-RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-#RASTER_NAMES = ["S10E40", "S10E20", "N00E50", "N00E20"]
+RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
+#RASTER_NAMES = ["S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"]
 
 class CroplandLocust:
     '''
@@ -38,14 +40,17 @@ class CroplandLocust:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-        self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
-        self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%d-%m-%Y')
+        #self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
+        #self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%d-%m-%Y')
+        self.flats = FlatFiles(self.path_in, self.path_out)
 
         # Import districts
         self.shp2_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
         self.shp2_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
         self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
         self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Sudan = gpd.read_file(self.path_in + "Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_SSudan = gpd.read_file(self.path_in + "Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
 
         # # Import cropland vector
         # self.crops = gpd.read_file(self.path_in + "cropland/Crops_vectorized.shp")
@@ -69,7 +74,8 @@ class CroplandLocust:
 
         :return: A geodataframe with all districts of the 4 countries concatenated.
         '''
-        district_level = [self.shp2_Kenya, self.shp2_Ethiopia, self.shp2_Somalia, self.shp2_Uganda]
+        district_level = [self.shp2_Kenya, self.shp2_Ethiopia, self.shp2_Somalia, self.shp2_Uganda, self.shp2_Sudan,
+                          self.shp2_SSudan]
         gdf_districts = gpd.GeoDataFrame(pd.concat(district_level, ignore_index=True))
         gdf_districts.crs = {"init": "epsg:4326"}
         return gdf_districts
@@ -293,13 +299,15 @@ class CroplandLocust:
         :return: The Cropland table in both a parquet and csv format with the date added in the name.
         '''
         crops_loc_df = self.add_fact_ids()
-        FlatFiles(INPUT_PATH, OUTPUT_PATH).export_output_w_date(crops_loc_df, filename)
+        self.flats.export_parquet_w_date(crops_loc_df, filename)
+        #self.flats.export_csv_w_date(crops_loc_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
 
     print("------- Extracting cropland area affected by locust per district table ---------")
     crop_loc = CroplandLocust()
     crop_loc.extract_crops_locust()
-    crop_loc.export_table('cropland_locust_fact/Crops_impact_locust_district')
+    #crop_loc.export_table('Crops_impact_locust_district') #local export
+    crop_loc.export_table('cropland_locust_fact/Crops_impact_locust_district') #export to S3
 
 
