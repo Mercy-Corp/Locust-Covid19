@@ -19,15 +19,15 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-#RASTER_NAMES = ["N20E20"]
+#RASTER_NAMES = ["N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"]
 
 class Cropland:
     '''
@@ -183,6 +183,7 @@ class Cropland:
         '''
         crops_df = self.add_fact_ids()
         self.flats.export_parquet_w_date(crops_df, filename)
+        #self.flats.export_csv_w_date(crops_df, filename) #only for testing purposes
         
 if __name__ == '__main__':
 
@@ -192,5 +193,5 @@ if __name__ == '__main__':
     #Extract all zonal statistics per raster
     cropland_area.extract_crops()
     #Load zonal statistics and prepare & export the cropland fact table
-    cropland_area.export_table("Cropland")
-    #cropland_area.export_table("cropland_fact/Cropland")
+    #cropland_area.export_table("Cropland") #local export
+    cropland_area.export_table("cropland_fact/Cropland") #export to S3
