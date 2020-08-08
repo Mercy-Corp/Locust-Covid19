@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+The aim of this module is to extract the price table.
+
+Created on Tue Jul 21 10:35:13 2020
+
+@author: rashmi.upreti@accenture.com
+"""
+
+# Imports
 import csv
 import os
 import pyarrow.parquet as pq
@@ -11,7 +21,7 @@ def price_function():
         readCSV = csv.reader(csvfile, delimiter=',')
         for Source_file_row in readCSV:
             output_rows.append(Source_file_row)
-    country=['Uganda','Kenya','Somalia','Ethiopia']
+    country=['Uganda','Kenya','Somalia','Ethiopia','Sudan', 'South Sudan']
     cm_list=['Rice (imported) - Retail','Rice - Retail','Milk - Retail','Milk (cow, fresh) - Retail','Beans - Retail','Beans (fava, dry) - Retail','Beans (dry) - Retail']
     location_filter_filename='data1/output/markets_district_updated.csv'
     location_data=[]
