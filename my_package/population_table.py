@@ -23,6 +23,9 @@ OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
 
+COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
+#COUNTRIES = ["SDN", "SSD"]
+
 class PopulationTable:
     '''
     This class creates the population table for the expected year.
@@ -31,34 +34,50 @@ class PopulationTable:
         self.path_in = path_in
         self.path_out = path_out
         self.year = year
+        self.flats = FlatFiles(path_in, path_out)
 
-        self.gdf_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
-        self.gdf_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+    def read_district_shp(self, country):
+        '''
 
-        self.raster_Uganda = self.path_in + "population/UGA_pop_" + str(self.year) + ".tif"
-        self.raster_Kenya = self.path_in + "population/KEN_pop_" + str(self.year) + ".tif"
-        self.raster_Somalia = self.path_in + "population/SOM_pop_" + str(self.year) + ".tif"
-        self.raster_Ethiopia = self.path_in + "population/ETH_pop_" + str(self.year) + ".tif"
+        :param country: The reference country
+        :return: A geodataframe with 2 columns: district id and geometry.
+        '''
+        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_2.shp")[['GID_2', 'geometry']]
+        return gdf_country
 
-        self.pop_density_Uganda = zonal_stats(self.gdf_Uganda.geometry, self.raster_Uganda, layer="polygons", stats=['sum'])
-        self.pop_density_Kenya = zonal_stats(self.gdf_Kenya.geometry, self.raster_Kenya, layer="polygons", stats=['sum'])
-        self.pop_density_Somalia = zonal_stats(self.gdf_Somalia.geometry, self.raster_Somalia, layer="polygons", stats=['sum'])
-        self.pop_density_Ethiopia = zonal_stats(self.gdf_Ethiopia.geometry, self.raster_Ethiopia, layer="polygons", stats=['sum'])
+    def read_population_raster(self, country):
+        '''
+
+        :param country: The reference country
+        :return: The raster with the population density for the reference country.
+        '''
+        raster_country = self.path_in + "population/" + country + "_pop_" + str(self.year) + ".tif"
+        return raster_country
+
+    def calc_population(self, country):
+        '''
+
+        :param country: The reference country
+        :return: The population for the given country
+        '''
+        gdf_country = self.read_district_shp(country)
+        raster_country = self.read_population_raster(country)
+        pop_density_country = zonal_stats(gdf_country.geometry, raster_country, layer="polygons", stats='sum')
+        return pop_density_country
+
 
     def population_table(self):
         '''
 
         :return: the geodataframe with the population column
         '''
-        # Add population as a column in our geodataframe
-        self.gdf_Uganda['population'] = pd.DataFrame(self.pop_density_Uganda)
-        self.gdf_Kenya['population'] = pd.DataFrame(self.pop_density_Kenya)
-        self.gdf_Somalia['population'] = pd.DataFrame(self.pop_density_Somalia)
-        self.gdf_Ethiopia['population'] = pd.DataFrame(self.pop_density_Ethiopia)
+        countries_list = []
+        for country in COUNTRIES:
+            print("Preparing {} population table for {}.".format(self.year, country))
+            gdf_country = self.read_district_shp(country)
+            gdf_country['population'] = pd.DataFrame(self.calc_population(country))
+            countries_list.append(gdf_country)
 
-        countries_list = [self.gdf_Ethiopia, self.gdf_Somalia, self.gdf_Kenya, self.gdf_Uganda]
         population_gdf = gpd.GeoDataFrame(pd.concat(countries_list, ignore_index=True))
         return population_gdf
 
@@ -67,7 +86,6 @@ class PopulationTable:
 
         :return: The population fact table
         '''
-
         population_gdf = self.population_table()
 
         # Add locationID
@@ -87,12 +105,13 @@ class PopulationTable:
             'year'].astype(str)
 
         # Add dateID
-        population_gdf = FlatFiles().add_date_id(population_gdf, column = 'year')
+        population_gdf = self.flats.add_date_id(population_gdf, column = 'year')
 
         # Select fact table columns
-        population_df = FlatFiles().select_columns_fact_table(df = population_gdf)
+        population_df = self.flats.select_columns_fact_table(df = population_gdf)
 
         return population_df
+
 
     def export_population(self):
         '''
@@ -101,17 +120,43 @@ class PopulationTable:
         '''
         population_df = self.add_ids_to_table()
         file_name = 'population_fact/population_table_' + str(self.year)
+        #file_name = 'population_table_' + str(self.year)
         population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
+        print("Dataframe exported to parquet format")
+
+    def export_intermediate_pop(self):
+        population_df = self.add_ids_to_table()
+        filename = 'population_table_Sudan_' + str(self.year)
+        self.flats.export_to_csv(population_df, filename)
+        self.flats.export_to_parquet(population_df, filename)
+
+    def append_populations_year(self):
+        population_initial = pd.read_csv(self.path_out + 'population_table_' + str(self.year) + ".csv", sep="|")
+        population_Sudan= self.add_ids_to_table()
+        #population_Sudan= pd.read_csv(self.path_out + 'population_table_Sudan_' + str(self.year) + ".csv", sep="|")
+        population_total = population_initial.append(population_Sudan)
+        return population_total
+
+    def export_total_population(self):
+        '''
+
+        :return: Exports population fact table to parquet format.
+        '''
+        population_df = self.append_populations_year()
+        file_name = 'population_fact/population_table_' + str(self.year)
+        #file_name = 'population_table_all_countries_' + str(self.year)
+        population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
+        self.flats.export_to_csv(population_df, file_name)
         print("Dataframe exported to parquet format")
 
 if __name__ == '__main__':
 
     print("------- Extracting population tables ---------")
-    PopulationTable(2000).export_population()
-    PopulationTable(2014).export_population()
-    PopulationTable(2015).export_population()
-    PopulationTable(2016).export_population()
-    PopulationTable(2017).export_population()
-    PopulationTable(2018).export_population()
-    PopulationTable(2019).export_population()
+    #PopulationTable(2000).export_population()
+    #PopulationTable(2014).export_population()
+    #PopulationTable(2015).export_population()
+    #PopulationTable(2016).export_population()
+    #PopulationTable(2017).export_population()
+    #PopulationTable(2018).export_population()
+    #PopulationTable(2019).export_population()
     PopulationTable(2020).export_population()

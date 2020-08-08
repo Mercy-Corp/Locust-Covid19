@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """
+The aim of this module is to extract the price table.
+
 Created on Tue Jul 21 10:35:13 2020
 
-@author: rashmi.upreti
+@author: rashmi.upreti@accenture.com
 """
 
 import os
@@ -10,8 +12,8 @@ import csv
 import pickle
 import pyarrow.parquet as pq
 import pyarrow.csv as pv
-import pyarrow as pa
-import pandas as pd
+#import pyarrow as pa
+#import pandas as pd
 import boto3
 client = boto3.client('s3')
 
@@ -19,7 +21,6 @@ client = boto3.client('s3')
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
 OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
-#Source_file = s3://mercy-locust-covid19-in-dev/inbound/sourcedata/wfpvam_foodprices.csv
 Source_file= INPUT_PATH + 'wfpvam_foodprices.csv'
 PICKLE_FILE = INPUT_PATH + 'pickle.pkl'
 print(Source_file)
@@ -85,4 +86,3 @@ else:
     df=pv.read_csv(filename)
     pq.write_table(df, filename.replace('csv', 'parquet'))
     print("Price table extracted")
-

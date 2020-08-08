@@ -4,24 +4,38 @@ The prediction of current demand is based on demand in 2000 and population
 values from 2014-2020.
 
 Created on Fri Jul 17 10:59:01 2020
+Last modified on Fri Aug 07 14:52:01 2020
 
-@author: linnea.evanson@accenture.com
+@author: linnea.evanson@accenture.com, ioanna.papachristou@accenture.com
 """
 
 import pandas as pd
 import numpy as np
-from my_package.utils_flat_files import FlatFiles
+from utils_flat_files import FlatFiles
 from scipy.optimize import curve_fit
 import re
+import geopandas as gpd
+from rasterstats import zonal_stats
 #import boto3
 #client = boto3.client('s3')
 
 # #S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
+
+COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
+
+COMMODITIES = ['beef', 'egg', 'mlk', 'mut', 'pork', 'pou']
+
+COMMODITIES_DICT = {'beef': {'cmdt_name': 'beef consumption', 'id': 22},
+                    'egg': {'cmdt_name': 'egg consumption', 'id': 21},
+                    'mlk': {'cmdt_name': 'milk consumption', 'id': 20},
+                    'mut': {'cmdt_name': 'mutton consumption', 'id': 24},
+                    'pork': {'cmdt_name': 'pork consumption', 'id': 25},
+                    'pou': {'cmdt_name': 'poultry consumption', 'id': 23}}
 
 class DemandTable:
     '''
@@ -30,112 +44,75 @@ class DemandTable:
     def __init__(self, path_in=INPUT_PATH, path_out=OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
+        self.flats = FlatFiles(path_in, path_out)
 
-        self.df_egg = pd.read_excel(self.path_in + 'UA_Eggs_AF.xlsx')
-        self.df_milk = pd.read_excel(self.path_in + 'UA_Milk_AF.xlsx')
-        self.df_mutt = pd.read_excel(self.path_in + 'UA_Mutt_AF.xlsx')
-        self.df_pork = pd.read_excel(self.path_in + 'UA_Pork_AF.xlsx')
-        self.df_pou = pd.read_excel(self.path_in + 'UA_Pou_AF.xlsx')
-        self.df_beef = pd.read_excel(self.path_in + 'UrbanAreas_Beef_Africa.xlsx')
+        self.popfile00 = str(self.path_out + "population_fact/population_table_all_countries_2000.csv")
+        self.popfile14 = str(self.path_out + "population_fact/population_table_all_countries_2014.csv")
+        self.popfile16 = str(self.path_out + "population_fact/population_table_all_countries_2016.csv")
+        self.popfile17 = str(self.path_out + "population_fact/population_table_all_countries_2017.csv")
+        self.popfile18 = str(self.path_out + "population_fact/population_table_all_countries_2018.csv")
+        self.popfile20 = str(self.path_out + "population_fact/population_table_all_countries_2020.csv")
 
-        self.location = pd.read_csv(self.path_in + 'cities_mapping_all_countries.csv', sep='|')
-
-        self.popfile00 = str(self.path_out + "population_table_2000.csv")
-        self.popfile14 = str(self.path_out + "population_table_2014.csv")
-        self.popfile16 = str(self.path_out + "population_table_2016.csv")
-        self.popfile17 = str(self.path_out + "population_table_2017.csv")
-        self.popfile18 = str(self.path_out + "population_table_2018.csv")
-        self.popfile20 = str(self.path_out + "population_table_2020.csv")
-
-    def filter_input_tables(self):
+    def load_rasters(self, cmdt):
         '''
-        Filter for desired columns.
 
-        :return: filtered, concatenated table from the 6 input files
+        :param cmdt: The commodity to load.
+        :return: The raster with the population density for the reference country.
         '''
-        self.df_egg= self.df_egg.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL'], axis=1)
-        self.df_milk= self.df_milk.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL','WB_Region_2010'], axis=1)
-        self.df_mutt= self.df_mutt.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL','WB_Region_2010'], axis=1)
-        self.df_pork= self.df_pork.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL','WB_Region_2010'], axis=1)
-        self.df_pou= self.df_pou.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL','WB_Region_2010'], axis=1)
-        self.df_beef= self.df_beef.drop(['NEW_URBID','ISO3','Continent','SQKM_FINAL','WB_Region_2010'], axis=1)
+        raster_cmdt = self.path_in + "demand/" + cmdt + "_cons00.tif"
 
-        countries=['Ethiopia','Kenya','Somalia','Uganda']
+        return raster_cmdt
 
-        self.df_egg=self.df_egg[self.df_egg['ADM0_Name'].isin(countries)]
-        self.df_milk=self.df_milk[self.df_milk['ADM0_Name'].isin(countries)]
-        self.df_mutt=self.df_mutt[self.df_mutt['ADM0_Name'].isin(countries)]
-        self.df_pork=self.df_pork[self.df_pork['ADM0_Name'].isin(countries)]
-        self.df_pou=self.df_pou[self.df_pou['ADM0_Name'].isin(countries)]
-        self.df_beef=self.df_beef[self.df_beef['ADM0_Name'].isin(countries)]
-
-        # Rename columns (Cons00 = Consumption in 2000, Cons30 = Predicted consumption in 2030)
-        self.df_egg = self.df_egg.rename(columns={'Egg_Cons00': 'Cons00', 'Egg_Cons30': 'Cons30'})
-        self.df_milk = self.df_milk.rename(columns={'Milk_Cons00': 'Cons00', 'Milk_Cons30': 'Cons30'})
-        self.df_mutt = self.df_mutt.rename(columns={'Mut_Cons00': 'Cons00', 'Mut_Cons30': 'Cons30'})
-        self.df_pork = self.df_pork.rename(columns={'Pork_Cons00': 'Cons00', 'Pork_Cons30': 'Cons30'})
-        self.df_pou = self.df_pou.rename(columns={'Pou_Cons00': 'Cons00', 'Pou_Cons30': 'Cons30'})
-        self.df_beef = self.df_beef.rename(columns={'Beef_Cons00': 'Cons00', 'Beef_Cons30': 'Cons30'})
-
-        # Insert columns to name type of consumption
-        self.df_egg.insert(7, 'dm_commodity_name', 'egg consumption')  # insert column at specified location (column 7 here)
-        self.df_milk.insert(7, 'dm_commodity_name', 'milk consumption')
-        self.df_mutt.insert(7, 'dm_commodity_name', 'mutton consumption')
-        self.df_pork.insert(7, 'dm_commodity_name', 'pork consumption')
-        self.df_pou.insert(7, 'dm_commodity_name', 'poultry consumption')
-        self.df_beef.insert(7, 'dm_commodity_name', 'beef consumption')
-
-        # Concatenate all food types
-        frames = pd.concat([self.df_egg, self.df_milk, self.df_mutt, self.df_pork, self.df_pou, self.df_beef])  # called 'frames' for all dataframes
-
-        #Create measureID
-        conditions = [
-            (frames['dm_commodity_name'] == 'egg consumption'),
-            (frames['dm_commodity_name'] == 'milk consumption'),
-            (frames['dm_commodity_name'] == 'mutton consumption'),
-            (frames['dm_commodity_name'] == 'pork consumption'),
-           (frames['dm_commodity_name'] == 'poultry consumption'),
-            (frames['dm_commodity_name'] == 'beef consumption')]
-
-        choices = ['21', '20', '24', '25', '23', '22']
-        frames['measureID'] = np.select(conditions, choices) #assign an ID to each of the different types of conditions
-
-        return frames
-
-    def create_locationIDs(self,frames):
+    def read_boundaries_shp(self, country, hierarchy):
         '''
-        Map locations within countries to their location ID and insert locationID column.
 
-        :param frames: the dataframe of all filtered and concatenated input files.
-        :return: the dataframe with additional column locationID.
+        :param country: The reference country
+        :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
+        :return: A geodataframe with 2 columns: locationID and geometry.
         '''
-        frames['NAME'] = frames['NAME'].str.lower()
-        frames["NAME"] = frames["NAME"].str.strip()
-        self.location['City'] = self.location['City'].str.lower()
-        self.location["City"] = self.location["City"].str.strip()
+        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        GID_column = 'GID_' + str(hierarchy)
+        gdf_country = gdf_country[[GID_column, 'geometry']]
+        gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
 
-        locID = []
-        count = 0
-        for line in frames['NAME']:  # match names of cities to location IDs
-            mask = np.isin(self.location['City'], line)
-            if sum(mask):
-                flag = 0
-                for i in range(len(self.location['City'])):
-                    if flag == 1:
-                        # nothing
-                        0
-                    elif self.location['City'][
-                        i] == line:  # TODO : map all locations, currently some are removed that do not have a locationID
-                        locID.append(self.location['locationID'][i])
-                        flag = 1
-            else:
-                locID.append(np.nan)
-            count += 1
+        return gdf_country
 
-        # Add locID to frames
-        frames['locationID'] = locID
+    def calc_commodity(self, gdf_country, cmdt):
 
-        return frames
+        raster_cmdt = self.load_rasters(cmdt)
+        demand_country = zonal_stats(gdf_country.geometry, raster_cmdt, layer="polygons", stats='sum')
+        return demand_country
+
+    def demand_table(self):
+        '''
+
+        :return: the geodataframe with the demand column
+        '''
+        countries_list = []
+
+        for country in COUNTRIES:
+            print("Preparing demand table for {}.".format(country))
+            gdf_country = self.read_boundaries_shp(country, 1)
+            gdf_country['year'] = 2000
+
+            commodities_gdf = gpd.GeoDataFrame()
+            for cmdt in COMMODITIES:
+                print("Calculating {} commodity...".format(cmdt))
+                commodity_gdf = gdf_country
+                commodity_gdf['measureID'] = COMMODITIES_DICT[cmdt]['id']
+                commodity_gdf['Cons00'] = pd.DataFrame(self.calc_commodity(commodity_gdf, cmdt))
+                commodity_gdf['dm_commodity_name'] = COMMODITIES_DICT[cmdt]['cmdt_name']
+                commodities_gdf = commodities_gdf.append(commodity_gdf)
+
+            countries_list.append(commodities_gdf)
+
+        demand_gdf = gpd.GeoDataFrame(pd.concat(countries_list, ignore_index=True))
+
+        # For test purposes only:
+        #demand = demand_gdf.drop(['geometry'], axis=1)
+        #demand.to_csv(self.path_in + 'demand/demand_districts.csv', sep='|', encoding='utf-8', index=False)
+
+        return demand_gdf
 
     def split_locationID(self,locationID):
         '''
@@ -262,8 +239,8 @@ class DemandTable:
         :return: demand_final: the final dataframe, with a value for consumption for each year.
         '''
 
-        frames = self.filter_input_tables()
-        frames = self.create_locationIDs(frames)
+        frames = self.demand_table()
+        #frames = self.create_locationIDs(frames)
 
         demand, cons14, cons15, cons16, cons17, cons18, cons19, cons20 = self.get_consumption_preds(frames)
 
@@ -285,35 +262,35 @@ class DemandTable:
         # Create date IDs for each of the different year predictions:
         date00 = [2000 for i in range(len(df00['value']))]
         df00.insert(1, 'date', date00)
-        df00 = FlatFiles().add_date_id(df00, 'date')
+        df00 = self.flats.add_date_id(df00, 'date')
 
         date14 = [2014 for i in range(len(cons14))]
         df14.insert(1, 'date', date14)
-        df14 = FlatFiles().add_date_id(df14, 'date')
+        df14 = self.flats.add_date_id(df14, 'date')
 
         date15 = [2015 for i in range(len(cons15))]
         df15.insert(1, 'date', date15)
-        df15 = FlatFiles().add_date_id(df15, 'date')
+        df15 = self.flats.add_date_id(df15, 'date')
 
         date16 = [2016 for i in range(len(cons16))]
         df16.insert(1, 'date', date16)
-        df16 = FlatFiles().add_date_id(df16, 'date')
+        df16 = self.flats.add_date_id(df16, 'date')
 
         date17 = [2017 for i in range(len(cons17))]
         df17.insert(1, 'date', date17)
-        df17 = FlatFiles().add_date_id(df17, 'date')
+        df17 = self.flats.add_date_id(df17, 'date')
 
         date18 = [2018 for i in range(len(cons18))]
         df18.insert(1, 'date', date18)
-        df18 = FlatFiles().add_date_id(df18, 'date')
+        df18 = self.flats.add_date_id(df18, 'date')
 
         date19 = [2019 for i in range(len(cons19))]
         df19.insert(1, 'date', date19)
-        df19 = FlatFiles().add_date_id(df19, 'date')
+        df19 = self.flats.add_date_id(df19, 'date')
 
         date20 = [2020 for i in range(len(cons20))]
         df20.insert(1, 'date', date20)
-        df20 = FlatFiles().add_date_id(df20, 'date')
+        df20 = self.flats.add_date_id(df20, 'date')
 
         demand_final = pd.concat([df00, df14, df15, df16, df17, df18, df19, df20])
         demand_final = demand_final.drop(['date'], axis=1)
@@ -325,7 +302,10 @@ class DemandTable:
         demand_final.insert(0, 'factID', [str('DEF_' + str(i + 1)) for i in
                                           range(len(demand_final['value']))])  # insert at first columns
 
+        self.flats.export_output_w_date(demand_final, "demand_fact/demand_table")
+
         return demand_final
+
 
 if __name__ == '__main__':
     print("------- Extracting demand table ---------")
@@ -334,6 +314,8 @@ if __name__ == '__main__':
 
     # Create dataframe
     demand_df = dem_table.create_demand_table()
+    print(demand_df.columns)
+    print(demand_df.head())
 
     # Export files: use utils function to add today's date to the filename
-    out = FlatFiles().export_output_w_date(demand_final, "Demand")
+    #FlatFiles().export_output_w_date(demand_final, "demand_table")

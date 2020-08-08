@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the production table.
+Data available from: http://www.fao.org/faostat/en/#data/QC
 
 Created on Thu Jun 30 15:36:40 2020
 
@@ -9,15 +10,16 @@ Created on Thu Jun 30 15:36:40 2020
 
 # Imports
 import pandas as pd
-from my_package.utils_flat_files import FlatFiles
+from utils_flat_files import FlatFiles
+import numpy as np
 
-# #S3 paths
-# INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/Spatial/'
-# OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/location_dim/'
+#S3 paths
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 class ProductionTable:
     '''
@@ -26,9 +28,9 @@ class ProductionTable:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data.csv", sep=",")
-        self.locations = pd.read_csv(self.path_out + "location_table.csv", sep = "|")[['locationID', 'name']]
-
+        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data.csv", sep=",", encoding='utf-8')
+        self.locations = pd.read_csv(self.path_out + "location_dim/location_table.csv", sep = "|", encoding='utf-8')[['locationID', 'name']]
+        self.flats = FlatFiles(self.path_in, self.path_out)
 
     def create_measure_df(self):
         '''
@@ -58,18 +60,28 @@ class ProductionTable:
             'Item Code'].astype(str) + '_' + production['Year Code'].astype(str)
 
         # Merge with dates and add dateID
-        production = FlatFiles().add_date_id(production, 'Year')
+        production = self.flats.add_date_id(production, 'Year')
 
         # Merge with locations and add locationID
+        production['Area'] = production['Area'].replace(['Sudan (former)'], 'Sudan') # Sudan split in 2011
         production = production.merge(self.locations, left_on='Area', right_on='name', how='left')
 
         # Add value column (production units = tonnes)
         production['value'] = production['Value']
+        #Drop NA (located in Sudan)
+        production.dropna(subset=['value'], inplace=True)
 
         # Filter only needed columns to export
-        production = FlatFiles().select_columns_fact_table(production)
+        production = self.flats.select_columns_fact_table(production)
         return production
 
+    def export_files(self):
+        '''
+        Exports to parquet format.
+        '''
+        production_df = self.add_ids_to_table()
+        #self.flats.export_csv_w_date(production_df, 'production_table')
+        self.flats.export_parquet_w_date(production_df, 'production_fact/production_table')
 
 if __name__ == '__main__':
 
@@ -78,9 +90,9 @@ if __name__ == '__main__':
     prod_table = ProductionTable()
 
     # Create dataframe
-    production_df = prod_table.add_ids_to_table()
+    #production_df = prod_table.add_ids_to_table()
 
     # Export
-    FlatFiles().export_output_w_date(production_df, 'production_table')
+    prod_table.export_files()
 
 
