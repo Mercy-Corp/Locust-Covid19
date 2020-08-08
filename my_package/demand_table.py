@@ -4,7 +4,7 @@ The prediction of current demand is based on demand in 2000 and population
 values from 2014-2020.
 
 Created on Fri Jul 17 10:59:01 2020
-Last modified on Fri Aug 07 11:57:01 2020
+Last modified on Fri Aug 07 14:52:01 2020
 
 @author: linnea.evanson@accenture.com, ioanna.papachristou@accenture.com
 """
@@ -20,14 +20,14 @@ from rasterstats import zonal_stats
 #client = boto3.client('s3')
 
 # #S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
-#COUNTRIES = ["SDN"]
+
 COMMODITIES = ['beef', 'egg', 'mlk', 'mut', 'pork', 'pou']
 
 COMMODITIES_DICT = {'beef': {'cmdt_name': 'beef consumption', 'id': 22},
@@ -46,12 +46,12 @@ class DemandTable:
         self.path_out = path_out
         self.flats = FlatFiles(path_in, path_out)
 
-        self.popfile00 = str(self.path_out + "population_table_all_countries_2000.csv")
-        self.popfile14 = str(self.path_out + "population_table_all_countries_2014.csv")
-        self.popfile16 = str(self.path_out + "population_table_all_countries_2016.csv")
-        self.popfile17 = str(self.path_out + "population_table_all_countries_2017.csv")
-        self.popfile18 = str(self.path_out + "population_table_all_countries_2018.csv")
-        self.popfile20 = str(self.path_out + "population_table_all_countries_2020.csv")
+        self.popfile00 = str(self.path_out + "population_fact/population_table_all_countries_2000.csv")
+        self.popfile14 = str(self.path_out + "population_fact/population_table_all_countries_2014.csv")
+        self.popfile16 = str(self.path_out + "population_fact/population_table_all_countries_2016.csv")
+        self.popfile17 = str(self.path_out + "population_fact/population_table_all_countries_2017.csv")
+        self.popfile18 = str(self.path_out + "population_fact/population_table_all_countries_2018.csv")
+        self.popfile20 = str(self.path_out + "population_fact/population_table_all_countries_2020.csv")
 
     def load_rasters(self, cmdt):
         '''
@@ -110,7 +110,7 @@ class DemandTable:
 
         # For test purposes only:
         #demand = demand_gdf.drop(['geometry'], axis=1)
-        #demand.to_csv(self.path_in + 'demand_districts.csv', sep='|', encoding='utf-8', index=False)
+        #demand.to_csv(self.path_in + 'demand/demand_districts.csv', sep='|', encoding='utf-8', index=False)
 
         return demand_gdf
 
@@ -302,7 +302,7 @@ class DemandTable:
         demand_final.insert(0, 'factID', [str('DEF_' + str(i + 1)) for i in
                                           range(len(demand_final['value']))])  # insert at first columns
 
-        self.flats.export_output_w_date(demand_final, "demand_table")
+        self.flats.export_output_w_date(demand_final, "demand_fact/demand_table")
 
         return demand_final
 
