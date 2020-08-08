@@ -11,22 +11,26 @@ Created on Thu Jul 21 17:14:40 2020
 import geopandas as gpd
 import pandas as pd
 from geopy.geocoders import Nominatim
-#from functools import partial
+from functools import partial
 from geopy.extra.rate_limiter import RateLimiter
 import pickle
+import warnings
+warnings.filterwarnings("ignore")
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+INPUT_PATH = r'data/input/'
+OUTPUT_PATH = r'data/output/'
 
 geolocator = Nominatim(user_agent="custom-application", timeout=10)
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
 
-COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia']
+COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
+COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
+COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
 
 class ExtractMarkets:
     '''
@@ -40,23 +44,115 @@ class ExtractMarkets:
         self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
         # TODO load demand
 
+        # location table
+        #self.location_table = pd.read_csv(self.path_out + 'location_table.csv', sep='|')[['']]
+
     def filter_prices(self):
         #Load prices
         prices = self.prices
-        print(prices.columns)
         #Filter countries
         prices = prices[prices['adm0_name'].isin(COUNTRY_LIST)]
+        #Filter for retail only
+        prices = prices[prices.pt_name == 'Retail']
         #Filter columns
         prices = prices.drop(['adm0_id', 'adm1_id', 'mkt_id', 'cm_id', 'cur_id', 'cur_name', 'pt_id', 'um_id', 'um_name',
                       'mp_commoditysource'], axis=1)
         #Filter commodities
         cm_name = ['Maize (white) - Retail', 'Maize - Retail', 'Rice - Retail',
                    'Milk - Retail', 'Milk (cow, fresh) - Retail',
-                   'Beans - Retail', 'Beans (dry) - Retail', 'Beans (fava, dry) - Retail']
+                   'Beans - Retail', 'Beans (dry) - Retail', 'Beans (fava, dry) - Retail', 'Meat (beef) - Retail']
         prices = prices[prices['cm_name'].isin(cm_name)]
+
+        #prices.to_csv('data/input/prices_filtered.csv', sep='|', encoding='utf-8', index=False)
+
         return prices
 
     # TODO filter_demand function
+
+    def read_region_shp(self, country_id):
+        '''
+
+        :param country: The reference country
+        :return: A geodataframe with 2 columns: district id and geometry.
+        '''
+        if country_id == 'UGA':
+            df_region3 = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_3.shp")[['GID_3', 'NAME_3']]
+            df_region3 = df_region3.rename(columns={'GID_3': 'location_id', 'NAME_3': 'adm_name'})
+
+            df_region2 = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_2.shp")[['GID_2', 'NAME_2']]
+            df_region2 = df_region2.rename(columns={'GID_2': 'location_id', 'NAME_2': 'adm_name'})
+
+            df_region1 = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_1.shp")[['GID_1', 'NAME_1']]
+            df_region1 = df_region1.rename(columns={'GID_1': 'location_id', 'NAME_1': 'adm_name'})
+
+            df_region = df_region3.append(df_region2)
+            df_region = df_region.append(df_region1)
+
+        else:
+            df_region = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_1.shp")[
+                ['GID_1', 'NAME_1']]
+            df_region = df_region.rename(columns={'GID_1': 'location_id', 'NAME_1': 'adm_name'})
+
+        return df_region
+
+    def add_adm1_SSudan(self):
+        # initialize list of lists
+        data = [['Bentiu', 'Central Equatoria'], ['Yida', 'Unity'], ['Rubkona', 'Unity'], ['Aniet', 'Unity'],
+                ['Konyokonyo', 'Central Equatoria'], ['Kapoeta South', 'Eastern Equatoria'],
+                ['Aweil Town', 'North Bahr-al-Ghazal'], ['Kuajok', 'Warap'], ['Jau', 'West Bahr-al-Ghazal'],
+                ['Malakal', 'Upper Nile'], ['Bunj', 'Upper Nile'], ['Suk Shabi', 'Upper Nile'], ['Melut', 'Upper Nile'],
+                ['Rumbek', 'Lakes'], ['Minkaman', 'Lakes'], ['Torit', 'Eastern Equatoria'], ['Bor', 'Jungoli'],
+                ['Wunrok', 'Warap'], ['Yambio', 'West Equatoria'], ['Makpandu', 'West Equatoria']]
+
+        # Create the pandas DataFrame
+        df = pd.DataFrame(data, columns=['mkt_name', 'adm1_name'])
+        return df
+
+    def add_location_id(self, country, country_id):
+        prices = self.filter_prices()
+        prices_country = prices[prices['adm0_name'] == country]
+
+        adm1_replacements = {'Addis Ababa': 'Addis Abeba', 'Banadir' :'Banaadir', 'Galgaduud': 'Galguduud',
+                             'Hiraan' : 'Hiiraan', 'Juba Hoose' : 'Jubbada Hoose', 'Shabelle Hoose' : 'Shabeellaha Hoose',
+                             'Juba Dhexe': 'Jubbada Dhexe', 'Shabeellaha Dhexe': 'Shabeellaha Dhexe',
+                             'Beneshangul Gumu': 'Benshangul-Gumaz', 'Gambela' : 'Gambela Peoples', 'Hareri' : 'Harari People',
+                             'SNNPR': 'Southern Nations, Nationalities and Peoples', 'Jonglei': 'Jungoli',
+                             'Northern Bahr El Ghazal':'North Bahr-al-Ghazal', 'Warrap':'Warap',
+                             'Western Bahr El Ghazal':'West Bahr-al-Ghazal', 'Western Equatoria':'West Equatoria'}
+        mkt_replacements = {'Hola (Tana River)': 'Tana River', 'Lodwar (Turkana)': 'Turkana', 'Marigat (Baringo)': 'Baringo'}
+        prices_country['adm1_name'].replace(adm1_replacements, inplace=True)
+        prices_country['mkt_name'].replace(mkt_replacements, inplace=True)
+
+        regions_country = self.read_region_shp(country_id)
+
+        if country_id == 'KEN':
+            prices_country_location = pd.merge(prices_country, regions_country, how='left', left_on='mkt_name',
+                                               right_on='adm_name')
+        elif country_id == 'SSD':
+            admin_SSUdan = self.add_adm1_SSudan()
+            prices_country = prices_country.drop(['adm1_name'], axis = 1)
+            prices_country = pd.merge(prices_country, admin_SSUdan, how = 'inner', on =['mkt_name'])
+            prices_country_location = pd.merge(prices_country, regions_country, how='left', left_on='adm1_name',
+                                              right_on='adm_name')
+
+        else:
+            prices_country_location = pd.merge(prices_country, regions_country, how = 'left', left_on = 'adm1_name', right_on = 'adm_name')
+        print(prices_country_location.head())
+
+        return prices_country_location
+
+    def location_id_to_markets(self):
+        prices_countries = pd.DataFrame()
+        for country, country_id in COUNTRIES_DICT.items():
+            print(country)
+            country_df = self.add_location_id(country, country_id)
+            prices_countries = prices_countries.append(country_df)
+            print(prices_countries.shape)
+        print(prices_countries.columns)
+        print(prices_countries.head())
+        prices_countries.to_csv(self.path_in + 'prices_districts.csv', sep='|', encoding='utf-8', index=False)
+        return prices_countries
+
 
     def save_to_pickle(self): # TODO transform to generic for both demand and price
         prices = self.filter_prices()
@@ -72,7 +168,7 @@ class ExtractCoordinates:
         self.path_out = path_out
 
     def load_prices_pickle(self):
-        prices = pickle.load(open(self.path_in + 'prices.pickle', 'rb'))
+        prices = pickle.load(open(self.path_in + 'prices_filtered.pickle', 'rb'))
         return prices
 
     def market_country_geolocations(self, country):
@@ -87,8 +183,8 @@ class ExtractCoordinates:
         if country == 'Kenya':
             adm1_replacements = {'Coast': 'Coastal Kenya', 'Eastern': 'East Kenya', 'North Eastern': 'Northeast Kenya',
                              'Rift Valley': ' '}
-        elif country == 'Uganda':
-            mkt_replacements = {'Makaratin': ''}
+        #elif country == 'Uganda':
+         #   mkt_replacements = {'Makaratin': ''}
         elif country == 'Ethiopia':
             mkt_replacements = {'Abaala': 'Abala', 'Robit': 'Shoa Robit', 'Asayta': 'Asaita', 'Wonago': 'Wenago',
                                 'Karati': 'Konso',
@@ -122,7 +218,6 @@ class ExtractCoordinates:
             print("Pickle exported for " + country)
 
         return "All pickles exported."
-
 
 class ExtractLocations:
     '''
@@ -271,6 +366,8 @@ class CrossResults:
         self.shp2_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
         self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
         self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Sudan = gpd.read_file(self.path_in + "Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_SSudan = gpd.read_file(self.path_in + "Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
 
     def load_df_country_pickle(self, country):
         df = pickle.load(open(self.path_in + 'location/df_' + country + '.pickle', 'rb'))
@@ -461,12 +558,15 @@ class CrossResults:
 if __name__ == '__main__':
 
     print("------- Extracting coordinates for locations ---------")
-    #PopulationTable(2000).export_population()
-    #ExtractCoordinates().filter_prices()
+    #prices = ExtractMarkets().filter_prices()
+    #ExtractMarkets().save_to_pickle()
 
-    # prices = ExtractCoordinates().filter_prices()
-    # print(prices.shape)
-    # print(prices.head())
+    prices = ExtractMarkets().location_id_to_markets()
+    #print(prices.shape)
+    #print(prices.columns)
+    #print(prices.head())
+    #print(prices.adm0_name.unique())
+    #print(prices.adm1_name.unique())
     # print(prices.isna().sum())
 
     #Somalia = ExtractCoordinates().market_country_geolocations('Somalia')
@@ -494,4 +594,4 @@ if __name__ == '__main__':
     #print(markets_district.columns)
     #print(markets_district.head())
 
-    CrossResults().export_markets_district_csv('markets_district')
+    #CrossResults().export_markets_district_csv('markets_district')
