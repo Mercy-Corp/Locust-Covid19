@@ -283,6 +283,7 @@ class CroplandLocust:
 
         crops_locust_district['date'] = crops_locust_district['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
         crops_locust_district['dateID'] = crops_locust_district['date'].apply(lambda x: datetime.strftime(x, '%Y%m%d'))
+        crops_locust_district['dateID'] = crops_locust_district['dateID'].astype(int) #Athena accepts a bigint to prepare the view
         #print(crops_locust_district[['date', 'dateID']].head())
 
         # Add dateID
