@@ -4,7 +4,7 @@ The prediction of current demand is based on demand in 2000 and population
 values from 2014-2020.
 
 Created on Fri Jul 17 10:59:01 2020
-Last modified on Fri Aug 07 14:52:01 2020
+Last modified on Wed Aug 12 09:17:01 2020
 
 @author: linnea.evanson@accenture.com, ioanna.papachristou@accenture.com
 """
@@ -20,11 +20,12 @@ from rasterstats import zonal_stats
 #client = boto3.client('s3')
 
 # #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+
 #local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+INPUT_PATH = r'data/input/'
+OUTPUT_PATH = r'data/output/'
 
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
@@ -39,19 +40,23 @@ COMMODITIES_DICT = {'beef': {'cmdt_name': 'beef consumption', 'id': 22},
 
 class DemandTable:
     '''
-    This class creates the 2020 demand table.
+    This class creates the demand table.
     '''
     def __init__(self, path_in=INPUT_PATH, path_out=OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(path_in, path_out)
 
-        self.popfile00 = str(self.path_out + "population_fact/population_table_all_countries_2000.csv")
-        self.popfile14 = str(self.path_out + "population_fact/population_table_all_countries_2014.csv")
-        self.popfile16 = str(self.path_out + "population_fact/population_table_all_countries_2016.csv")
-        self.popfile17 = str(self.path_out + "population_fact/population_table_all_countries_2017.csv")
-        self.popfile18 = str(self.path_out + "population_fact/population_table_all_countries_2018.csv")
-        self.popfile20 = str(self.path_out + "population_fact/population_table_all_countries_2020.csv")
+    def load_population(self, year):
+        '''
+
+        :param year: The year of the population file.
+        :return: The file related to the population we would like to load.
+        '''
+        population_year = pd.read_csv(self.path_out + "population_fact/population_table_all_countries_" + str(year) + ".csv", sep='|')
+
+        return population_year
+
 
     def load_rasters(self, cmdt):
         '''
@@ -78,6 +83,12 @@ class DemandTable:
         return gdf_country
 
     def calc_commodity(self, gdf_country, cmdt):
+        '''
+
+        :param gdf_country: A geodataframe with the administrative boundaries in a country.
+        :param cmdt: The commodity
+        :return: The sum of demand per administrative boundary in the selected country.
+        '''
 
         raster_cmdt = self.load_rasters(cmdt)
         demand_country = zonal_stats(gdf_country.geometry, raster_cmdt, layer="polygons", stats='sum')
@@ -91,7 +102,7 @@ class DemandTable:
         countries_list = []
 
         for country in COUNTRIES:
-            print("Preparing demand table for {}.".format(country))
+            print("Preparing demand table for {}".format(country))
             gdf_country = self.read_boundaries_shp(country, 1)
             gdf_country['year'] = 2000
 
@@ -128,15 +139,14 @@ class DemandTable:
         region = split[3]
         return country, area, district, region
 
-    def sum_regions(self,filename):
+    def sum_regions(self,pop):
         '''
         Function to sum population of all districts within a region.
 
-        :param filename: name of the file containing population data down to district level for all
+        :param pop: the file containing population data down to district level for all
         regions in all countries of interest for a particular year.
         :return the sum of the population on a region level and the locationIDs for those regions.
         '''
-        pop = pd.read_csv(filename, sep='|')
         pop = pop.dropna()
 
         splits = np.empty((len(pop['locationID']), 4), dtype=object)
@@ -180,24 +190,34 @@ class DemandTable:
 
     def get_consumption_preds(self,frames):
         '''
-        Predict consumption in 2014-2020 based on population values from the same period, and
-        consumption in 2000 as the initial value
+        Predicts consumption in 2014-2020 based on population values from the same period, and
+        consumption in 2000 as the initial value.
 
         :param frames: the current dataframe with all locations and consumption types.
         :returns the consumption predictions for 2014-2020 per region and an updated dataframe with no null values.
         '''
 
         #Get population values on a region level
-        pop00, regions = self.sum_regions(self.popfile00)
-        pop14, regions14 = self.sum_regions(self.popfile14)
-        pop16, regions16 = self.sum_regions(self.popfile16)
-        pop17, regions17 = self.sum_regions(self.popfile17)
-        pop18, regions18 = self.sum_regions(self.popfile18)
-        pop20, regions20 = self.sum_regions(self.popfile20)
+        pop00, regions = self.sum_regions(self.load_population(2000))
+        pop14, regions14 = self.sum_regions(self.load_population(2014))
+        pop16, regions16 = self.sum_regions(self.load_population(2016))
+        pop17, regions17 = self.sum_regions(self.load_population(2017))
+        pop18, regions18 = self.sum_regions(self.load_population(2018))
+        pop20, regions20 = self.sum_regions(self.load_population(2020))
+        '''
+        districts = self.load_population(2020)['locationID'].unique()
+        pop00 = self.load_population(2000)['locationID', 'value']
+        pop14 = self.load_population(2014)['locationID', 'value']
+        pop16 = self.load_population(2016)['locationID', 'value']
+        pop17 = self.load_population(2017)['locationID', 'value']
+        pop18 = self.load_population(2018)['locationID', 'value']
+        pop20 = self.load_population(2020)['locationID', 'value']
 
+        '''
         # Remove duplicates from region tags (regions for each year are the same so we need only take one year):
         all_regions = []
         [all_regions.append(x) for x in regions if x not in all_regions]
+
 
         #Fit a curve to the population points using scipy curve_fit
         time = [0, 14, 16, 17, 18, 20]
