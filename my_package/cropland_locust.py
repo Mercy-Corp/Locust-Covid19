@@ -24,7 +24,7 @@ client = boto3.client('s3')
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
@@ -253,9 +253,19 @@ class CroplandLocust:
         Loads all intermediate files (csvs) on zonal statistics per raster.
         :return: A concatenated df of all zonal statistics.
         '''
-        all_files = glob.glob(self.path_in + "cropland/crops_locust_distr_*" + ".csv")
-
+        resp = client.list_objects_v2(Bucket='mercy-locust-covid19-in-dev')
+        keys = []
+        all_files = []
+        for obj in resp['Contents']:
+            keys.append(obj['Key'])
+        for i in keys:
+            if 'inbound/sourcedata/cropland/crops_locust_distr' in i:
+              s = 's3://mercy-locust-covid19-in-dev/' + str(i)
+              all_files.append(s)
+        #all_files = glob.glob(self.path_in + "cropland/crops_locust_distr_*" + ".csv")
+        #mercy-locust-covid19-in-dev/inbound/sourcedata/cropland/crops_locust_distr_*.csv
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
+        print(all_files)
         concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
         return concatenated_df
 
@@ -307,6 +317,7 @@ if __name__ == '__main__':
 
     print("------- Extracting cropland area affected by locust per district table ---------")
     crop_loc = CroplandLocust()
+#    crop_loc.load_extracted_crops()
     crop_loc.extract_crops_locust()
     #crop_loc.export_table('Crops_impact_locust_district') #local export
     crop_loc.export_table('cropland_locust_fact/Crops_impact_locust_district') #export to S3

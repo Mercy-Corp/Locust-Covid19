@@ -14,7 +14,7 @@ from my_package.utils_shapefiles import Shapefiles
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+OUTPUT_PATH = r'/home/ec2-user/Locust-Covid19/my_package/'
 
 # #local paths
 # INPUT_PATH = r'data/input/'

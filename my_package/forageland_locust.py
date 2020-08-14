@@ -9,18 +9,22 @@ Created on Wed Jul 15 08:54:40 2020
 """
 
 # Imports
+import os
 import pandas as pd
 import geopandas as gpd
 import geopandas
 from utils_flat_files import FlatFiles
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+
+if os.environ['ENVIRONMENT'] == 'PROD':
+   INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+   OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
+else:
 
 #local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+   INPUT_PATH = r'data/input/'
+   OUTPUT_PATH = r'data/output/'
 
 class ForagelandLocust:
     '''
@@ -29,8 +33,8 @@ class ForagelandLocust:
     def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-        self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
-        self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%d-%m-%Y')
+        self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
+        self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%m/%d/%Y')
         self.flats = FlatFiles(path_in, path_out)
 
         # Import districts

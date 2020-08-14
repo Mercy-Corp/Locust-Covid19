@@ -16,12 +16,11 @@ from scipy.optimize import curve_fit
 import re
 import geopandas as gpd
 from rasterstats import zonal_stats
-#import boto3
-#client = boto3.client('s3')
+import io
 
 # #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 #local paths
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
@@ -46,12 +45,12 @@ class DemandTable:
         self.path_out = path_out
         self.flats = FlatFiles(path_in, path_out)
 
-        self.popfile00 = str(self.path_out + "population_fact/population_table_all_countries_2000.csv")
-        self.popfile14 = str(self.path_out + "population_fact/population_table_all_countries_2014.csv")
-        self.popfile16 = str(self.path_out + "population_fact/population_table_all_countries_2016.csv")
-        self.popfile17 = str(self.path_out + "population_fact/population_table_all_countries_2017.csv")
-        self.popfile18 = str(self.path_out + "population_fact/population_table_all_countries_2018.csv")
-        self.popfile20 = str(self.path_out + "population_fact/population_table_all_countries_2020.csv")
+        self.popfile00 = str(self.path_out + "population_fact/population_table_all_countries_2000.parquet")
+        self.popfile14 = str(self.path_out + "population_fact/population_table_all_countries_2014.parquet")
+        self.popfile16 = str(self.path_out + "population_fact/population_table_all_countries_2016.parquet")
+        self.popfile17 = str(self.path_out + "population_fact/population_table_all_countries_2017.parquet")
+        self.popfile18 = str(self.path_out + "population_fact/population_table_all_countries_2018.parquet")
+        self.popfile20 = str(self.path_out + "population_fact/population_table_all_countries_2020.parquet")
 
     def load_rasters(self, cmdt):
         '''
@@ -136,7 +135,8 @@ class DemandTable:
         regions in all countries of interest for a particular year.
         :return the sum of the population on a region level and the locationIDs for those regions.
         '''
-        pop = pd.read_csv(filename, sep='|')
+        
+        pop = pd.read_parquet(filename, engine='pyarrow')
         pop = pop.dropna()
 
         splits = np.empty((len(pop['locationID']), 4), dtype=object)
@@ -314,8 +314,9 @@ if __name__ == '__main__':
 
     # Create dataframe
     demand_df = dem_table.create_demand_table()
+    demand_final = demand_df
     print(demand_df.columns)
     print(demand_df.head())
 
     # Export files: use utils function to add today's date to the filename
-    #FlatFiles().export_output_w_date(demand_final, "demand_table")
+    FlatFiles().export_output_w_date(demand_final, "demand_table")

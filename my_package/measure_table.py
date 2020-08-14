@@ -10,11 +10,11 @@ from my_package.utils_flat_files import FlatFiles
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+#OUTPUT_PATH = r'/home/ec2-user/'
 
 class MeasuresTable:
     '''

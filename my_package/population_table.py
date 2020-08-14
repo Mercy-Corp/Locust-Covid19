@@ -11,13 +11,13 @@ Created on Thu Jul 02 17:16:40 2020
 import pandas as pd
 import geopandas as gpd
 from rasterstats import zonal_stats
-from utils_flat_files import FlatFiles
+from my_package.utils_flat_files import FlatFiles
 import boto3
 client = boto3.client('s3')
 
 #S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
@@ -152,11 +152,11 @@ class PopulationTable:
 if __name__ == '__main__':
 
     print("------- Extracting population tables ---------")
-    #PopulationTable(2000).export_population()
+    PopulationTable(2000).export_population()
     #PopulationTable(2014).export_population()
     #PopulationTable(2015).export_population()
     #PopulationTable(2016).export_population()
     #PopulationTable(2017).export_population()
     #PopulationTable(2018).export_population()
     #PopulationTable(2019).export_population()
-    PopulationTable(2020).export_population()
+    #PopulationTable(2020).export_population()

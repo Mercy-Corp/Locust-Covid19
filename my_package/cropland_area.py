@@ -19,8 +19,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+INPUT_PATH = r's3://mercy-locust-covid19-landing/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
@@ -119,7 +119,16 @@ class Cropland:
         Loads all intermediate files (csvs) on zonal statistics per raster.
         :return: A concatenated df of all zonal statistics.
         '''
-        all_files = glob.glob(self.path_in + "cropland/crops_*" + ".csv")
+
+        resp = client.list_objects_v2(Bucket='mercy-locust-covid19-landing')
+        keys = []
+        all_files = []
+        for obj in resp['Contents']:
+            keys.append(obj['Key'])
+        for i in keys:
+            if 'cropland/crops_' in i:
+              s = 's3://mercy-locust-covid19-landing/' + str(i)
+              all_files.append(s)
 
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
         concatenated_df = pd.concat(df_from_each_file, ignore_index=True)

@@ -22,12 +22,12 @@ from datetime import datetime
 from utils_flat_files import FlatFiles
 
 #S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+INPUT_PATH = r's3://mercy-locust-covid19-landing/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'/home/ec2-user/'
 
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
 COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
@@ -234,4 +234,4 @@ if __name__ == '__main__':
 
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
-    PricesTable().export_table('price_table')
+    PricesTable().export_table('price_fact/price_table')

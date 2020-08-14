@@ -10,11 +10,11 @@ Created on Thu Jun 18 09:16:40 2020
 
 import pandas as pd
 import geopandas as gpd
-from my_package.utils_shapefiles import Shapefiles
+from utils_shapefiles import Shapefiles
 
 # S3 paths
 INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 # #local paths
 #INPUT_PATH = r'data/input/'
