@@ -13,24 +13,25 @@ import os
 import pandas as pd
 import geopandas as gpd
 import geopandas
-from utils_flat_files import FlatFiles
+import yaml
+from utils.flat_files import FlatFiles
 
 #S3 paths
 
-if os.environ['ENVIRONMENT'] == 'PROD':
-   INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-   OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-else:
+#if os.environ['ENVIRONMENT'] == 'PROD':
+#   INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#   OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
+#else:
 
 #local paths
-   INPUT_PATH = r'data/input/'
-   OUTPUT_PATH = r'data/output/'
+#   INPUT_PATH = r'data/input/'
+#   OUTPUT_PATH = r'data/output/'
 
 class ForagelandLocust:
     '''
     This class calculates the forageland area affected by locust per district.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
@@ -50,7 +51,7 @@ class ForagelandLocust:
         self.forageland_v.crs = {"init": "epsg:4326"}
 
         # Import locust gdf
-        self.locust_gdf = gpd.read_file(self.path_in + "Swarm_Master.shp")
+        self.locust_gdf = gpd.read_file(self.path_in + "swarm/Swarm_Master.shp")
         #print(self.locust_gdf.COUNTRYID.unique()) # to select new countries
 
     def get_districts(self):
@@ -199,7 +200,7 @@ class ForagelandLocust:
 
     def export_table(self, filename):
         '''
-
+        Exports result table
         :return: The Forageland table in both a parquet and csv format with the date added in the name.
         '''
         forageland_loc_df = self.add_fact_ids()
@@ -207,7 +208,12 @@ class ForagelandLocust:
 
 if __name__ == '__main__':
 
+    with open("config/application.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
+
     print("------- Extracting forageland area affected by locust per district table ---------")
     ForagelandLocust().export_table('forageland_locust_fact/Forage_impact_locust_district')
-
-

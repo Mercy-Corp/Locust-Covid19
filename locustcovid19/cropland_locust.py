@@ -15,16 +15,17 @@ import geopandas as gpd
 import geopandas
 from datetime import datetime
 from rasterstats import zonal_stats
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 import glob
 import warnings
+import yaml
 warnings.filterwarnings("ignore")
 import boto3
 client = boto3.client('s3')
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
@@ -37,7 +38,7 @@ class CroplandLocust:
     '''
     This class calculates the cropland area affected by locust per district.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         #self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
@@ -56,7 +57,7 @@ class CroplandLocust:
         # self.crops = gpd.read_file(self.path_in + "cropland/Crops_vectorized.shp")
 
         # Import locust gdf
-        self.locust_gdf = gpd.read_file(self.path_in + "Swarm_Master.shp")
+        self.locust_gdf = gpd.read_file(self.path_in + "swarm/Swarm_Master.shp")
 
     # def filter_crops(self):
     #     '''
@@ -314,6 +315,14 @@ class CroplandLocust:
         #self.flats.export_csv_w_date(crops_loc_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
+
+    with open("config/application.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
+
 
     print("------- Extracting cropland area affected by locust per district table ---------")
     crop_loc = CroplandLocust()

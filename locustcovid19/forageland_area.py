@@ -10,11 +10,12 @@ Created on Mon Jul 13 11:16:40 2020
 # Imports
 import pandas as pd
 import geopandas as gpd
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
+import yaml
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
@@ -24,7 +25,7 @@ class Forageland:
     '''
     This class calculates the forageland area per district.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(path_in, path_out)
@@ -101,6 +102,13 @@ class Forageland:
         self.flats.export_output_w_date(forageland_df, filename)
         
 if __name__ == '__main__':
+
+    with open("config/application.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
 
     print("------- Extracting forageland area per district table ---------")
     Forageland().export_table('forageland_fact/Forageland')

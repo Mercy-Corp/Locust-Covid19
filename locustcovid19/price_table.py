@@ -10,6 +10,7 @@ Created on Thu Aug 06 17:14:40 2020
 """
 
 #Imports
+import yaml
 import geopandas as gpd
 import pandas as pd
 from geopy.geocoders import Nominatim
@@ -19,15 +20,16 @@ import pickle
 import warnings
 warnings.filterwarnings("ignore")
 from datetime import datetime
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-landing/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'/home/ec2-user/'
+with open("config/application.yaml", "r") as ymlfile:
+    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+INPUT_PATH = cfg["data"]['landing']
+OUTPUT_PATH = cfg["data"]['reporting']
+print(INPUT_PATH)
 
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
 COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
@@ -226,7 +228,7 @@ class PricesTable:
         '''
         prices_df = self.add_ids_to_table()
         self.flats.export_parquet_w_date(prices_df, filename)
-        self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
+#        self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
 

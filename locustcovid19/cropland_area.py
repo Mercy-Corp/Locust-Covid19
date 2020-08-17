@@ -10,21 +10,29 @@ Created on Mon Jul 13 11:16:40 2020
 # Imports
 import pandas as pd
 import geopandas as gpd
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 from rasterstats import zonal_stats
 import glob
 import boto3
+import yaml
 client = boto3.client('s3')
 import warnings
 warnings.filterwarnings("ignore")
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-landing/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
+#INPUT_PATH = r's3://mercy-locust-covid19-landing/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
+
+#with open("config/application.yaml", "r") as ymlfile:
+#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+#INPUT_PATH = cfg["data"]['landing']
+#OUTPUT_PATH = cfg["data"]['reporting']
+#print(INPUT_PATH)
 
 RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
 #RASTER_NAMES = ["N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"]
@@ -33,7 +41,7 @@ class Cropland:
     '''
     This class calculates the cropland area per district.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(self.path_in, self.path_out)
@@ -195,6 +203,13 @@ class Cropland:
         #self.flats.export_csv_w_date(crops_df, filename) #only for testing purposes
         
 if __name__ == '__main__':
+
+    with open("config/application.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
 
     print("------- Extracting cropland area per district table ---------")
     #Call the class

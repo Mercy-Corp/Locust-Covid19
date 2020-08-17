@@ -10,26 +10,34 @@ Created on Thu Jun 30 15:36:40 2020
 
 # Imports
 import pandas as pd
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 import numpy as np
+import yaml
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-landing/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
+#INPUT_PATH = r's3://mercy-locust-covid19-landing/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
 
+#with open("config/application.yaml", "r") as ymlfile:
+#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+#INPUT_PATH = cfg["data"]['landing']
+#OUTPUT_PATH = cfg["data"]['reporting']
+
 class ProductionTable:
     '''
     This class creates the production table.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data.csv", sep=",", encoding='utf-8')
-        self.locations = pd.read_csv(self.path_out + "location_dim/location_table.csv", sep = "|", encoding='utf-8')[['locationID', 'name']]
+        self.locations = pd.read_parquet(self.path_out + "location_dim/location_table.parquet", engine='pyarrow')
+#        self.locations = pd.read_csv(self.path_out + "location_dim/location_table.csv", sep = "|", encoding='utf-8')[['locationID', 'name']]
         self.flats = FlatFiles(self.path_in, self.path_out)
 
     def create_measure_df(self):
@@ -85,9 +93,17 @@ class ProductionTable:
 
 if __name__ == '__main__':
 
+    with open("config/application.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
+
+
     print("------- Extracting production table ---------")
 
-    prod_table = ProductionTable()
+    prod_table = ProductionTable(INPUT_PATH, OUTPUT_PATH)
 
     # Create dataframe
     #production_df = prod_table.add_ids_to_table()

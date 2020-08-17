@@ -1,0 +1,4 @@
+environment: 'test'
+data:
+        landing: r's3://mercy-locust-covid19-landing-test/'
+        reporting: r's3://mercy-locust-covid19-reporting-test/'

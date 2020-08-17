@@ -8,23 +8,28 @@ Created on Thu Jun 18 09:16:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
+import yaml
 import pandas as pd
 import geopandas as gpd
-from utils_shapefiles import Shapefiles
+from utils.shapefiles import Shapefiles
 
 # S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
-# #local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+#with open("config/application.yaml", "r") as ymlfile:
+#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+#INPUT_PATH = cfg["data"]['landing']
+#OUTPUT_PATH = cfg["data"]['reporting']
+#print(INPUT_PATH)
+
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 class LocationTable:
     '''
     This class creates the location table.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.countries = Shapefiles(self.path_in, self.path_out, 0).create_sub_tables()[["locationID", "name", "hierarchy", "type", "GID_0", "NAME_0"]]
@@ -62,10 +67,17 @@ class LocationTable:
         :return:
         '''
         df = self.concat_sub_tables()
-        df.to_csv(self.path_out+'location_dim/'+file_name+'.csv', sep='|', encoding='utf-8', index=False)
-        print("Location table extracted to csv format.")
+#        df.to_csv(self.path_out+'location_dim/'+file_name+'.csv', sep='|', encoding='utf-8', index=False)
+#        print("Location table extracted to csv format.")
 
 if __name__ == '__main__':
+
+    with open("config/application.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
 
     print("------- Extracting location table ---------")
 
@@ -73,4 +85,5 @@ if __name__ == '__main__':
     # Create geodataframe
     gdf_all = loc_table.concat_sub_tables()
     # Export table to csv
-    loc_table.export_to_csv('location_table')
+#    loc_table.export_to_csv('location_table')
+    loc_table.export_to_parquet('location_table')

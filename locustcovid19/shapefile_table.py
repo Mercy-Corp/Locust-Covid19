@@ -8,23 +8,23 @@ Created on Thu Jun 19 11:04:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
+import yaml
 import pandas as pd
 import geopandas as gpd
-from my_package.utils_shapefiles import Shapefiles
+from utils.shapefiles import Shapefiles
 
-#S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r'/home/ec2-user/Locust-Covid19/my_package/'
+#with open("config/application.yaml", "r") as ymlfile:
+#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-# #local paths
-# INPUT_PATH = r'data/input/'
-# OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = cfg["data"]['landing']
+#OUTPUT_PATH = cfg["data"]['reporting']
+#print(INPUT_PATH)
 
 class ShapefileTable:
     '''
     This class creates the shapefile table.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.countries = Shapefiles(self.path_in, self.path_out, 0).create_sub_tables()[["locationID", "geometry"]]
@@ -61,11 +61,17 @@ class ShapefileTable:
 
 if __name__ == '__main__':
 
+    with open("config/application.yaml", "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
+
     print("------- Extracting shapefile table ---------")
 
-    shp_table = ShapefileTable()
+    shp_table = ShapefileTable(INPUT_PATH, OUTPUT_PATH)
+    #shp_table = ShapefileTable()
     gdf_all = shp_table.concat_sub_tables()
     #Export table to shp
     shp_table.export_to_shp(gdf_all, 'shapefile_table')
-
-

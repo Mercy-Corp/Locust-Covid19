@@ -9,9 +9,10 @@ Last modified on Fri Aug 07 14:52:01 2020
 @author: linnea.evanson@accenture.com, ioanna.papachristou@accenture.com
 """
 
+import yaml
 import pandas as pd
 import numpy as np
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 from scipy.optimize import curve_fit
 import re
 import geopandas as gpd
@@ -19,11 +20,18 @@ from rasterstats import zonal_stats
 import io
 
 # #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 #local paths
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
+
+#with open("config/application.yaml", "r") as ymlfile:
+#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+#INPUT_PATH = cfg["data"]['landing']
+#OUTPUT_PATH = cfg["data"]['reporting']
+#print(INPUT_PATH)
 
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
@@ -40,7 +48,7 @@ class DemandTable:
     '''
     This class creates the 2020 demand table.
     '''
-    def __init__(self, path_in=INPUT_PATH, path_out=OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(path_in, path_out)
