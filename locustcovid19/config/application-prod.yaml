@@ -1,0 +1,4 @@
+environment: 'production'
+data:
+        landing: r's3://mercy-locust-covid19-landing/'
+        reporting: r's3://mercy-locust-covid19-reporting/'

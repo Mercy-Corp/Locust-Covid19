@@ -1,6 +1,7 @@
-# Basic template for python projects
+# Main instructions
 
-There are several files in the root folder. The code goes in *my_package" (change the name to something meaningful).
+
+There are several files in the root folder. The code goes in *my_package".
 
 - *README.md* (this file) has a description of what the code does. It also shows up in the repository web interface.
 - *requirements.txt* has all the non-standard packages that are needed to run our code (pandas, numpy)
@@ -11,5 +12,5 @@ There are several files in the root folder. The code goes in *my_package" (chang
 ## Folder structure
 - *my_package* is the folder that has the module code. Change the name to something meaningful.
 - *tests* is the folder where python unittests are run
-- *scripts* should have auxiliary script that may be needed to make the package work, for example table creation scripts
-- *extras* this is a cointainer for anaything that might be useful but is not part of the package itself. For example Jupyter notebooks, log outputs, test files, etc.
+- *scripts* have auxiliary script that may be needed to make the package work, for example table creation scripts
+- *extras* this is a cointainer for anything that might be useful but is not part of the package itself. For example Jupyter notebooks, log outputs, test files, etc.

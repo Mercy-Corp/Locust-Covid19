@@ -1,0 +1,4 @@
+environment: 'local'
+data:
+        landing: r'data/input/'
+        reporting: r'data/output/'
