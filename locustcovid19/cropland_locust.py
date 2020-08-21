@@ -316,7 +316,9 @@ class CroplandLocust:
 
 if __name__ == '__main__':
 
-    with open("config/application.yaml", "r") as ymlfile:
+
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     INPUT_PATH = cfg["data"]['landing']
