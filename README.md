@@ -101,7 +101,7 @@ module is the python module that will be executed, valid module names are locati
    
    input: Swarm_Master.sh, Swarm_Master.shx
 
-There are several files in the root folder. The code goes in *my_package".
+There are several files in the root folder. The code goes in *locustcovid19".
 
 - *requirements.txt* has all the non-standard packages that are needed to run our code (pandas, numpy)
 - *MANIFEST.in* has a list of the folders that will be included when the package is generated. It has to be edited.
