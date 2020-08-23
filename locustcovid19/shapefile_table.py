@@ -61,6 +61,7 @@ class ShapefileTable:
 
 if __name__ == '__main__':
 
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
     with open("config/application.yaml", "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
