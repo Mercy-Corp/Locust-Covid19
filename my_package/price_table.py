@@ -72,19 +72,25 @@ class PricesTable:
 
     def normalise_units(self):
         prices = self.filter_prices()
+
         # Replace KG and L to be able to split
         replacements = {'KG': '1 KG', 'L': '1 L'}
         prices['um_name'].replace(replacements, inplace=True)
+
         # Split to number of units and units
         prices[['number_units', 'units']] = prices.um_name.str.split(expand=True)
+
         # Transform number of units to numeric
         prices['number_units'] = pd.to_numeric(prices['number_units'])
         #print(prices[prices['number_units'] > 1].head())
+
         # Calculate the price of 1 unit
         prices['mp_price'] = prices['mp_price'] / prices['number_units']
         #print(prices[prices['number_units'] > 1].head())
 
-        # TODO if eggs: multiply price x 12
+        # If eggs, calculate price for 12
+        if prices[prices['cm_name'] == 'eggs':
+            prices['mp_price'] = prices['mp_price'] x 12
 
         return prices
 
