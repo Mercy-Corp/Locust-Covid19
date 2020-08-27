@@ -58,7 +58,7 @@ class PricesTable:
         #Filter for retail only
         prices = prices[prices.pt_name == 'Retail']
         #Filter columns
-        prices = prices.drop(['adm0_id', 'adm1_id', 'mkt_id', 'cm_id', 'cur_id', 'cur_name', 'pt_id', 'um_id', 'um_name',
+        prices = prices.drop(['adm0_id', 'adm1_id', 'mkt_id', 'cm_id', 'cur_id', 'cur_name', 'pt_id', 'um_id',
                       'mp_commoditysource'], axis=1)
         #Filter commodities
         cm_name = ['Maize (white) - Retail', 'Maize - Retail', 'Rice - Retail',
@@ -67,6 +67,24 @@ class PricesTable:
         prices = prices[prices['cm_name'].isin(cm_name)]
 
         #prices.to_csv('data/input/prices_filtered.csv', sep='|', encoding='utf-8', index=False)
+
+        return prices
+
+    def normalise_units(self):
+        prices = self.filter_prices()
+        # Replace KG and L to be able to split
+        replacements = {'KG': '1 KG', 'L': '1 L'}
+        prices['um_name'].replace(replacements, inplace=True)
+        # Split to number of units and units
+        prices[['number_units', 'units']] = prices.um_name.str.split(expand=True)
+        # Transform number of units to numeric
+        prices['number_units'] = pd.to_numeric(prices['number_units'])
+        #print(prices[prices['number_units'] > 1].head())
+        # Calculate the price of 1 unit
+        prices['mp_price'] = prices['mp_price'] / prices['number_units']
+        #print(prices[prices['number_units'] > 1].head())
+
+        # TODO if eggs: multiply price x 12
 
         return prices
 
@@ -110,7 +128,7 @@ class PricesTable:
         return df
 
     def add_location_id(self, country, country_id):
-        prices = self.filter_prices()
+        prices = self.normalise_units()
         prices_country = prices[prices['adm0_name'] == country]
 
         adm1_replacements = {'Addis Ababa': 'Addis Abeba', 'Banadir' :'Banaadir', 'Galgaduud': 'Galguduud',
@@ -232,6 +250,7 @@ if __name__ == '__main__':
 
     print("------- Extracting prices table ---------")
 
+    #PricesTable().normalise_units()
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
     PricesTable().export_table('price_table')
