@@ -253,12 +253,68 @@ class PricesTable:
         price_table_filtered = price_table[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
         return price_table_filtered
 
+    def Numbeo_to_USD(self):
+        numbeo_prices = pd.read_csv(self.path_in + 'Numbeo_pricecom_2020.csv', sep=';')
+        numbeo_prices = numbeo_prices[numbeo_prices['value'].notna()]
+
+        numbeo_norm = pd.merge(numbeo_prices, self.rates, how='left', on=['currency'])
+        print(numbeo_norm.head())
+        # For 'currency' == USD, 'value USD' = 1
+        numbeo_norm['value USD'].fillna(1.0, inplace=True)
+        numbeo_norm['value'] = numbeo_norm['value'] * numbeo_norm['value USD']
+
+        # Filter only needed columns
+        numbeo_norm_filtered = numbeo_norm[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
+
+        return numbeo_norm_filtered
+
+    def cross_price_w_numbeo(self):
+        prices = self.add_ids_to_table()
+        numbeo_prices = self.Numbeo_to_USD()
+
+        #Uganda needs eggs (10), beef (8), milk (9) & rice (7) from Numbeo
+        Uganda_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'UGA']
+        Uganda_numbeo = Uganda_numbeo[Uganda_numbeo['measureID'].isin([10, 8, 9, 7])]
+        prices = prices.append(Uganda_numbeo)
+
+        #Sudan needs eggs (10), beef (8), milk (9) & rice (7) from Numbeo
+        Sudan_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SUD']
+        Sudan_numbeo = Sudan_numbeo[Sudan_numbeo['measureID'].isin([10, 8, 9, 7])]
+        prices = prices.append(Sudan_numbeo)
+
+        #S. Sudan needs eggs (10) from Numbeo
+        SSudan_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SSD']
+        SSudan_numbeo = SSudan_numbeo[SSudan_numbeo['measureID'] == 10]
+        prices = prices.append(SSudan_numbeo)
+
+        #Somalia needs eggs (10) & beef (8) from Numbeo
+        Somalia_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SOM']
+        Somalia_numbeo = Somalia_numbeo[Somalia_numbeo['measureID'].isin([10, 8])]
+        prices = prices.append(Somalia_numbeo)
+
+        #Kenya eggs (10), beef (8) & rice (7) from Numbeo
+        Kenya_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'KEN']
+        Kenya_numbeo = Kenya_numbeo[Kenya_numbeo['measureID'].isin([10, 8, 7])]
+        prices = prices.append(Kenya_numbeo)
+
+        #Ethiopia needs eggs (10) & beef (8)from Numbeo
+        Ethiopia_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'ETH']
+        Ethiopia_numbeo = Ethiopia_numbeo[Ethiopia_numbeo['measureID'].isin([10, 8])]
+        prices = prices.append(Ethiopia_numbeo)
+
+        # Homogenise factID
+        prices = prices.reset_index(drop=True)
+        prices['factID'] = 'PRICE_' + prices.index.astype(str)
+
+        return prices
+
+
     def export_table(self, filename):
         '''
 
         :return: The price table in a parquet format with the date added in the name.
         '''
-        prices_df = self.add_ids_to_table()
+        prices_df = self.cross_price_w_numbeo()
         self.flats.export_parquet_w_date(prices_df, filename)
         self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
@@ -270,3 +326,4 @@ if __name__ == '__main__':
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
     PricesTable().export_table('price_table')
+
