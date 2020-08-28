@@ -46,6 +46,7 @@ class PricesTable:
         self.flats = FlatFiles(self.path_in, self.path_out)
         self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
         self.dates['date'] = pd.to_datetime(self.dates['date'])
+        self.rates = pd.read_csv(self.path_in + 'currenciesconversion.csv', sep=';')
 
         # prices
         self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
@@ -89,10 +90,19 @@ class PricesTable:
         #print(prices[prices['number_units'] > 1].head())
 
         # If eggs, calculate price for 12
-        if prices[prices['cm_name'] == 'eggs':
-            prices['mp_price'] = prices['mp_price'] x 12
+        #if prices[prices['cm_name'] == 'eggs']:
+         #   prices['mp_price'] = prices['mp_price'] * 12
 
         return prices
+
+    def normalise_currencies(self):
+        prices = self.normalise_units()
+        #load csv currency rates
+        prices_norm = pd.merge(prices, self.rates, how='left', left_on='adm0_name',
+                                          right_on='country')
+        prices_norm['mp_price'] = prices_norm['mp_price'] * prices_norm['value USD']
+
+        return prices_norm
 
     def read_region_shp(self, country_id):
         '''
@@ -134,7 +144,7 @@ class PricesTable:
         return df
 
     def add_location_id(self, country, country_id):
-        prices = self.normalise_units()
+        prices = self.normalise_currencies()
         prices_country = prices[prices['adm0_name'] == country]
 
         adm1_replacements = {'Addis Ababa': 'Addis Abeba', 'Banadir' :'Banaadir', 'Galgaduud': 'Galguduud',
