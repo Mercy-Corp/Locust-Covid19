@@ -17,7 +17,7 @@ class FlatFiles:
       Functions to treat flat files and create fact tables.
       '''
 
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         #self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
