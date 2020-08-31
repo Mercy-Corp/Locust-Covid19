@@ -42,7 +42,7 @@ environment is selfexplanatory, can be production or test
 
 data holds the location of the input bucket (landing) and output bucket (reporting) on s3
 
-module is the python module that will be executed, valid module names are location, shapefile, production, population, measure, demand, cropland and forageland
+module is the python module that will be executed, valid module names are location, shapefile, production, population, measure, demand, cropland, croplandlocust, forageland and foragelandlocust 
 
 ## Modules
 
