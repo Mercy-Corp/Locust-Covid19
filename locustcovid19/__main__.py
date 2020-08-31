@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
        # 7. Calculation of cropland
        print("------- Extracting cropland area per district table ---------")
-       Cropland(INPUT_PATH, OUTPUT_PATH).export_table("Cropland")
+       Cropland(INPUT_PATH, OUTPUT_PATH).export_table("cropland_fact/Cropland")
 
     elif module == 'forageland':
 
