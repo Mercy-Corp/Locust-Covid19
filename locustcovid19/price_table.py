@@ -21,15 +21,6 @@ warnings.filterwarnings("ignore")
 from datetime import datetime
 from utils.flat_files import FlatFiles
 
-#S3 paths
-
-with open("config/application.yaml", "r") as ymlfile:
-    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-INPUT_PATH = cfg["data"]['landing']
-OUTPUT_PATH = cfg["data"]['reporting']
-print(INPUT_PATH)
-
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
 COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
 '''
@@ -41,7 +32,7 @@ class PricesTable:
     '''
     This class extracts the markets of the prices and demand dfs. # TODO extract markets from demand df. Currently only working on prices.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(self.path_in, self.path_out)
@@ -230,6 +221,14 @@ class PricesTable:
 #        self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
+
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg["data"]['landing']
+    OUTPUT_PATH = cfg["data"]['reporting']
+    print(INPUT_PATH)
 
     print("------- Extracting prices table ---------")
 

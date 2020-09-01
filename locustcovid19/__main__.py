@@ -21,6 +21,7 @@ from cropland_area import Cropland
 from forageland_area import Forageland
 from forageland_locust import ForagelandLocust
 from cropland_locust import CroplandLocust
+from price_table import PricesTable
 import os
 import yaml
 
@@ -93,6 +94,13 @@ if __name__ == '__main__':
        #Export
        FlatFiles().export_to_parquet(demand_df,"demand")
        # out = FlatFiles().export_output_w_date(demand_df, "Demand")
+
+    elif module == 'price':
+
+       print("------- Extracting prices table ---------")
+       #prices = PricesTable().filter_prices()
+       #prices = PricesTable().location_id_to_markets()
+       PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
 
     elif module == 'cropland':
 

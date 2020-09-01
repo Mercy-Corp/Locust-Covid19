@@ -19,20 +19,6 @@ import geopandas as gpd
 from rasterstats import zonal_stats
 import io
 
-# #S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
-
-#with open("config/application.yaml", "r") as ymlfile:
-#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-#INPUT_PATH = cfg["data"]['landing']
-#OUTPUT_PATH = cfg["data"]['reporting']
-#print(INPUT_PATH)
-
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
 COMMODITIES = ['beef', 'egg', 'mlk', 'mut', 'pork', 'pou']
