@@ -245,7 +245,6 @@ class PricesTable:
         #df[column] = pd.to_datetime([f'{y}-01-01' for y in df[column]])
         #price_table = price_table.merge(self.dates, on='date', how='left')
 
-
         # Rename value (price units) & commodities columns
         price_table = price_table.rename(columns={'mp_price': 'value', 'cm_name': 'commodity_name'})
 
@@ -308,13 +307,39 @@ class PricesTable:
 
         return prices
 
+    def add_missing_locIDs(self):
+        prices = self.cross_price_w_numbeo()
+        # Load location table
+        location_table = pd.read_csv(self.path_out + 'location_dim/location_table.csv', sep="|")[['locationID', 'hierarchy']]
+        # Filter for regions
+        location_regions = location_table[location_table['hierarchy'] == 1]['locationID']
+
+        # Cross with location table to include all locationIDs even if they do not have any entries.
+        price_table = prices.merge(location_regions, on = 'locationID', how = 'outer')
+
+        # Homogenise factID
+        price_table = price_table.reset_index(drop=True)
+        price_table['factID'] = 'PRICE_' + price_table.index.astype(str)
+
+        # Fill NaNs - IDs cannot be NaNs --> error in Athena when we cross with other tables.
+        price_table['measureID'].fillna(0, inplace=True) # random measureID for prices - 0 that corresponds to nothing
+        price_table['measureID'] = price_table['measureID'].astype(int)
+
+        todays_date = int(datetime.now().strftime('%Y%m%d'))
+        price_table['dateID'].fillna(todays_date, inplace=True) #Fill with today's date
+        price_table['dateID'] = price_table['dateID'].astype(int)
+
+        # Filter /reorder only needed columns
+        price_table = price_table[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
+
+        return price_table
 
     def export_table(self, filename):
         '''
 
         :return: The price table in a parquet format with the date added in the name.
         '''
-        prices_df = self.cross_price_w_numbeo()
+        prices_df = self.add_missing_locIDs()
         self.flats.export_parquet_w_date(prices_df, filename)
         self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
@@ -326,4 +351,5 @@ if __name__ == '__main__':
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
     PricesTable().export_table('price_table')
+    #PricesTable().export_table('price_fact/price_table')
 
