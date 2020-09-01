@@ -21,8 +21,8 @@ from shapely import wkt
 #OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
@@ -114,9 +114,9 @@ class ConflictsTable:
         Exports to parquet format.
         '''
         conflicts_df = self.add_ids()
-        self.flats.export_csv_w_date(conflicts_df, 'conflict_table')
-        self.flats.export_parquet_w_date(conflicts_df, 'conflict_table')
-        #self.flats.export_parquet_w_date(displacement_df, 'conflict_fact/conflict_table')
+        #self.flats.export_csv_w_date(conflicts_df, 'conflict_table')
+        #self.flats.export_parquet_w_date(conflicts_df, 'conflict_table')
+        self.flats.export_parquet_w_date(displacement_df, 'conflict_fact/conflict_table')
 
 
 if __name__ == '__main__':

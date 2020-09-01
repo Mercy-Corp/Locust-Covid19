@@ -18,8 +18,8 @@ import warnings
 warnings.filterwarnings("ignore")
 
 #S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
+#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
+#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
 #INPUT_PATH = r'data/input/'
@@ -133,7 +133,8 @@ class Forageland:
         :return: The Forageland table in both a parquet and csv format with the date added in the name.
         '''
         forageland_df = self.add_fact_ids()
-        self.flats.export_output_w_date(forageland_df, filename)
+        self.flats.export_parquet_w_date(forageland_df, filename)
+        #self.flats.export_output_w_date(forageland_df, filename)
         
 if __name__ == '__main__':
 

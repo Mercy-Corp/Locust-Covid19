@@ -18,8 +18,8 @@ from utils_flat_files import FlatFiles
 #OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 
@@ -71,9 +71,9 @@ class RefugeesTable:
         Exports to parquet format.
         '''
         refugees_df = self.add_ids()
-        self.flats.export_csv_w_date(refugees_df, 'refugees_table')
-        self.flats.export_parquet_w_date(refugees_df, 'refugees_table')
-        #self.flats.export_parquet_w_date(refugees_df, 'refugees_fact/refugees_table')
+        #self.flats.export_csv_w_date(refugees_df, 'refugees_table')
+        #self.flats.export_parquet_w_date(refugees_df, 'refugees_table')
+        self.flats.export_parquet_w_date(refugees_df, 'refugees_fact/refugees_table')
 
 if __name__ == '__main__':
 

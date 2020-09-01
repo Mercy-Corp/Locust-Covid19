@@ -17,8 +17,8 @@ from utils_flat_files import FlatFiles
 #OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 
@@ -87,9 +87,9 @@ class DisplacementTable:
         Exports to parquet format.
         '''
         displacement_df = self.add_ids_to_table()
-        self.flats.export_csv_w_date(displacement_df, 'displacement_table')
-        self.flats.export_parquet_w_date(displacement_df, 'displacement_table')
-        #self.flats.export_parquet_w_date(displacement_df, 'displacement_fact/displacement_table')
+        #self.flats.export_csv_w_date(displacement_df, 'displacement_table')
+        #self.flats.export_parquet_w_date(displacement_df, 'displacement_table')
+        self.flats.export_parquet_w_date(displacement_df, 'displacement_fact/displacement_table')
 
 if __name__ == '__main__':
 
