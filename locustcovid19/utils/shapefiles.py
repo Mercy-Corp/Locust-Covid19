@@ -11,14 +11,6 @@ Created on Thu Jun 19 11:14:40 2020
 import geopandas as gpd
 import pandas as pd
 
-# S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/landing/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-
-# #local paths
-# INPUT_PATH = r'data/input/'
-# OUTPUT_PATH = r'data/output/'
-
 class Shapefiles:
     '''
     Functions related to shapefiles.

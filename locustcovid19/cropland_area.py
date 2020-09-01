@@ -19,21 +19,6 @@ client = boto3.client('s3')
 import warnings
 warnings.filterwarnings("ignore")
 
-#S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-landing/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
-
-#with open("config/application.yaml", "r") as ymlfile:
-#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-#INPUT_PATH = cfg["data"]['landing']
-#OUTPUT_PATH = cfg["data"]['reporting']
-#print(INPUT_PATH)
-
 RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
 #RASTER_NAMES = ["N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"]
 
@@ -124,20 +109,25 @@ class Cropland:
 
     def load_extracted_crops(self):
         '''
-        Loads all intermediate files (csvs) on zonal statistics per raster.
+        Loads all intermediate files (csv) on zonal statistics per raster.
         :return: A concatenated df of all zonal statistics.
         '''
 
-        resp = client.list_objects_v2(Bucket='mercy-locust-covid19-landing')
+        path_in = 's3://mercy-locust-covid19-landing-test'
+
+        resp = client.list_objects_v2(Bucket=path_in[5:], Prefix='cropland')
+#        resp = client.list_objects_v2(Bucket='mercy-locust-covid19-landing')
         keys = []
         all_files = []
         for obj in resp['Contents']:
             keys.append(obj['Key'])
         for i in keys:
             if 'cropland/crops_' in i:
-              s = 's3://mercy-locust-covid19-landing/' + str(i)
+              s = path_in + '/' + str(i)
               all_files.append(s)
 
+
+        print(all_files)
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
         concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
         return concatenated_df
@@ -208,8 +198,8 @@ if __name__ == '__main__':
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    INPUT_PATH = cfg["data"]['landing']
-    OUTPUT_PATH = cfg["data"]['reporting']
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
     print(INPUT_PATH)
 
     print("------- Extracting cropland area per district table ---------")
@@ -219,4 +209,4 @@ if __name__ == '__main__':
     cropland_area.extract_crops()
     #Load zonal statistics and prepare & export the cropland fact table
     #cropland_area.export_table("Cropland") #local export
-    cropland_area.export_table("cropland_fact/Cropland") #export to S3
+    cropland_area.export_table('cropland_fact/Cropland') #export to S3

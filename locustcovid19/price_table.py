@@ -9,7 +9,6 @@ Created on Thu Aug 06 17:14:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-#Imports
 import yaml
 import geopandas as gpd
 import pandas as pd
