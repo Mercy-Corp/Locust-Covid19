@@ -26,8 +26,8 @@ from utils_flat_files import FlatFiles
 #OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
 
 #local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
+#INPUT_PATH = r'data/input/'
+#OUTPUT_PATH = r'data/output/'
 
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
 COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
@@ -341,7 +341,7 @@ class PricesTable:
         '''
         prices_df = self.add_missing_locIDs()
         self.flats.export_parquet_w_date(prices_df, filename)
-        self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
+        #self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
 
@@ -350,6 +350,6 @@ if __name__ == '__main__':
     #PricesTable().normalise_units()
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
-    PricesTable().export_table('price_table')
-    #PricesTable().export_table('price_fact/price_table')
+    #PricesTable().export_table('price_table')
+    PricesTable().export_table('price_fact/price_table')
 
