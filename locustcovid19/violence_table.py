@@ -119,7 +119,7 @@ class ViolenceTable:
 
 if __name__ == '__main__':
 
-    print("------- Extracting violence aganinst civilians table ---------")
+    print("------- Extracting violence against civilians table ---------")
 
     filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
     with open(filepath, "r") as ymlfile:
