@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM amazonlinux:latest
 
 # set a directory for the app
 WORKDIR /usr/src/locustcovid19
@@ -7,7 +7,8 @@ WORKDIR /usr/src/locustcovid19
 COPY . .
 
 ADD https://bootstrap.pypa.io/get-pip.py .
-RUN python3 get-pip.py --user && \
+RUN yum install python37 -y \
+&& python3 get-pip.py --user && \
 pip3 install -r requirements.txt
 
 ENTRYPOINT ["python3", "locustcovid19"]

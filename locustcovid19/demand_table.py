@@ -313,4 +313,4 @@ if __name__ == '__main__':
     print(demand_df.head())
 
     # Export files: use utils function to add today's date to the filename
-    FlatFiles().export_output_w_date(demand_final, "demand_table")
+    FlatFiles().export_output_w_date(demand_final, "demand_fact/demand_table")
