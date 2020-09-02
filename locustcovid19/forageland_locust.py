@@ -16,21 +16,10 @@ import pandas as pd
 import geopandas as gpd
 import geopandas
 import yaml
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 from rasterstats import zonal_stats
 import warnings
 warnings.filterwarnings("ignore")
-
-#S3 paths
-
-#if os.environ['ENVIRONMENT'] == 'PROD':
-#   INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#   OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-#else:
-
-#local paths
-#   INPUT_PATH = r'data/input/'
-#   OUTPUT_PATH = r'data/output/'
 
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 

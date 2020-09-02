@@ -21,6 +21,7 @@ from cropland_area import Cropland
 from forageland_area import Forageland
 from forageland_locust import ForagelandLocust
 from cropland_locust import CroplandLocust
+from violence_table import ViolenceTable
 import os
 import yaml
 

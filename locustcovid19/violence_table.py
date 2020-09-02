@@ -9,7 +9,6 @@ Created on Thu Sep 02 12:21:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-# Imports
 import pandas as pd
 import geopandas as gpd
 from utils.flat_files import FlatFiles
@@ -18,14 +17,6 @@ from shapely.geometry import Point
 import time
 import yaml
 
-#S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
-
-#local paths
-INPUT_PATH = r'data/input/'
-OUTPUT_PATH = r'data/output/'
-
 COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
@@ -33,7 +24,7 @@ class ViolenceTable:
     '''
     This class creates the violence against civilians table.
     '''
-    def __init__(self, path_in=INPUT_PATH, path_out=OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(self.path_in, self.path_out)
@@ -139,4 +130,4 @@ if __name__ == '__main__':
     #print(violence_df.head())
 
     # Export
-    violence.export_files()
+    violence.export_files(INPUT_PATH, OUTPUT_PATH)
