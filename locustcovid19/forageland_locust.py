@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the forageland area affected by locust per district.
+Forageland data source: http://www.fao.org/geonetwork/srv/en/main.search?title=land%20cover
 Locust data source: https://locust-hub-hqfao.hub.arcgis.com/datasets/swarms-1/data?geometry=-91.702%2C-8.959%2C143.142%2C46.416&showData=true
 
 Created on Wed Jul 15 08:54:40 2020
+Last update Wed Aug 26 17:58:40 2020
 
 @author: ioanna.papachristou@accenture.com
 """
@@ -14,7 +16,10 @@ import pandas as pd
 import geopandas as gpd
 import geopandas
 import yaml
-from utils.flat_files import FlatFiles
+from utils_flat_files import FlatFiles
+from rasterstats import zonal_stats
+import warnings
+warnings.filterwarnings("ignore")
 
 #S3 paths
 
@@ -27,6 +32,8 @@ from utils.flat_files import FlatFiles
 #   INPUT_PATH = r'data/input/'
 #   OUTPUT_PATH = r'data/output/'
 
+COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
+
 class ForagelandLocust:
     '''
     This class calculates the forageland area affected by locust per district.
@@ -38,29 +45,40 @@ class ForagelandLocust:
         self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%m/%d/%Y')
         self.flats = FlatFiles(path_in, path_out)
 
-        # Import districts
-        self.shp2_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Sudan = gpd.read_file(self.path_in + "Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
-        self.shp2_SSudan = gpd.read_file(self.path_in + "Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
+        # # Import forageland vector
+        # self.forageland_v = gpd.read_file(self.path_in + "forageland/forageland_vector.shp")
+        # self.forageland_v.crs = {"init": "epsg:4326"}
 
-        # Import forageland vector
-        self.forageland_v = gpd.read_file(self.path_in + "forageland/forageland_vector.shp")
-        self.forageland_v.crs = {"init": "epsg:4326"}
+        # Forageland 2003 raster path
+        self.raster_path = self.path_in + 'forageland/forageland2003.tif'
 
         # Import locust gdf
         self.locust_gdf = gpd.read_file(self.path_in + "swarm/Swarm_Master.shp")
         #print(self.locust_gdf.COUNTRYID.unique()) # to select new countries
+
+    def read_boundaries_shp(self, country, hierarchy):
+        '''
+
+        :param country: The reference country
+        :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
+        :return: A geodataframe with 2 columns: locationID and geometry.
+        '''
+        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        GID_column = 'GID_' + str(hierarchy)
+        gdf_country = gdf_country[[GID_column, 'geometry']]
+        gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
+
+        return gdf_country
 
     def get_districts(self):
         '''
 
         :return: A geodataframe with all districts of the 4 countries concatenated.
         '''
-        district_level = [self.shp2_Kenya, self.shp2_Ethiopia, self.shp2_Somalia, self.shp2_Uganda, self.shp2_Sudan, self.shp2_SSudan]
-        gdf_districts = gpd.GeoDataFrame(pd.concat(district_level, ignore_index=True))
+        gdf_districts = gpd.GeoDataFrame()
+        for country in COUNTRIES_IDS:
+            gdf_district = self.read_boundaries_shp(country, 2)
+            gdf_districts = gdf_districts.append(gdf_district)
         gdf_districts.crs = {"init": "epsg:4326"}
         return gdf_districts
 
@@ -131,7 +149,7 @@ class ForagelandLocust:
         for group_name, df_group in locust_grouped:
             # Union of overlapping buffers
             geoms = df_group.geometry.unary_union
-            df_group = geopandas.GeoDataFrame(geometry=[geoms])
+            df_group = gpd.GeoDataFrame(geometry=[geoms])
             df_group = df_group.explode().reset_index(drop=True)
 
             # add date column
@@ -156,8 +174,8 @@ class ForagelandLocust:
 
     def intersect(self):
         '''
-        Intersects the buffers with the districts and the forageland.
-        :return: A gdf with locust affected foragelands per district
+        Intersects the buffers with the districts.
+        :return: A gdf with locust affected districts.
         '''
         gdf_districts = self.get_districts()
         locust_buffers_gdf = self.loc_buffers_to_gdf()
@@ -165,36 +183,54 @@ class ForagelandLocust:
         # intersect with districts
         locust_distr = gpd.overlay(locust_buffers_gdf, gdf_districts, how='intersection')
         # intersect with forageland
-        forage_locust_district = gpd.overlay(self.forageland_v, locust_distr, how='intersection')
+        #forage_locust_district = gpd.overlay(self.forageland_v, locust_distr, how='intersection')
 
-        return forage_locust_district
+        return locust_distr
 
-    def area_forage_affected_locust(self):
+    def area_districts_affected_locust(self):
         '''
         Calculates the area affected by locust
         :return: A gdf including the area in degrees
         '''
-        forage_locust_district = self.intersect()
-        forage_locust_district['forage_locust_area'] = forage_locust_district.geometry.area
+        locust_district = self.intersect()
+        locust_district['area'] = locust_district.geometry.area
 
-        return forage_locust_district
+        return locust_district
+
+    def get_stats(self):
+        '''
+
+        :param raster: The geotiff indicating the cropland area
+        :return: A df with two columns, district id and cropland area.
+        '''
+        gdf_districts = self.area_districts_affected_locust()
+        stats = zonal_stats(gdf_districts.geometry, self.raster_path,  layer="polygons", stats="count", categorical=True)
+        gdf_districts['forageland_count'] = pd.DataFrame.from_dict(stats)[1]
+        gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"]
+        gdf_districts = gdf_districts[gdf_districts['forageland_count'].notnull()]
+        gdf_districts['forageland_area'] = gdf_districts['forageland_count'] * gdf_districts['area'] / gdf_districts[
+            'area_count']
+        #Filter columns
+        df_districts = gdf_districts[['locationID', 'forageland_area', 'date']]
+
+        return df_districts
+
 
     def add_fact_ids(self):
         '''
         Adds ids of fact tables
         :return: A df with the standardised columns of fact tables.
         '''
-        forage_locust_district = self.area_forage_affected_locust()
+        forage_locust_district = self.get_stats()
         forage_locust_district['measureID'] = 29
         forage_locust_district['factID'] = 'FOR_LOC_DIS' + forage_locust_district.index.astype(str)
-        forage_locust_district['locationID'] = forage_locust_district['GID_2']
-        forage_locust_district['value'] = forage_locust_district['forage_locust_area']
+        forage_locust_district['value'] = forage_locust_district['forageland_area']
 
         # Add dateID
         forageland_loc_gdf = forage_locust_district.merge(self.dates, on='date', how='left')
 
         # Select fact table columns
-        forageland_loc_df = FlatFiles().select_columns_fact_table(df=forageland_loc_gdf)
+        forageland_loc_df = self.flats.select_columns_fact_table(df=forageland_loc_gdf)
 
         return forageland_loc_df
 
@@ -204,7 +240,8 @@ class ForagelandLocust:
         :return: The Forageland table in both a parquet and csv format with the date added in the name.
         '''
         forageland_loc_df = self.add_fact_ids()
-        self.flats.export_output_w_date(forageland_loc_df, filename)
+        self.flats.export_parquet_w_date(forageland_loc_df, filename)
+        #self.flats.export_output_w_date(forageland_loc_df, filename)
 
 if __name__ == '__main__':
 
@@ -217,4 +254,6 @@ if __name__ == '__main__':
     print(INPUT_PATH)
 
     print("------- Extracting forageland area affected by locust per district table ---------")
-    ForagelandLocust().export_table('forageland_locust_fact/Forage_impact_locust_district')
+    ForagelandLocust().export_table('forageland_locust_fact/forage_impact_locust_district')
+    #ForagelandLocust().export_table('forage_impact_locust_district')
+

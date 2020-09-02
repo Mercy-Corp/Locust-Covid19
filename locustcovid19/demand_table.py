@@ -4,7 +4,7 @@ The prediction of current demand is based on demand in 2000 and population
 values from 2014-2020.
 
 Created on Fri Jul 17 10:59:01 2020
-Last modified on Fri Aug 07 14:52:01 2020
+Last modified on Thu Aug 27 13:04:01 2020
 
 @author: linnea.evanson@accenture.com, ioanna.papachristou@accenture.com
 """
@@ -46,19 +46,24 @@ COMMODITIES_DICT = {'beef': {'cmdt_name': 'beef consumption', 'id': 22},
 
 class DemandTable:
     '''
-    This class creates the 2020 demand table.
+    This class creates the demand table.
     '''
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(path_in, path_out)
 
-        self.popfile00 = str(self.path_out + "population_fact/population_table_all_countries_2000.parquet")
-        self.popfile14 = str(self.path_out + "population_fact/population_table_all_countries_2014.parquet")
-        self.popfile16 = str(self.path_out + "population_fact/population_table_all_countries_2016.parquet")
-        self.popfile17 = str(self.path_out + "population_fact/population_table_all_countries_2017.parquet")
-        self.popfile18 = str(self.path_out + "population_fact/population_table_all_countries_2018.parquet")
-        self.popfile20 = str(self.path_out + "population_fact/population_table_all_countries_2020.parquet")
+    def load_population(self, year):
+        '''
+
+        :param year: The year of the population file.
+        :return: The file related to the population we would like to load.
+        '''
+        #population_year = pd.read_csv(self.path_out + "population_fact/population_table_all_countries_" + str(year) + ".csv", sep='|')
+        population_year = pd.read_csv(
+            self.path_out + "population_table_all_countries_" + str(year) + ".csv", sep='|')
+
+        return population_year
 
     def load_rasters(self, cmdt):
         '''
@@ -85,6 +90,12 @@ class DemandTable:
         return gdf_country
 
     def calc_commodity(self, gdf_country, cmdt):
+        '''
+
+        :param gdf_country: A geodataframe with the administrative boundaries in a country.
+        :param cmdt: The commodity
+        :return: The sum of demand per administrative boundary in the selected country.
+        '''
 
         raster_cmdt = self.load_rasters(cmdt)
         demand_country = zonal_stats(gdf_country.geometry, raster_cmdt, layer="polygons", stats='sum')
@@ -98,8 +109,8 @@ class DemandTable:
         countries_list = []
 
         for country in COUNTRIES:
-            print("Preparing demand table for {}.".format(country))
-            gdf_country = self.read_boundaries_shp(country, 1)
+            print("Preparing demand table for {}".format(country))
+            gdf_country = self.read_boundaries_shp(country, 2)
             gdf_country['year'] = 2000
 
             commodities_gdf = gpd.GeoDataFrame()
@@ -135,16 +146,14 @@ class DemandTable:
         region = split[3]
         return country, area, district, region
 
-    def sum_regions(self,filename):
+    def sum_regions(self,pop):
         '''
         Function to sum population of all districts within a region.
 
-        :param filename: name of the file containing population data down to district level for all
+        :param pop: the file containing population data down to district level for all
         regions in all countries of interest for a particular year.
         :return the sum of the population on a region level and the locationIDs for those regions.
         '''
-        
-        pop = pd.read_parquet(filename, engine='pyarrow')
         pop = pop.dropna()
 
         splits = np.empty((len(pop['locationID']), 4), dtype=object)
@@ -186,32 +195,47 @@ class DemandTable:
         '''
         return initial * ((1 + r) ** x)  # same formula used above
 
+    def removeNull(row):
+        return ['0' if i == '' else i for i in row]
+
     def get_consumption_preds(self,frames):
         '''
-        Predict consumption in 2014-2020 based on population values from the same period, and
-        consumption in 2000 as the initial value
+        Predicts consumption in 2014-2020 based on population values from the same period, and
+        consumption in 2000 as the initial value.
 
         :param frames: the current dataframe with all locations and consumption types.
         :returns the consumption predictions for 2014-2020 per region and an updated dataframe with no null values.
         '''
 
         #Get population values on a region level
-        pop00, regions = self.sum_regions(self.popfile00)
-        pop14, regions14 = self.sum_regions(self.popfile14)
-        pop16, regions16 = self.sum_regions(self.popfile16)
-        pop17, regions17 = self.sum_regions(self.popfile17)
-        pop18, regions18 = self.sum_regions(self.popfile18)
-        pop20, regions20 = self.sum_regions(self.popfile20)
+        '''
+        pop00, regions = self.sum_regions(self.load_population(2000))
+        pop14, regions14 = self.sum_regions(self.load_population(2014))
+        pop16, regions16 = self.sum_regions(self.load_population(2016))
+        pop17, regions17 = self.sum_regions(self.load_population(2017))
+        pop18, regions18 = self.sum_regions(self.load_population(2018))
+        pop20, regions20 = self.sum_regions(self.load_population(2020))
+        '''
+        districts = self.load_population(2020)['locationID'].values.tolist()
+        # KEN.47.6_1 doesn't have population in any of the years (probably an error in the creation of the polygons), that's why we fill na with =.
+        pop00 = self.load_population(2000)['value'].fillna(0).values.tolist()
+        pop14 = self.load_population(2014)['value'].fillna(0).values.tolist()
+        pop16 = self.load_population(2016)['value'].fillna(0).values.tolist()
+        pop17 = self.load_population(2017)['value'].fillna(0).values.tolist()
+        pop18 = self.load_population(2018)['value'].fillna(0).values.tolist()
+        pop20 = self.load_population(2020)['value'].fillna(0).values.tolist()
 
+        '''
         # Remove duplicates from region tags (regions for each year are the same so we need only take one year):
         all_regions = []
         [all_regions.append(x) for x in regions if x not in all_regions]
+        '''
 
         #Fit a curve to the population points using scipy curve_fit
         time = [0, 14, 16, 17, 18, 20]
         curve_params = []
-        for region in range(len(pop00)):
-            series = [pop00[region], pop14[region], pop16[region], pop17[region], pop18[region], pop20[region]]
+        for district in range(len(pop00)):
+            series = [pop00[district], pop14[district], pop16[district], pop17[district], pop18[district], pop20[district]]
             params, cov = curve_fit(self.func, time, series, maxfev=1000)
             curve_params.append(params[0])
 
@@ -220,7 +244,7 @@ class DemandTable:
 
         region_params = []
         for row in demand['locationID']:  # use demand not frames as we have already removed nan from demand
-            index = all_regions.index(row)
+            index = districts.index(row)
             region_params.append(curve_params[index])  # save the curve for that region
 
         demand['region_params'] = region_params #so their indices match (especially for plotting)
@@ -247,8 +271,9 @@ class DemandTable:
         :return: demand_final: the final dataframe, with a value for consumption for each year.
         '''
 
-        frames = self.demand_table()
-        #frames = self.create_locationIDs(frames)
+        frames = self.demand_table() # TODO change back to this line
+        #frames = pd.read_csv(self.path_in + "demand_districts.csv", sep = "|", encoding = 'utf-8') #for test purposes only!!
+        frames = frames.rename(columns={'value': 'Cons00'})
 
         demand, cons14, cons15, cons16, cons17, cons18, cons19, cons20 = self.get_consumption_preds(frames)
 
@@ -311,6 +336,7 @@ class DemandTable:
                                           range(len(demand_final['value']))])  # insert at first columns
 
         self.flats.export_output_w_date(demand_final, "demand_fact/demand_table")
+        #self.flats.export_output_w_date(demand_final, "demand_table")
 
         return demand_final
 
@@ -322,9 +348,5 @@ if __name__ == '__main__':
 
     # Create dataframe
     demand_df = dem_table.create_demand_table()
-    demand_final = demand_df
     print(demand_df.columns)
     print(demand_df.head())
-
-    # Export files: use utils function to add today's date to the filename
-    FlatFiles().export_output_w_date(demand_final, "demand_table")
