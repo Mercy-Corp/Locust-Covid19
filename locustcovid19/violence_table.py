@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the violence against civilians table.
-Data available from: https://ucdp.uu.se/downloads/index.html#ged_global
+Data available from: https://acleddata.com/data-export-tool/
+
 
 Created on Thu Sep 02 12:21:40 2020
 
@@ -10,11 +11,12 @@ Created on Thu Sep 02 12:21:40 2020
 
 # Imports
 import pandas as pd
-#from utils.flat_files import FlatFiles
-import numpy as np
 import geopandas as gpd
+from utils.flat_files import FlatFiles
 from datetime import datetime
 from shapely.geometry import Point
+import time
+import yaml
 
 #S3 paths
 #INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
@@ -34,7 +36,9 @@ class ViolenceTable:
     def __init__(self, path_in=INPUT_PATH, path_out=OUTPUT_PATH):
         self.path_in = path_in
         self.path_out = path_out
-        self.violence = pd.read_csv(self.path_in + "social_cohesion/violence/violence.csv", sep=",", encoding='utf-8')
+        self.flats = FlatFiles(self.path_in, self.path_out)
+        self.violence = pd.read_csv(self.path_in + "social_cohesion/violence/violence.csv", sep=",",
+                                    encoding='utf-8')[['event_date', 'latitude', 'longitude', 'fatalities', 'timestamp']]
 
     def coord_to_geometry(self):
         violence_df = self.violence
@@ -50,16 +54,89 @@ class ViolenceTable:
 
         return violence_gdf
 
+    def read_boundaries_shp(self, country, hierarchy):
+        '''
+
+        :param country: The reference country
+        :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
+        :return: A geodataframe with 2 columns: locationID and geometry.
+        '''
+        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        GID_column = 'GID_' + str(hierarchy)
+        gdf_country = gdf_country[[GID_column, 'geometry']]
+        gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
+
+        return gdf_country
+
+    def get_districts(self):
+        all_districts = gpd.GeoDataFrame()
+        for country in COUNTRIES_IDS:
+            gdf_district = self.read_boundaries_shp(country, 2)
+            all_districts = all_districts.append(gdf_district)
+        all_districts.crs = {"init": "epsg:4326"}
+
+        return all_districts
+
+    def add_ids(self):
+        violence = self.coord_to_geometry()
+
+        # Spatial join with districts and add locationID
+        districts = self.get_districts()
+        violence = gpd.sjoin(districts, violence, how='right', op='contains')
+
+        # Add dateID
+        violence['date'] = pd.to_datetime(violence['event_date'])
+        violence["date"] = [d.date() for d in violence["date"]]
+        violence['dateID'] = violence['date'].apply(lambda x: datetime.strftime(x, '%Y%m%d'))
+        violence['dateID'] = violence['dateID'].astype(int)
+
+        # Add value & factID per table (occurencies and deaths)
+        occurencies = violence.copy().reset_index(drop=True)
+        occurencies['value'] = 1
+        occurencies['measureID'] = 31
+        occurencies['factID'] = 'VIOL_OCC_' + occurencies.index.astype(str)
+        deaths = violence.copy().reset_index(drop=True)
+        deaths['value'] = deaths['fatalities']
+        deaths['measureID'] = 43
+        deaths['factID'] = 'VIOL_DEATHS_' + deaths.index.astype(str)
+
+        # Filter only needed columns to export
+        occurencies_df = occurencies[['factID', 'measureID', 'dateID', 'locationID', 'value']]
+        deaths_df = deaths[['factID', 'measureID', 'dateID', 'locationID', 'value']]
+
+        # Append the 2 tables
+        violence_df = occurencies_df.append(deaths_df)
+        return violence_df
+
+    def export_files(self):
+        '''
+        Exports to parquet format.
+        '''
+        violence_df = self.add_ids()
+        #self.export_csv_w_date(violence_df, 'violence_table')
+        #self.export_parquet_w_date(violence_df, 'violence_table')
+        self.flats.export_parquet_w_date(violence_df, 'violence_fact/violence_table')
+
 if __name__ == '__main__':
 
     print("------- Extracting violence aganinst civilians table ---------")
 
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    module = cfg['module']
+    print(INPUT_PATH)
+
     violence = ViolenceTable()
 
     # Create dataframe
-    violence_df = violence.coord_to_geometry()
-    print(violence_df.shape)
-    print(violence_df.head())
+    #violence_df = violence.add_ids()
+    #print(violence_df.shape)
+    #print(violence_df.columns)
+    #print(violence_df.head())
 
     # Export
-    #violence_df.export_files()
+    violence.export_files()
