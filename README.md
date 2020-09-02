@@ -108,6 +108,10 @@ There are several files in the root folder. The code goes in *locustcovid19".
 - *.gitignore* contains a list of file specifications that will not be part of the repository
 - *setup.py* has the installation instructions for our package. It follows the setuptools guidelines. Running "python setup.py install" will install the package in our current environment.
 
+## Dockerfile
+
+A docker container is deployed to run the modules. 
+
 ## Folder structure
 - *locustcovid19* is the folder that has the module code. 
 - *config* yaml configuration files
