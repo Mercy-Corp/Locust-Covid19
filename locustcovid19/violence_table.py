@@ -119,7 +119,7 @@ if __name__ == '__main__':
     module = cfg['module']
     print(INPUT_PATH)
 
-    violence = ViolenceTable()
+    violence = ViolenceTable(INPUT_PATH, OUTPUT_PATH)
 
     # Create dataframe
     #violence_df = violence.add_ids()

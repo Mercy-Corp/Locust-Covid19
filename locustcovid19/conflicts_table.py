@@ -10,19 +10,11 @@ Created on Thu Jun 24 13:36:40 2020
 
 # Imports
 import pandas as pd
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 import numpy as np
 import geopandas as gpd
 from datetime import datetime
 from shapely import wkt
-
-#S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
-
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
 
 COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
@@ -120,6 +112,15 @@ class ConflictsTable:
 
 
 if __name__ == '__main__':
+
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    module = cfg['module']
+    print(INPUT_PATH)
 
     print("------- Extracting conflict events table ---------")
 

@@ -14,10 +14,6 @@ from utils.flat_files import FlatFiles
 import glob
 import yaml
 
-# #local paths
-# INPUT_PATH = r'data/input/'
-# OUTPUT_PATH = r'data/output/'
-
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
 class FamineTable:

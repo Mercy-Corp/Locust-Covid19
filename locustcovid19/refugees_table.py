@@ -10,16 +10,8 @@ Created on Thu Jun 25 12:18:40 2020
 
 # Imports
 import pandas as pd
-from utils_flat_files import FlatFiles
+from utils.flat_files import FlatFiles
 
-
-#S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-out-dev/'
-
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
 
 COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 
@@ -27,7 +19,7 @@ class RefugeesTable:
     '''
     This class creates the dislacements table.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.refugees_df = pd.read_csv(self.path_in + "social_cohesion/refugees/population.csv", skiprows=14, sep=",", encoding='utf-8')
@@ -77,9 +69,18 @@ class RefugeesTable:
 
 if __name__ == '__main__':
 
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print(INPUT_PATH)
+    print(OUTPUT_PATH)
+
     print("------- Extracting refugees table ---------")
 
-    refugees = RefugeesTable()
+    refugees = RefugeesTable(INPUT_PATH, OUTPUT_PATH)
 
     # Create dataframe
     refugees_df = refugees.add_ids()
