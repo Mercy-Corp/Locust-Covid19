@@ -1,5 +1,5 @@
 environment: 'test'
 data:
-        landing: 's3://mercy-locust-covid19-landing-test/'
-        reporting: 's3://mercy-locust-covid19-reporting-test/'
+        landing: 's3://mercy-locust-covid19-test/'
+        reporting: 's3://mercy-locust-covid19-out-dev/'
 module: 'violence'

@@ -243,6 +243,6 @@ if __name__ == '__main__':
     print(INPUT_PATH)
 
     print("------- Extracting forageland area affected by locust per district table ---------")
-    ForagelandLocust().export_table('forageland_locust_fact/forage_impact_locust_district')
+    ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('forageland_locust_fact/forage_impact_locust_district')
     #ForagelandLocust().export_table('forage_impact_locust_district')
 
