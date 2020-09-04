@@ -21,18 +21,6 @@ warnings.filterwarnings("ignore")
 from datetime import datetime
 from utils.flat_files import FlatFiles
 
-#S3 paths
-
-with open("config/application.yaml", "r") as ymlfile:
-    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-INPUT_PATH = cfg["data"]['landing']
-OUTPUT_PATH = cfg["data"]['reporting']
-print(INPUT_PATH)
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
-
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
 COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
 '''
@@ -365,4 +353,3 @@ if __name__ == '__main__':
     #prices = PricesTable().location_id_to_markets()
     #PricesTable().export_table('price_table')
     PricesTable().export_table('price_fact/price_table')
-
