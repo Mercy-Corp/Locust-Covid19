@@ -21,7 +21,7 @@ from cropland_area import Cropland
 from forageland_area import Forageland
 from forageland_locust import ForagelandLocust
 from cropland_locust import CroplandLocust
-from price_table import PricesTable
+from violence_table import ViolenceTable
 import os
 import yaml
 
@@ -125,6 +125,12 @@ if __name__ == '__main__':
        # 10 Calculation of cropland affected by locust
        print("------- Extracting cropland area affected by locust per district table ---------")
        CroplandLocust(INPUT_PATH, OUTPUT_PATH).export_table('cropland_locust_fact/Crops_impact_locust_district')
+
+    elif module == 'violence':
+
+       # 11 Calculation of cropland affected by locust
+       print("------- Extracting violence against civilians table ---------")
+       ViolenceTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     else:
 
