@@ -21,7 +21,7 @@ from cropland_area import Cropland
 from forageland_area import Forageland
 from forageland_locust import ForagelandLocust
 from cropland_locust import CroplandLocust
-from prices_table import PricesTable
+from price_table import PricesTable
 from displacement_table import DisplacementTable
 from refugees_table import RefugeesTable
 from conflicts_table import ConflictsTable
