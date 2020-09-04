@@ -3,7 +3,6 @@
 The aim of this module is to extract the violence against civilians table.
 Data available from: https://acleddata.com/data-export-tool/
 
-
 Created on Thu Sep 02 12:21:40 2020
 
 @author: ioanna.papachristou@accenture.com
@@ -17,7 +16,6 @@ from shapely.geometry import Point
 import time
 import yaml
 
-COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
 class ViolenceTable:
