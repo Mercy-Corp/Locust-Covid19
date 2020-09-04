@@ -40,7 +40,7 @@ class PricesTable:
         self.dates['date'] = pd.to_datetime(self.dates['date'])
 
         # prices
-        self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
+        self.prices = pd.read_csv(self.path_in + 'price/wfpvam_foodprices.csv', sep=',')
 
     def filter_prices(self):
         #Load prices
