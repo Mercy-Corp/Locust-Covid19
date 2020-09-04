@@ -43,7 +43,6 @@ class FamineTable:
             gdf_list.append(gdf)
 
         famine = pd.concat(gdf_list)
-        print(famine.head())
 
         return famine
 
@@ -90,7 +89,6 @@ class FamineTable:
         :return: A geodataframe with the famine intersected by district.
         '''
         famine = self.rename_columns(self.read_famine_data())
-        print(famine.head())
 
         gdf_districts = self.get_districts()
         #gdf_districts.to_crs(famine)
@@ -124,7 +122,7 @@ class FamineTable:
         famine_df = self.add_ids()
         #self.flats.export_csv_w_date(famine_df, 'famine_table')
         #self.flats.export_parquet_w_date(famine_df, 'famine_table')
-        self.flats.export_parquet_w_date(famine_df, 'famine_df/famine_table')
+        self.flats.export_parquet_w_date(famine_df, 'famine_fact/famine_table')
 
 
 if __name__ == '__main__':
