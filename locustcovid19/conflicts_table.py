@@ -23,7 +23,7 @@ class ConflictsTable:
     '''
     This class creates the conflict events table.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(self.path_in, self.path_out)
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     print("------- Extracting conflict events table ---------")
 
-    conflicts = ConflictsTable()
+    conflicts = ConflictsTable(INPUT_PATH, OUTPUT_PATH)
 
     # Create dataframe
     conflicts_df = conflicts.add_ids()
