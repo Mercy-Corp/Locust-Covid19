@@ -121,9 +121,15 @@ if __name__ == '__main__':
 
     elif module == 'violence':
 
-       # 11 Calculation of cropland affected by locust
+       # 11 Violence against civilians
        print("------- Extracting violence against civilians table ---------")
        ViolenceTable(INPUT_PATH, OUTPUT_PATH).export_files()
+
+    elif module == 'famine':
+
+        # 12 Famine vulnerability
+        print("------- Extracting famine vulnerability table ---------")
+        FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     else:
 
