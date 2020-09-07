@@ -22,14 +22,7 @@ import yaml
 warnings.filterwarnings("ignore")
 import boto3
 client = boto3.client('s3')
-
-#S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
+import os
 
 RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
 #RASTER_NAMES = ["S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"]
@@ -327,7 +320,7 @@ if __name__ == '__main__':
 
 
     print("------- Extracting cropland area affected by locust per district table ---------")
-    crop_loc = CroplandLocust()
+    crop_loc = CroplandLocust(INPUT_PATH, OUTPUT_PATH)
 #    crop_loc.load_extracted_crops()
     crop_loc.extract_crops_locust()
     #crop_loc.export_table('Crops_impact_locust_district') #local export

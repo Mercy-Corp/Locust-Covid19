@@ -21,15 +21,6 @@ warnings.filterwarnings("ignore")
 from datetime import datetime
 from utils.flat_files import FlatFiles
 
-#S3 paths
-
-with open("config/application.yaml", "r") as ymlfile:
-    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-INPUT_PATH = cfg["data"]['landing']
-OUTPUT_PATH = cfg["data"]['reporting']
-print(INPUT_PATH)
-
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
 COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
 '''
@@ -41,15 +32,16 @@ class PricesTable:
     '''
     This class extracts the markets of the prices and demand dfs. # TODO extract markets from demand df. Currently only working on prices.
     '''
-    def __init__(self, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(self.path_in, self.path_out)
         self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
         self.dates['date'] = pd.to_datetime(self.dates['date'])
+        self.rates = pd.read_csv(self.path_in + 'currenciesconversion.csv', sep=';')
 
         # prices
-        self.prices = pd.read_csv(self.path_in + 'wfpvam_foodprices.csv', sep=',')
+        self.prices = pd.read_csv(self.path_in + 'price/wfpvam_foodprices.csv', sep=',')
 
     def filter_prices(self):
         #Load prices
@@ -59,7 +51,7 @@ class PricesTable:
         #Filter for retail only
         prices = prices[prices.pt_name == 'Retail']
         #Filter columns
-        prices = prices.drop(['adm0_id', 'adm1_id', 'mkt_id', 'cm_id', 'cur_id', 'cur_name', 'pt_id', 'um_id', 'um_name',
+        prices = prices.drop(['adm0_id', 'adm1_id', 'mkt_id', 'cm_id', 'cur_id', 'cur_name', 'pt_id', 'um_id',
                       'mp_commoditysource'], axis=1)
         #Filter commodities
         cm_name = ['Maize (white) - Retail', 'Maize - Retail', 'Rice - Retail',
@@ -70,6 +62,39 @@ class PricesTable:
         #prices.to_csv('data/input/prices_filtered.csv', sep='|', encoding='utf-8', index=False)
 
         return prices
+
+    def normalise_units(self):
+        prices = self.filter_prices()
+
+        # Replace KG and L to be able to split
+        replacements = {'KG': '1 KG', 'L': '1 L'}
+        prices['um_name'].replace(replacements, inplace=True)
+
+        # Split to number of units and units
+        prices[['number_units', 'units']] = prices.um_name.str.split(expand=True)
+
+        # Transform number of units to numeric
+        prices['number_units'] = pd.to_numeric(prices['number_units'])
+        #print(prices[prices['number_units'] > 1].head())
+
+        # Calculate the price of 1 unit
+        prices['mp_price'] = prices['mp_price'] / prices['number_units']
+        #print(prices[prices['number_units'] > 1].head())
+
+        # If eggs, calculate price for 12
+        #if prices[prices['cm_name'] == 'eggs']:
+         #   prices['mp_price'] = prices['mp_price'] * 12
+
+        return prices
+
+    def normalise_currencies(self):
+        prices = self.normalise_units()
+        #load csv currency rates
+        prices_norm = pd.merge(prices, self.rates, how='left', left_on='adm0_name',
+                                          right_on='country')
+        prices_norm['mp_price'] = prices_norm['mp_price'] * prices_norm['value USD']
+
+        return prices_norm
 
     def read_region_shp(self, country_id):
         '''
@@ -111,7 +136,7 @@ class PricesTable:
         return df
 
     def add_location_id(self, country, country_id):
-        prices = self.filter_prices()
+        prices = self.normalise_currencies()
         prices_country = prices[prices['adm0_name'] == country]
 
         adm1_replacements = {'Addis Ababa': 'Addis Abeba', 'Banadir' :'Banaadir', 'Galgaduud': 'Galguduud',
@@ -212,7 +237,6 @@ class PricesTable:
         #df[column] = pd.to_datetime([f'{y}-01-01' for y in df[column]])
         #price_table = price_table.merge(self.dates, on='date', how='left')
 
-
         # Rename value (price units) & commodities columns
         price_table = price_table.rename(columns={'mp_price': 'value', 'cm_name': 'commodity_name'})
 
@@ -220,19 +244,112 @@ class PricesTable:
         price_table_filtered = price_table[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
         return price_table_filtered
 
+    def Numbeo_to_USD(self):
+        numbeo_prices = pd.read_csv(self.path_in + 'Numbeo_pricecom_2020.csv', sep=';')
+        numbeo_prices = numbeo_prices[numbeo_prices['value'].notna()]
+
+        numbeo_norm = pd.merge(numbeo_prices, self.rates, how='left', on=['currency'])
+        print(numbeo_norm.head())
+        # For 'currency' == USD, 'value USD' = 1
+        numbeo_norm['value USD'].fillna(1.0, inplace=True)
+        numbeo_norm['value'] = numbeo_norm['value'] * numbeo_norm['value USD']
+
+        # Filter only needed columns
+        numbeo_norm_filtered = numbeo_norm[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
+
+        return numbeo_norm_filtered
+
+    def cross_price_w_numbeo(self):
+        prices = self.add_ids_to_table()
+        numbeo_prices = self.Numbeo_to_USD()
+
+        #Uganda needs eggs (10), beef (8), milk (9) & rice (7) from Numbeo
+        Uganda_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'UGA']
+        Uganda_numbeo = Uganda_numbeo[Uganda_numbeo['measureID'].isin([10, 8, 9, 7])]
+        prices = prices.append(Uganda_numbeo)
+
+        #Sudan needs eggs (10), beef (8), milk (9) & rice (7) from Numbeo
+        Sudan_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SUD']
+        Sudan_numbeo = Sudan_numbeo[Sudan_numbeo['measureID'].isin([10, 8, 9, 7])]
+        prices = prices.append(Sudan_numbeo)
+
+        #S. Sudan needs eggs (10) from Numbeo
+        SSudan_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SSD']
+        SSudan_numbeo = SSudan_numbeo[SSudan_numbeo['measureID'] == 10]
+        prices = prices.append(SSudan_numbeo)
+
+        #Somalia needs eggs (10) & beef (8) from Numbeo
+        Somalia_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SOM']
+        Somalia_numbeo = Somalia_numbeo[Somalia_numbeo['measureID'].isin([10, 8])]
+        prices = prices.append(Somalia_numbeo)
+
+        #Kenya eggs (10), beef (8) & rice (7) from Numbeo
+        Kenya_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'KEN']
+        Kenya_numbeo = Kenya_numbeo[Kenya_numbeo['measureID'].isin([10, 8, 7])]
+        prices = prices.append(Kenya_numbeo)
+
+        #Ethiopia needs eggs (10) & beef (8)from Numbeo
+        Ethiopia_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'ETH']
+        Ethiopia_numbeo = Ethiopia_numbeo[Ethiopia_numbeo['measureID'].isin([10, 8])]
+        prices = prices.append(Ethiopia_numbeo)
+
+        # Homogenise factID
+        prices = prices.reset_index(drop=True)
+        prices['factID'] = 'PRICE_' + prices.index.astype(str)
+
+        return prices
+
+    def add_missing_locIDs(self):
+        prices = self.cross_price_w_numbeo()
+        # Load location table
+        location_table = pd.read_csv(self.path_out + 'location_dim/location_table.csv', sep="|")[['locationID', 'hierarchy']]
+        # Filter for regions
+        location_regions = location_table[location_table['hierarchy'] == 1]['locationID']
+
+        # Cross with location table to include all locationIDs even if they do not have any entries.
+        price_table = prices.merge(location_regions, on = 'locationID', how = 'outer')
+
+        # Homogenise factID
+        price_table = price_table.reset_index(drop=True)
+        price_table['factID'] = 'PRICE_' + price_table.index.astype(str)
+
+        # Fill NaNs - IDs cannot be NaNs --> error in Athena when we cross with other tables.
+        price_table['measureID'].fillna(0, inplace=True) # random measureID for prices - 0 that corresponds to nothing
+        price_table['measureID'] = price_table['measureID'].astype(int)
+
+        todays_date = int(datetime.now().strftime('%Y%m%d'))
+        price_table['dateID'].fillna(todays_date, inplace=True) #Fill with today's date
+        price_table['dateID'] = price_table['dateID'].astype(int)
+
+        # Filter /reorder only needed columns
+        price_table = price_table[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
+
+        return price_table
+
     def export_table(self, filename):
         '''
 
         :return: The price table in a parquet format with the date added in the name.
         '''
-        prices_df = self.add_ids_to_table()
+        prices_df = self.add_missing_locIDs()
         self.flats.export_parquet_w_date(prices_df, filename)
-#        self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
+        #self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
 
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print(INPUT_PATH)
+    print(OUTPUT_PATH)
+
     print("------- Extracting prices table ---------")
 
+    #PricesTable().normalise_units()
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
+    #PricesTable().export_table('price_table')
     PricesTable().export_table('price_fact/price_table')

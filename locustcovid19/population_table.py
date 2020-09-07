@@ -15,14 +15,6 @@ from utils.flat_files import FlatFiles
 import boto3
 client = boto3.client('s3')
 
-#S3 paths
-INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-
-#local paths
-#INPUT_PATH = r'data/input/'
-#OUTPUT_PATH = r'data/output/'
-
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
 #COUNTRIES = ["SDN", "SSD"]
 
@@ -30,7 +22,7 @@ class PopulationTable:
     '''
     This class creates the population table for the expected year.
     '''
-    def __init__(self, year, path_in = INPUT_PATH, path_out = OUTPUT_PATH):
+    def __init__(self, year, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
         self.year = year

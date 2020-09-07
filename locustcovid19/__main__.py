@@ -21,6 +21,12 @@ from cropland_area import Cropland
 from forageland_area import Forageland
 from forageland_locust import ForagelandLocust
 from cropland_locust import CroplandLocust
+from price_table import PricesTable
+from displacement_table import DisplacementTable
+from refugees_table import RefugeesTable
+from conflicts_table import ConflictsTable
+from violence_table import ViolenceTable
+from famine_table import FamineTable
 import os
 import yaml
 
@@ -39,9 +45,8 @@ if __name__ == '__main__':
 
        # 1. Creation of location table
        print("------- Extracting location table ---------")
-
-       loc_table = LocationTable(INPUT_PATH, OUTPUT_PATH)
-       loc_table.export_to_parquet('location_table')       # Export table to parquet format
+       LocationTable(INPUT_PATH, OUTPUT_PATH).export_to_parquet('location_table')
+       #LocationTable(INPUT_PATH, OUTPUT_PATH).export_to_csv('location_table')
 
     elif module == 'shapefile': 
    
@@ -56,10 +61,7 @@ if __name__ == '__main__':
 
        # 3. Creation of production table
        print("------- Extracting production table ---------")
-       #Load class
-       prod_table = ProductionTable(INPUT_PATH, OUTPUT_PATH)
-       # Export
-       prod_table.export_files()
+       ProductionTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     elif module == 'population':
 
@@ -69,7 +71,7 @@ if __name__ == '__main__':
 
        for year in years:
            print("Population {}:".format(year))
-           PopulationTable(year).export_population()
+           PopulationTable(year, INPUT_PATH, OUTPUT_PATH).export_population()
 
     elif module == 'measure':    
 
@@ -86,13 +88,14 @@ if __name__ == '__main__':
 
        # 6. Creation of demand table
        print("------- Extracting demand table ---------")
-       #Load class
-       demand_table = DemandTable(INPUT_PATH,OUTPUT_PATH)
-       #Create dataframe
-       demand_df = demand_table.create_demand_table()
-       #Export
-       FlatFiles().export_to_parquet(demand_df,"demand")
-       # out = FlatFiles().export_output_w_date(demand_df, "Demand")
+       DemandTable(INPUT_PATH, OUTPUT_PATH).create_demand_table()
+
+    elif module == 'price':
+
+       print("------- Extracting prices table ---------")
+       #prices = PricesTable().filter_prices()
+       #prices = PricesTable().location_id_to_markets()
+       PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
 
     elif module == 'cropland':
 
@@ -117,6 +120,35 @@ if __name__ == '__main__':
        # 10 Calculation of cropland affected by locust
        print("------- Extracting cropland area affected by locust per district table ---------")
        CroplandLocust(INPUT_PATH, OUTPUT_PATH).export_table('cropland_locust_fact/Crops_impact_locust_district')
+
+    elif module == 'prices':
+
+        print("------- Extracting prices table ---------")
+        PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
+
+    elif module == 'displacements':
+        print("------- Extracting displacements table ---------")
+        DisplacementTable().export_files(INPUT_PATH, OUTPUT_PATH)
+
+    elif module == 'refugees':
+
+        print("------- Extracting refugees table ---------")
+        RefugeesTable(INPUT_PATH, OUTPUT_PATH).export_files()
+
+    elif module == 'conflicts':
+
+        print("------- Extracting conflict events table ---------")
+        ConflictsTable(INPUT_PATH, OUTPUT_PATH).export_files()
+
+    elif module == 'violence':
+
+       print("------- Extracting violence against civilians table ---------")
+       ViolenceTable(INPUT_PATH, OUTPUT_PATH).export_files()
+
+    elif module == 'famine':
+
+        print("------- Extracting famine vulnerability table ---------")
+        FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     else:
 
