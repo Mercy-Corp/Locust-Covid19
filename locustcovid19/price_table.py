@@ -38,7 +38,7 @@ class PricesTable:
         self.flats = FlatFiles(self.path_in, self.path_out)
         self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
         self.dates['date'] = pd.to_datetime(self.dates['date'])
-        self.rates = pd.read_csv(self.path_in + 'currenciesconversion.csv', sep=';')
+        self.rates = pd.read_csv(self.path_in + 'price/currenciesconversion.csv', sep=';')
 
         # prices
         self.prices = pd.read_csv(self.path_in + 'price/wfpvam_foodprices.csv', sep=',')
@@ -64,6 +64,10 @@ class PricesTable:
         return prices
 
     def normalise_units(self):
+        '''
+        Normalises units to 1KG and 1L.
+        :return: The prices df with its units normalised.
+        '''
         prices = self.filter_prices()
 
         # Replace KG and L to be able to split
@@ -75,11 +79,12 @@ class PricesTable:
 
         # Transform number of units to numeric
         prices['number_units'] = pd.to_numeric(prices['number_units'])
-        #print(prices[prices['number_units'] > 1].head())
 
         # Calculate the price of 1 unit
         prices['mp_price'] = prices['mp_price'] / prices['number_units']
-        #print(prices[prices['number_units'] > 1].head())
+
+        # Correct DQ issues with some of the prices (detected in Ethiopia)
+        prices.loc[(prices['adm0_name'] == 'Ethiopia') & (prices.mp_price > 1000), 'mp_price'] =prices.loc[(prices['adm0_name'] == 'Ethiopia') & (prices.mp_price > 1000), 'mp_price'] / 100
 
         # If eggs, calculate price for 12
         #if prices[prices['cm_name'] == 'eggs']:
@@ -88,6 +93,10 @@ class PricesTable:
         return prices
 
     def normalise_currencies(self):
+        '''
+        Normalises local currencies to USD.
+        :return: The prices df with the prices normalised to USD.
+        '''
         prices = self.normalise_units()
         #load csv currency rates
         prices_norm = pd.merge(prices, self.rates, how='left', left_on='adm0_name',
@@ -169,19 +178,16 @@ class PricesTable:
         print(prices_country_location.head())
 
         return prices_country_location
-    '''
-    def prices_to_USD(self, df, column, country):
-        df[column] = df[column].astype(float)
-        df[column] = df[column] * CURRENCIES_DICT[country]['USD']
-        return df[column]
-    '''
+
     def location_id_to_markets(self):
+        '''
+        Adds locationID to all markets.
+        :return: A df with all locationIDs per country and market.
+        '''
         prices_countries = pd.DataFrame()
         for country, country_id in COUNTRIES_DICT.items():
             print(country)
             country_df = self.add_location_id(country, country_id)
-            #country_df['mp_price'] = self.prices_to_USD(country_df, 'mp_price', country)
-
             prices_countries = prices_countries.append(country_df)
             print(prices_countries.shape)
         print(prices_countries.columns)
@@ -203,39 +209,25 @@ class PricesTable:
         # Create the pandas DataFrame
         measure_df = pd.DataFrame(measure_id_data, columns=['measureID', 'item'])
         return measure_df
-    '''
-    def convert_prices_to_USD(self, price_df):
-        price_df['mp_price'] = price_df['mp_price'].astype(float)
-        for country in CURRENCIES_DICT:
-            price_df[price_df['adm1_name'] == country]['mp_price'] = price_df[price_df['adm1_name'] == country]['mp_price'] * CURRENCIES_DICT[country]['USD']
 
-        return price_df
-    '''
     def add_ids_to_table(self):
         '''
         Merges with all other tables and extracts all ids.
-
         :return: The price dataframe with all columns as defined in the data model.
         '''
         price_table = self.location_id_to_markets()
-        # Conert prices to USD
-        #price_table = self.convert_prices_to_USD(price_table)
 
         # Merge production with measure and add measureID
         price_table = price_table.merge(self.create_measure_df(), left_on='cm_name', right_on = 'item', how='left')
 
         # Create factID
-        price_table['factID'] = 'PRICE_'  + price_table.index.astype(str)
+        price_table['factID'] = 'PRICE_' + price_table.index.astype(str)
 
         # Create date & dateID column
         price_table['date'] = price_table['mp_year'].astype(str) + '-' + price_table['mp_month'].astype(str) + '-01'
-        #price_table['date'] = pd.to_datetime(price_table['date'], format='%Y-%m-%d')
         price_table['date'] = price_table['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
         price_table['dateID'] = price_table['date'].apply(lambda x: datetime.strftime(x, '%Y%m%d'))
         price_table['dateID'] = price_table['dateID'].astype(int)
-
-        #df[column] = pd.to_datetime([f'{y}-01-01' for y in df[column]])
-        #price_table = price_table.merge(self.dates, on='date', how='left')
 
         # Rename value (price units) & commodities columns
         price_table = price_table.rename(columns={'mp_price': 'value', 'cm_name': 'commodity_name'})
@@ -245,7 +237,7 @@ class PricesTable:
         return price_table_filtered
 
     def Numbeo_to_USD(self):
-        numbeo_prices = pd.read_csv(self.path_in + 'Numbeo_pricecom_2020.csv', sep=';')
+        numbeo_prices = pd.read_csv(self.path_in + 'price/Numbeo_pricecom.csv', sep=';')
         numbeo_prices = numbeo_prices[numbeo_prices['value'].notna()]
 
         numbeo_norm = pd.merge(numbeo_prices, self.rates, how='left', on=['currency'])
@@ -332,7 +324,7 @@ class PricesTable:
         :return: The price table in a parquet format with the date added in the name.
         '''
         prices_df = self.add_missing_locIDs()
-        self.flats.export_parquet_w_date(prices_df, filename)
+        self.flats.export_to_parquet(prices_df, filename)
         #self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
