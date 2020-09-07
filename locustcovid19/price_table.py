@@ -50,6 +50,8 @@ class PricesTable:
         prices = prices[prices['adm0_name'].isin(COUNTRY_LIST)]
         #Filter for retail only
         prices = prices[prices.pt_name == 'Retail']
+        #Filter years
+        prices = prices[prices.mp_year >= 2000]
         #Filter columns
         prices = prices.drop(['adm0_id', 'adm1_id', 'mkt_id', 'cm_id', 'cur_id', 'cur_name', 'pt_id', 'um_id',
                       'mp_commoditysource'], axis=1)
