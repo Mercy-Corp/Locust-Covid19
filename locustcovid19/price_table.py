@@ -10,6 +10,7 @@ Created on Thu Aug 06 17:14:40 2020
 """
 
 import yaml
+import os
 import geopandas as gpd
 import pandas as pd
 from geopy.geocoders import Nominatim
@@ -36,12 +37,12 @@ class PricesTable:
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(self.path_in, self.path_out)
-        self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
+        self.dates = pd.read_csv(self.path_out + '/Date_Dim/Date_Dim.csv', sep=",")
         self.dates['date'] = pd.to_datetime(self.dates['date'])
-        self.rates = pd.read_csv(self.path_in + 'currenciesconversion.csv', sep=';')
+        self.rates = pd.read_csv(self.path_in + '/price/currenciesconversion.csv', sep=';')
 
         # prices
-        self.prices = pd.read_csv(self.path_in + 'price/wfpvam_foodprices.csv', sep=',')
+        self.prices = pd.read_csv(self.path_in + '/price/wfpvam_foodprices.csv', sep=',')
 
     def filter_prices(self):
         #Load prices
@@ -103,20 +104,20 @@ class PricesTable:
         :return: A geodataframe with 2 columns: district id and geometry.
         '''
         if country_id == 'UGA':
-            df_region3 = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_3.shp")[['GID_3', 'NAME_3']]
+            df_region3 = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country_id + "_3.shp")[['GID_3', 'NAME_3']]
             df_region3 = df_region3.rename(columns={'GID_3': 'locationID', 'NAME_3': 'adm_name'})
 
-            df_region2 = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_2.shp")[['GID_2', 'NAME_2']]
+            df_region2 = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country_id + "_2.shp")[['GID_2', 'NAME_2']]
             df_region2 = df_region2.rename(columns={'GID_2': 'locationID', 'NAME_2': 'adm_name'})
 
-            df_region1 = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_1.shp")[['GID_1', 'NAME_1']]
+            df_region1 = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country_id + "_1.shp")[['GID_1', 'NAME_1']]
             df_region1 = df_region1.rename(columns={'GID_1': 'locationID', 'NAME_1': 'adm_name'})
 
             df_region = df_region3.append(df_region2)
             df_region = df_region.append(df_region1)
 
         else:
-            df_region = gpd.read_file(self.path_in + "Spatial/gadm36_" + country_id + "_1.shp")[
+            df_region = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country_id + "_1.shp")[
                 ['GID_1', 'NAME_1']]
             df_region = df_region.rename(columns={'GID_1': 'locationID', 'NAME_1': 'adm_name'})
 
@@ -245,7 +246,7 @@ class PricesTable:
         return price_table_filtered
 
     def Numbeo_to_USD(self):
-        numbeo_prices = pd.read_csv(self.path_in + 'Numbeo_pricecom_2020.csv', sep=';')
+        numbeo_prices = pd.read_csv(self.path_in + '/price/Numbeo_pricecom.csv', sep=';')
         numbeo_prices = numbeo_prices[numbeo_prices['value'].notna()]
 
         numbeo_norm = pd.merge(numbeo_prices, self.rates, how='left', on=['currency'])
@@ -302,7 +303,7 @@ class PricesTable:
     def add_missing_locIDs(self):
         prices = self.cross_price_w_numbeo()
         # Load location table
-        location_table = pd.read_csv(self.path_out + 'location_dim/location_table.csv', sep="|")[['locationID', 'hierarchy']]
+        location_table = pd.read_csv(self.path_out + '/location_dim/location_table.csv', sep="|")[['locationID', 'hierarchy']]
         # Filter for regions
         location_regions = location_table[location_table['hierarchy'] == 1]['locationID']
 
@@ -343,8 +344,8 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    print(INPUT_PATH)
-    print(OUTPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting prices table ---------")
 
@@ -352,4 +353,4 @@ if __name__ == '__main__':
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
     #PricesTable().export_table('price_table')
-    PricesTable().export_table('price_fact/price_table')
+    PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')

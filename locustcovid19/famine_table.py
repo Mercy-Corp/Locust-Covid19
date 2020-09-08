@@ -11,8 +11,10 @@ Created on Thu Sep 03 12:56:40 2020
 import pandas as pd
 import geopandas as gpd
 from utils.flat_files import FlatFiles
-import glob
 import yaml
+import os
+from boto3 import client
+client = client('s3')
 
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
@@ -31,9 +33,28 @@ class FamineTable:
         :return: A geodataframe of all famine related historical data.
         '''
         gdf_list = []
-        for file in glob.glob(self.path_in + 'famine/EA_*_CS.shp'):
+
+#        path_in = 's3://mercy-locust-covid19-landing-test'
+        path_in = str(self.path_in)
+
+        resp = client.list_objects_v2(Bucket=path_in[5:], Prefix='famine')
+#        resp = client.list_objects_v2(Bucket='mercy-locust-covid19-landing')
+        keys = []
+        all_files = []
+        for obj in resp['Contents']:
+            keys.append(obj['Key'])
+        for i in keys:
+            if 'famine/EA_' in i:
+              if '.shp' in i and '.shp.xml' not in i:
+                 s = path_in + '/' + str(i)
+                 all_files.append(s)
+
+#        print('all_files loop')
+
+        for file in all_files:
             # Split by "_"
             date, file_type = file.split('.')[0].split('_')[1:]
+#            print('first line')
             gdf = (gpd.read_file(file)
                   .assign(date=date+'01'))
             gdf_list.append(gdf)
@@ -49,7 +70,7 @@ class FamineTable:
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
         '''
-        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        gdf_country = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
         GID_column = 'GID_' + str(hierarchy)
         gdf_country = gdf_country[[GID_column, 'geometry']]
         gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
@@ -75,6 +96,7 @@ class FamineTable:
         :param gdf: The geodataframe.
         :return: The geodataframe with it's column names changed
         '''
+
         gdf.rename(columns={'CS': 'IPC', 'ML1': 'IPC', 'ML2': 'IPC', 'HA0': 'HA', 'HA1': 'HA', 'HA2': 'HA'}, inplace=True)
         gdf.crs = {"init": "epsg:4326"}
         return gdf
@@ -84,6 +106,7 @@ class FamineTable:
 
         :return: A geodataframe with the famine intersected by district.
         '''
+        
         famine = self.rename_columns(self.read_famine_data())
 
         gdf_districts = self.get_districts()
@@ -96,6 +119,7 @@ class FamineTable:
         Adds the fact table ids to the table.
         :return: The famine dataframe with the fact table ids.
         '''
+
         famine_gdf = self.intersect_w_districts()
 
         # Add dateID
@@ -118,12 +142,10 @@ class FamineTable:
         famine_df = self.add_ids()
         #self.flats.export_csv_w_date(famine_df, 'famine_table')
         #self.flats.export_parquet_w_date(famine_df, 'famine_table')
-        self.flats.export_parquet_w_date(famine_df, 'famine_fact/famine_table')
+        self.flats.export_parquet_w_date(famine_df, '/famine_fact/famine_table')
 
 
 if __name__ == '__main__':
-
-    print("------- Extracting famine vulnerability table ---------")
 
     filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
     with open(filepath, "r") as ymlfile:
@@ -132,8 +154,10 @@ if __name__ == '__main__':
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
     module = cfg['module']
-    print(INPUT_PATH)
-
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
+    print("------- Extracting famine vulnerability table ---------")
+    
     famine = FamineTable(INPUT_PATH, OUTPUT_PATH)
 
     # # Create dataframe
