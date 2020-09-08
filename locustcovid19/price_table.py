@@ -41,6 +41,8 @@ class PricesTable:
         self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
         self.dates['date'] = pd.to_datetime(self.dates['date'])
         self.rates = pd.read_csv(self.path_in + 'price/currenciesconversion.csv', sep=';')
+        self.locations = pd.read_csv(self.path_out + 'location_dim/location_table.csv', sep='|')[
+            ['locationID', 'name', 'hierarchy', 'GID_0']]
 
         # prices
         self.prices = pd.read_csv(self.path_in + 'price/wfpvam_foodprices.csv', sep=',')
@@ -59,7 +61,7 @@ class PricesTable:
                       'mp_commoditysource'], axis=1)
         #Filter commodities
         cm_name = ['Maize (white) - Retail', 'Maize - Retail', 'Rice - Retail',
-                   'Milk - Retail', 'Milk (cow, fresh) - Retail',
+                   'Milk - Retail', 'Milk (fresh) - Retail', 'Milk (cow, fresh) - Retail',
                    'Beans - Retail', 'Beans (dry) - Retail', 'Beans (fava, dry) - Retail', 'Meat (beef) - Retail']
         prices = prices[prices['cm_name'].isin(cm_name)]
 
@@ -193,9 +195,9 @@ class PricesTable:
             print(country)
             country_df = self.add_location_id(country, country_id)
             prices_countries = prices_countries.append(country_df)
-            print(prices_countries.shape)
-        print(prices_countries.columns)
-        print(prices_countries.head())
+        #     print(prices_countries.shape)
+        # print(prices_countries.columns)
+        # print(prices_countries.head())
 
         #prices_countries.to_csv(self.path_in + 'prices_districts.csv', sep='|', encoding='utf-8', index=False)
         return prices_countries
@@ -259,9 +261,9 @@ class PricesTable:
         prices = self.add_ids_to_table()
         numbeo_prices = self.Numbeo_to_USD()
 
-        #Uganda needs eggs (10), beef (8), milk (9) & rice (7) from Numbeo
+        #Uganda needs eggs (10), beef (8) & rice (7) from Numbeo
         Uganda_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'UGA']
-        Uganda_numbeo = Uganda_numbeo[Uganda_numbeo['measureID'].isin([10, 8, 9, 7])]
+        Uganda_numbeo = Uganda_numbeo[Uganda_numbeo['measureID'].isin([10, 8, 7])]
         prices = prices.append(Uganda_numbeo)
 
         #Sudan needs eggs (10), beef (8), milk (9) & rice (7) from Numbeo
@@ -295,10 +297,70 @@ class PricesTable:
 
         return prices
 
-    def add_missing_locIDs(self):
+    def load_REACH_data(self):
+        reach = pd.read_excel(self.path_in + 'price/ULEARN_WFP_UGA_Market-Monitor_Price_Table-15-31-July-2020.xlsx', sheet_name='District Mean')
+        reach = reach[['District', 'Regions', 'Period', 'price_maize_g', 'price_maize_f', 'price_beans', 'price_milk']]
+
+        # Add dateID
+        periods = {'July_1-14': 20200701, 'July_15-30': 20200715, 'March': 20200301}
+        reach['dateID'] = reach['Period']
+        reach['dateID'].replace(periods, inplace=True)
+
+        # Add value column
+        maize_g = reach.copy()[['District', 'Regions', 'price_maize_g', 'dateID']]
+        maize_g['measureID'] = 6
+        maize_g = maize_g.rename(columns={'price_maize_g': 'value'})
+        maize_g['commodity_name'] = 'price_maize_g'
+
+        maize_f = reach.copy()[['District', 'Regions', 'price_maize_f', 'dateID']]
+        maize_f['measureID'] = 6
+        maize_f = maize_f.rename(columns={'price_maize_f': 'value'})
+        maize_f['commodity_name'] = 'price_maize_f'
+
+        beans = reach.copy()[['District', 'Regions', 'price_beans', 'dateID']]
+        beans['measureID'] = 11
+        beans = beans.rename(columns={'price_beans': 'value'})
+        beans['commodity_name'] = 'price_beans'
+
+        milk = reach.copy()[['District', 'Regions', 'price_milk', 'dateID']]
+        milk['measureID'] = 9
+        milk = milk.rename(columns={'price_milk': 'value'})
+        milk['commodity_name'] = 'price_milk'
+
+        reach_df = pd.concat([maize_g, maize_f, beans, milk])
+
+        # Merge with rates
+        reach_df['currency'] = 'UGX'
+        reach_df = pd.merge(reach_df, self.rates, how='left', on=['currency'])
+        reach_df['value'] = reach_df['value'] * reach_df['value USD']
+
+        # Add locationID
+        locations = self.locations[self.locations['GID_0'] == 'UGA']
+        locations = locations[locations['hierarchy'].isin([1, 2, 3])][['locationID', 'name']]
+        reach_df = reach_df.merge(locations, left_on='Regions', right_on='name', how='left')
+
+        # Create factID
+        reach_df['factID'] = 'PRICE_' + reach_df.index.astype(str)
+
+        # Filter only needed columns
+        reach_df_filtered = reach_df[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
+
+        return reach_df_filtered
+
+    def cross_price_w_REACH(self):
         prices = self.cross_price_w_numbeo()
+        reach = self.load_REACH_data()
+
+        #Uganda needs milk (9) & maize (6) from REACH
+        reach_filtered = reach[reach['measureID'].isin([9, 6])]
+        prices_new = prices.append(reach_filtered)
+
+        return prices_new
+
+    def add_missing_locIDs(self):
+        prices = self.cross_price_w_REACH()
         # Load location table
-        location_table = pd.read_csv(self.path_out + 'location_dim/location_table.csv', sep="|")[['locationID', 'hierarchy']]
+        location_table = self.locations[['locationID', 'hierarchy']]
         # Filter for regions
         location_regions = location_table[location_table['hierarchy'] == 1]['locationID']
 
