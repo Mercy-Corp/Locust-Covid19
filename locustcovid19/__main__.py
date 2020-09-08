@@ -95,7 +95,7 @@ if __name__ == '__main__':
        print("------- Extracting prices table ---------")
        #prices = PricesTable().filter_prices()
        #prices = PricesTable().location_id_to_markets()
-       PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
+       PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('/price_fact/price_table')
 
     elif module == 'cropland':
 
@@ -121,24 +121,19 @@ if __name__ == '__main__':
        print("------- Extracting cropland area affected by locust per district table ---------")
        CroplandLocust(INPUT_PATH, OUTPUT_PATH).export_table('cropland_locust_fact/Crops_impact_locust_district')
 
-    elif module == 'prices':
-
-        print("------- Extracting prices table ---------")
-        PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
-
     elif module == 'displacements':
-        print("------- Extracting displacements table ---------")
-        DisplacementTable().export_files(INPUT_PATH, OUTPUT_PATH)
+       print("------- Extracting displacements table ---------")
+       DisplacementTable().export_files(INPUT_PATH, OUTPUT_PATH)
 
     elif module == 'refugees':
 
-        print("------- Extracting refugees table ---------")
-        RefugeesTable(INPUT_PATH, OUTPUT_PATH).export_files()
+       print("------- Extracting refugees table ---------")
+       RefugeesTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     elif module == 'conflicts':
 
-        print("------- Extracting conflict events table ---------")
-        ConflictsTable(INPUT_PATH, OUTPUT_PATH).export_files()
+       print("------- Extracting conflict events table ---------")
+       ConflictsTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     elif module == 'violence':
 
@@ -147,8 +142,8 @@ if __name__ == '__main__':
 
     elif module == 'famine':
 
-        print("------- Extracting famine vulnerability table ---------")
-        FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
+       print("------- Extracting famine vulnerability table ---------")
+       FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     else:
 
