@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the price table.
-Prices data source: https://data.humdata.org/dataset/wfp-food-prices
+Prices data source WFP: https://data.humdata.org/dataset/wfp-food-prices
+Prices data source Numbeo: https://www.numbeo.com/food-prices/
 To check markets: https://dataviz.vam.wfp.org/economic_explorer/prices?adm0=253
 
 Created on Thu Aug 06 17:14:40 2020
+Latest update Mon Sep 07 13:54:40 2020
 
 @author: ioanna.papachristou@accenture.com
 """
@@ -79,14 +81,14 @@ class PricesTable:
         # Split to number of units and units
         prices[['number_units', 'units']] = prices.um_name.str.split(expand=True)
 
-        # Transform number of units to numeric
+        # Transform er of units to numeric
         prices['number_units'] = pd.to_numeric(prices['number_units'])
 
         # Calculate the price of 1 unit
         prices['mp_price'] = prices['mp_price'] / prices['number_units']
 
         # Correct DQ issues with some of the prices (detected in Ethiopia)
-        prices.loc[(prices['adm0_name'] == 'Ethiopia') & (prices.mp_price > 1000), 'mp_price'] =prices.loc[(prices['adm0_name'] == 'Ethiopia') & (prices.mp_price > 1000), 'mp_price'] / 100
+        prices.loc[(prices['adm0_name'] == 'Ethiopia') & (prices.mp_price > 1000), 'mp_price'] = prices.loc[(prices['adm0_name'] == 'Ethiopia') & (prices.mp_price > 1000), 'mp_price'] / 100
 
         # If eggs, calculate price for 12
         #if prices[prices['cm_name'] == 'eggs']:
@@ -272,17 +274,17 @@ class PricesTable:
         SSudan_numbeo = SSudan_numbeo[SSudan_numbeo['measureID'] == 10]
         prices = prices.append(SSudan_numbeo)
 
-        #Somalia needs eggs (10) & beef (8) from Numbeo
+        #Somalia needs eggs (10), beef (8) & rice (7) from Numbeo
         Somalia_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SOM']
-        Somalia_numbeo = Somalia_numbeo[Somalia_numbeo['measureID'].isin([10, 8])]
+        Somalia_numbeo = Somalia_numbeo[Somalia_numbeo['measureID'].isin([10, 8, 7])]
         prices = prices.append(Somalia_numbeo)
 
-        #Kenya eggs (10), beef (8) & rice (7) from Numbeo
+        #Kenya needs eggs (10), beef (8), rice (7) & milk (9) from Numbeo
         Kenya_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'KEN']
-        Kenya_numbeo = Kenya_numbeo[Kenya_numbeo['measureID'].isin([10, 8, 7])]
+        Kenya_numbeo = Kenya_numbeo[Kenya_numbeo['measureID'].isin([10, 8, 7, 9])]
         prices = prices.append(Kenya_numbeo)
 
-        #Ethiopia needs eggs (10) & beef (8)from Numbeo
+        #Ethiopia needs eggs (10) & beef (8) from Numbeo
         Ethiopia_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'ETH']
         Ethiopia_numbeo = Ethiopia_numbeo[Ethiopia_numbeo['measureID'].isin([10, 8])]
         prices = prices.append(Ethiopia_numbeo)
