@@ -303,7 +303,8 @@ class PricesTable:
     def add_missing_locIDs(self):
         prices = self.cross_price_w_numbeo()
         # Load location table
-        location_table = pd.read_csv(self.path_out + '/location_dim/location_table.csv', sep="|")[['locationID', 'hierarchy']]
+#        location_table = pd.read_csv(self.path_out + '/location_dim/location_table.csv', sep="|")[['locationID', 'hierarchy']]
+        location_table = pd.read_parquet(self.path_out + '/location_dim/location_table.parquet', engine='pyarrow')
         # Filter for regions
         location_regions = location_table[location_table['hierarchy'] == 1]['locationID']
 
@@ -353,4 +354,4 @@ if __name__ == '__main__':
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
     #PricesTable().export_table('price_table')
-    PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
+    PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('/price_fact/price_table')
