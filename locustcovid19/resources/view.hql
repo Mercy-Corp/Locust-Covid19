@@ -288,3 +288,21 @@ FROM
 LEFT JOIN measure_dim_test m ON ("fact"."measureid" = "m"."measureid"))
 LEFT JOIN location_dim_test l ON ("fact"."locationid" = "l"."locationid"))
 LEFT JOIN date_dim_test d ON ("fact"."dateid" = "d"."dateid"))
+UNION ALL SELECT
+  "famine"."factid"
+, "m"."measure"
+, "l"."locationid"
+, "l"."hierarchy"
+, "l"."name_0" "location_1"
+, "l"."name_1" "location_2"
+, "l"."name_2" "location_3"
+, "l"."name_3" "location_4"
+, "date_parse"("d"."date", '%m/%d/%Y') "date"
+, null "name"
+, "famine"."value"
+, 'ACLED' "Source_Name"
+FROM
+  (((famine_fact_test famine
+LEFT JOIN measure_dim_test m ON ("famine"."measureid" = "m"."measureid"))
+LEFT JOIN location_dim_test l ON ("famine"."locationid" = "l"."locationid"))
+LEFT JOIN date_dim_test d ON ("famine"."dateid" = "d"."dateid"))
