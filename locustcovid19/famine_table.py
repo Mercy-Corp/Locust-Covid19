@@ -11,6 +11,7 @@ Created on Thu Sep 03 12:56:40 2020
 import pandas as pd
 import geopandas as gpd
 from utils.flat_files import FlatFiles
+import glob
 import yaml
 import os
 from boto3 import client
@@ -53,6 +54,7 @@ class FamineTable:
 
         for file in all_files:
             # Split by "_"
+            print("... Reading file: " + file)
             date, file_type = file.split('.')[0].split('_')[1:]
 #            print('first line')
             gdf = (gpd.read_file(file)
@@ -96,7 +98,6 @@ class FamineTable:
         :param gdf: The geodataframe.
         :return: The geodataframe with it's column names changed
         '''
-
         gdf.rename(columns={'CS': 'IPC', 'ML1': 'IPC', 'ML2': 'IPC', 'HA0': 'HA', 'HA1': 'HA', 'HA2': 'HA'}, inplace=True)
         gdf.crs = {"init": "epsg:4326"}
         return gdf
@@ -106,11 +107,11 @@ class FamineTable:
 
         :return: A geodataframe with the famine intersected by district.
         '''
-        
         famine = self.rename_columns(self.read_famine_data())
 
         gdf_districts = self.get_districts()
         #gdf_districts.to_crs(famine)
+        print("... Intersecting IPC indicator with districts.")
         famine_district = gpd.overlay(famine, gdf_districts, how='intersection')
         return famine_district
 
@@ -119,7 +120,6 @@ class FamineTable:
         Adds the fact table ids to the table.
         :return: The famine dataframe with the fact table ids.
         '''
-
         famine_gdf = self.intersect_w_districts()
 
         # Add dateID
@@ -133,7 +133,10 @@ class FamineTable:
         # Filter only needed columns to export
         famine_df = famine_gdf[['factID', 'measureID', 'dateID', 'locationID', 'value']]
 
-        return famine_df
+        # Filter out values > 5 indicating parks, water, no data. Include only IPC values.
+        famine_filtered = famine_df[famine_df['value'] <= 5]
+
+        return famine_filtered
 
     def export_files(self):
         '''
@@ -141,8 +144,7 @@ class FamineTable:
         '''
         famine_df = self.add_ids()
         #self.flats.export_csv_w_date(famine_df, 'famine_table')
-        #self.flats.export_parquet_w_date(famine_df, 'famine_table')
-        self.flats.export_parquet_w_date(famine_df, '/famine_fact/famine_table')
+        self.flats.export_to_parquet(famine_df, '/famine_fact/famine_table')
 
 
 if __name__ == '__main__':
@@ -157,7 +159,7 @@ if __name__ == '__main__':
     print('INPUT_PATH: ' + INPUT_PATH)
     print('OUTPUT_PATH: ' + OUTPUT_PATH)
     print("------- Extracting famine vulnerability table ---------")
-    
+
     famine = FamineTable(INPUT_PATH, OUTPUT_PATH)
 
     # # Create dataframe

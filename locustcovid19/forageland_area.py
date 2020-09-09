@@ -77,11 +77,11 @@ class Forageland:
         :return: A df with two columns, district id and cropland area.
         '''
         gdf_districts = self.get_districts()
-        gdf_districts['area'] = gdf_districts.geometry.area
-        stats = zonal_stats(gdf_districts.geometry, self.raster_path,  layer="polygons", stats="count", categorical=True)
-        gdf_districts['forageland_count'] = pd.DataFrame.from_dict(stats)[1]
-        gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"]
-        gdf_districts = gdf_districts[gdf_districts['forageland_count'].notnull()]
+        gdf_districts['area'] = gdf_districts.geometry.area # Calculate area of each district.
+        stats = zonal_stats(gdf_districts.geometry, self.raster_path,  layer="polygons", stats="count", categorical=True) # Cross districts with foragelands
+        gdf_districts['forageland_count'] = pd.DataFrame.from_dict(stats)[1] # Count areas of values == 1, foragelands, per district
+        gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"] # Total number of pixels per district
+        gdf_districts = gdf_districts[gdf_districts['forageland_count'].notnull()] # drop nulls
         gdf_districts['forageland_area'] = gdf_districts['forageland_count'] * gdf_districts['area'] / gdf_districts[
             'area_count']
         #Filter columns
@@ -134,8 +134,8 @@ class Forageland:
         :return: The Forageland table in both a parquet and csv format with the date added in the name.
         '''
         forageland_df = self.add_fact_ids()
-        self.flats.export_parquet_w_date(forageland_df, filename)
-        #self.flats.export_output_w_date(forageland_df, filename)
+        self.flats.export_to_parquet(forageland_df, filename)
+        #self.flats.export_csv_w_date(forageland_df, filename)
         
 if __name__ == '__main__':
 
@@ -148,5 +148,5 @@ if __name__ == '__main__':
     print(INPUT_PATH)
 
     print("------- Extracting forageland area per district table ---------")
-    Forageland().export_table('forageland_fact/forageland')
-    #Forageland().export_table('forageland')
+    Forageland(INPUT_PATH, OUTPUT_PATH).export_table('forageland_fact/forageland')
+    #Forageland(INPUT_PATH, OUTPUT_PATH).export_table('forageland')

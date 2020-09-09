@@ -27,6 +27,7 @@ from refugees_table import RefugeesTable
 from conflicts_table import ConflictsTable
 from violence_table import ViolenceTable
 from famine_table import FamineTable
+from risk_indicators import RiskTables
 import os
 import yaml
 
@@ -144,6 +145,16 @@ if __name__ == '__main__':
 
        print("------- Extracting famine vulnerability table ---------")
        FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
+
+    elif module == 'locust_risk':
+
+        print("------- Extracting locust risk table ---------")
+        RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('locust')
+
+    elif module == 'locust_risk':
+
+        print("------- Extracting RVF risk table ---------")
+        RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('RVF')
 
     else:
 
