@@ -33,6 +33,7 @@ class FamineTable:
         gdf_list = []
         for file in glob.glob(self.path_in + 'famine/EA_*_CS.shp'):
             # Split by "_"
+            print("... Reading file: " + file)
             date, file_type = file.split('.')[0].split('_')[1:]
             gdf = (gpd.read_file(file)
                   .assign(date=date+'01'))
@@ -88,6 +89,7 @@ class FamineTable:
 
         gdf_districts = self.get_districts()
         #gdf_districts.to_crs(famine)
+        print("... Intersecting IPC indicator with districts.")
         famine_district = gpd.overlay(famine, gdf_districts, how='intersection')
         return famine_district
 
@@ -109,7 +111,10 @@ class FamineTable:
         # Filter only needed columns to export
         famine_df = famine_gdf[['factID', 'measureID', 'dateID', 'locationID', 'value']]
 
-        return famine_df
+        # Filter out values > 5 indicating parks, water, no data. Include only IPC values.
+        famine_filtered = famine_df[famine_df['value'] <= 5]
+
+        return famine_filtered
 
     def export_files(self):
         '''
@@ -117,8 +122,7 @@ class FamineTable:
         '''
         famine_df = self.add_ids()
         #self.flats.export_csv_w_date(famine_df, 'famine_table')
-        #self.flats.export_parquet_w_date(famine_df, 'famine_table')
-        self.flats.export_parquet_w_date(famine_df, 'famine_fact/famine_table')
+        self.flats.export_to_parquet(famine_df, 'famine_table')
 
 
 if __name__ == '__main__':
