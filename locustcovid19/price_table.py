@@ -317,7 +317,8 @@ class PricesTable:
         maize_g['measureID'] = 6
         maize_g = maize_g.rename(columns={'price_maize_g': 'value'})
         maize_g['commodity_name'] = 'price_maize_g, REACH'
-        '''
+
+        ''' # maize flour excluded
         maize_f = reach.copy()[['District', 'Regions', 'price_maize_f', 'dateID']]
         maize_f['measureID'] = 6
         maize_f = maize_f.rename(columns={'price_maize_f': 'value'})

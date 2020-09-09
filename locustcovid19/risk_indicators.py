@@ -5,7 +5,7 @@ Locust risk data source: https://www.icpac.net/news/desert-locust-projection-16-
 RVF data source: https://icpald.org/rvf-countries-remain-vigilant/
 
 Created on Thu Sep 09 13:10:40 2020
-Latest update Thu Sep 09 13:12:40 2020
+Latest update Thu Sep 09 17:14:40 2020
 
 @author: ioanna.papachristou@accenture.com
 """
