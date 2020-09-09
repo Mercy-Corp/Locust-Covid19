@@ -71,7 +71,7 @@ class RiskTables:
         '''
         risk_df = self.risk_table(indicator)
         #self.flats.export_csv_w_date(risk_df, indicator + '_risk_table')
-        self.flats.export_to_parquet(risk_df, '/'+ indicator + 'fact/' + indicator + '_risk_table')
+        self.flats.export_to_parquet(risk_df, '/'+ indicator + '_fact/' + indicator + '_risk_table')
 
 if __name__ == '__main__':
 
