@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the locust risk and RVF risk tables.
-Locust risk data source: https://data.humdata.org/dataset/wfp-food-prices
-RVF data source: https://www.numbeo.com/food-prices/
+Locust risk data source: https://www.icpac.net/news/desert-locust-projection-16-31-july/
+RVF data source: https://icpald.org/rvf-countries-remain-vigilant/
 
 Created on Thu Sep 09 13:10:40 2020
 Latest update Thu Sep 09 13:12:40 2020
