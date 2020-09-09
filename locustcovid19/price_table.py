@@ -60,9 +60,10 @@ class PricesTable:
         prices = prices.drop(['adm0_id', 'adm1_id', 'mkt_id', 'cm_id', 'cur_id', 'cur_name', 'pt_id', 'um_id',
                       'mp_commoditysource'], axis=1)
         #Filter commodities
-        cm_name = ['Maize (white) - Retail', 'Maize - Retail', 'Rice - Retail',
+        cm_name = ['Maize (white) - Retail', 'Maize - Retail', 'Rice - Retail', 'Rice (imported) - Retail',
                    'Milk - Retail', 'Milk (fresh) - Retail', 'Milk (cow, fresh) - Retail',
-                   'Beans - Retail', 'Beans (dry) - Retail', 'Beans (fava, dry) - Retail', 'Meat (beef) - Retail']
+                   'Beans - Retail', 'Beans (dry) - Retail', 'Beans (fava, dry) - Retail', 'Meat (beef) - Retail',
+                   'Beans (red) - Retail']
         prices = prices[prices['cm_name'].isin(cm_name)]
 
         #prices.to_csv('data/input/prices_filtered.csv', sep='|', encoding='utf-8', index=False)
@@ -209,8 +210,9 @@ class PricesTable:
         '''
         # initialize list of lists
         measure_id_data = [[6, 'Maize (white) - Retail'], [6, 'Maize - Retail'], [7, 'Rice - Retail'],
-                           [8, 'Meat (beef) - Retail'], [9, 'Milk - Retail'], [9, 'Milk (cow, fresh) - Retail'],
-                           [11, 'Beans - Retail'], [11, 'Beans (dry) - Retail'], [11,'Beans (fava, dry) - Retail']]
+                           [7, 'Rice (imported) - Retail'], [8, 'Meat (beef) - Retail'], [9, 'Milk - Retail'],
+                           [9, 'Milk (cow, fresh) - Retail'], [9, 'Milk (fresh) - Retail'], [11, 'Beans - Retail'],
+                           [11, 'Beans (dry) - Retail'], [11,'Beans (fava, dry) - Retail'], [11, 'Beans (red) - Retail']]
 
         # Create the pandas DataFrame
         measure_df = pd.DataFrame(measure_id_data, columns=['measureID', 'item'])
@@ -276,9 +278,9 @@ class PricesTable:
         SSudan_numbeo = SSudan_numbeo[SSudan_numbeo['measureID'] == 10]
         prices = prices.append(SSudan_numbeo)
 
-        #Somalia needs eggs (10), beef (8) & rice (7) from Numbeo
+        #Somalia needs eggs (10) & beef (8) from Numbeo
         Somalia_numbeo = numbeo_prices[numbeo_prices['locationID'] == 'SOM']
-        Somalia_numbeo = Somalia_numbeo[Somalia_numbeo['measureID'].isin([10, 8, 7])]
+        Somalia_numbeo = Somalia_numbeo[Somalia_numbeo['measureID'].isin([10, 8])]
         prices = prices.append(Somalia_numbeo)
 
         #Kenya needs eggs (10), beef (8), rice (7) & milk (9) from Numbeo
@@ -311,12 +313,12 @@ class PricesTable:
         maize_g['measureID'] = 6
         maize_g = maize_g.rename(columns={'price_maize_g': 'value'})
         maize_g['commodity_name'] = 'price_maize_g'
-
+        '''
         maize_f = reach.copy()[['District', 'Regions', 'price_maize_f', 'dateID']]
         maize_f['measureID'] = 6
         maize_f = maize_f.rename(columns={'price_maize_f': 'value'})
         maize_f['commodity_name'] = 'price_maize_f'
-
+        '''
         beans = reach.copy()[['District', 'Regions', 'price_beans', 'dateID']]
         beans['measureID'] = 11
         beans = beans.rename(columns={'price_beans': 'value'})
@@ -327,7 +329,7 @@ class PricesTable:
         milk = milk.rename(columns={'price_milk': 'value'})
         milk['commodity_name'] = 'price_milk'
 
-        reach_df = pd.concat([maize_g, maize_f, beans, milk])
+        reach_df = pd.concat([maize_g, beans, milk])
 
         # Merge with rates
         reach_df['currency'] = 'UGX'
@@ -354,6 +356,10 @@ class PricesTable:
         #Uganda needs milk (9) & maize (6) from REACH
         reach_filtered = reach[reach['measureID'].isin([9, 6])]
         prices_new = prices.append(reach_filtered)
+
+        # Homogenise factID
+        prices_new = prices_new.reset_index(drop=True)
+        prices['factID'] = 'PRICE_' + prices.index.astype(str)
 
         return prices_new
 
@@ -389,7 +395,7 @@ class PricesTable:
 
         :return: The price table in a parquet format with the date added in the name.
         '''
-        prices_df = self.add_missing_locIDs()
+        prices_df = self.cross_price_w_REACH()
         self.flats.export_to_parquet(prices_df, filename)
         #self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
