@@ -396,7 +396,7 @@ class PricesTable:
 
         :return: The price table in a parquet format with the date added in the name.
         '''
-        prices_df = self.cross_price_w_REACH()
+        prices_df = self.add_missing_locIDs()
         self.flats.export_to_parquet(prices_df, filename)
         #self.flats.export_csv_w_date(prices_df, filename) #only for testing purposes
 
