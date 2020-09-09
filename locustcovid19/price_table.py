@@ -240,6 +240,7 @@ class PricesTable:
 
         # Rename value (price units) & commodities columns
         price_table = price_table.rename(columns={'mp_price': 'value', 'cm_name': 'commodity_name'})
+        price_table['commodity_name'] = price_table['commodity_name'] + ', WFP'
 
         # Filter only needed columns to export
         price_table_filtered = price_table[['factID', 'measureID', 'dateID', 'locationID', 'value', 'commodity_name']]
@@ -298,6 +299,8 @@ class PricesTable:
         prices = prices.reset_index(drop=True)
         prices['factID'] = 'PRICE_' + prices.index.astype(str)
 
+        prices['commodity_name'] = prices['commodity_name'] + ', Numbeo'
+
         return prices
 
     def load_REACH_data(self):
@@ -313,22 +316,23 @@ class PricesTable:
         maize_g = reach.copy()[['District', 'Regions', 'price_maize_g', 'dateID']]
         maize_g['measureID'] = 6
         maize_g = maize_g.rename(columns={'price_maize_g': 'value'})
-        maize_g['commodity_name'] = 'price_maize_g'
-        '''
+        maize_g['commodity_name'] = 'price_maize_g, REACH'
+
+        ''' # maize flour excluded
         maize_f = reach.copy()[['District', 'Regions', 'price_maize_f', 'dateID']]
         maize_f['measureID'] = 6
         maize_f = maize_f.rename(columns={'price_maize_f': 'value'})
-        maize_f['commodity_name'] = 'price_maize_f'
+        maize_f['commodity_name'] = 'price_maize_f, REACH'
         '''
         beans = reach.copy()[['District', 'Regions', 'price_beans', 'dateID']]
         beans['measureID'] = 11
         beans = beans.rename(columns={'price_beans': 'value'})
-        beans['commodity_name'] = 'price_beans'
+        beans['commodity_name'] = 'price_beans, REACH'
 
         milk = reach.copy()[['District', 'Regions', 'price_milk', 'dateID']]
         milk['measureID'] = 9
         milk = milk.rename(columns={'price_milk': 'value'})
-        milk['commodity_name'] = 'price_milk'
+        milk['commodity_name'] = 'price_milk, REACH'
 
         reach_df = pd.concat([maize_g, beans, milk])
 
