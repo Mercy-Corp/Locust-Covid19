@@ -3,10 +3,11 @@
 The aim of this module is to extract the price table.
 Prices data source WFP: https://data.humdata.org/dataset/wfp-food-prices
 Prices data source Numbeo: https://www.numbeo.com/food-prices/
+Prices data source REACH: https://www.reach-initiative.org/where-we-work/
 To check markets: https://dataviz.vam.wfp.org/economic_explorer/prices?adm0=253
 
 Created on Thu Aug 06 17:14:40 2020
-Latest update Mon Sep 07 13:54:40 2020
+Latest update Mon Sep 09 12:03:40 2020
 
 @author: ioanna.papachristou@accenture.com
 """
