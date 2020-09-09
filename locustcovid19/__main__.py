@@ -151,7 +151,7 @@ if __name__ == '__main__':
         print("------- Extracting locust risk table ---------")
         RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('locust')
 
-    elif module == 'locust_risk':
+    elif module == 'RVF':
 
         print("------- Extracting RVF risk table ---------")
         RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('RVF')
