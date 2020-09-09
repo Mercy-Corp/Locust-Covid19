@@ -155,7 +155,6 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    module = cfg['module']
     print('INPUT_PATH: ' + INPUT_PATH)
     print('OUTPUT_PATH: ' + OUTPUT_PATH)
     print("------- Extracting famine vulnerability table ---------")
