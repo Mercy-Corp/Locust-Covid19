@@ -10,6 +10,7 @@ Last updated Wed Aug 26 17:16:40 2020
 """
 
 # Imports
+import os
 import pandas as pd
 import geopandas as gpd
 from utils.flat_files import FlatFiles
@@ -38,11 +39,11 @@ class Forageland:
         self.flats = FlatFiles(path_in, path_out)
         '''
         # Import forageland vector
-        self.forageland_v = gpd.read_file(self.path_in + "forageland/forageland_vector.shp")
+        self.forageland_v = gpd.read_file(self.path_in + "/forageland/forageland_vector.shp")
         self.forageland_v.crs = {"init": "epsg:4326"}
         '''
         # Forageland 2003 raster path
-        self.raster_path = self.path_in + 'forageland/forageland2003.tif'
+        self.raster_path = self.path_in + '/forageland/forageland2003.tif'
 
     def read_boundaries_shp(self, country, hierarchy):
         '''
@@ -51,7 +52,7 @@ class Forageland:
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
         '''
-        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        gdf_country = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
         GID_column = 'GID_' + str(hierarchy)
         gdf_country = gdf_country[[GID_column, 'geometry']]
         gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
@@ -77,11 +78,11 @@ class Forageland:
         :return: A df with two columns, district id and cropland area.
         '''
         gdf_districts = self.get_districts()
-        gdf_districts['area'] = gdf_districts.geometry.area
-        stats = zonal_stats(gdf_districts.geometry, self.raster_path,  layer="polygons", stats="count", categorical=True)
-        gdf_districts['forageland_count'] = pd.DataFrame.from_dict(stats)[1]
-        gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"]
-        gdf_districts = gdf_districts[gdf_districts['forageland_count'].notnull()]
+        gdf_districts['area'] = gdf_districts.geometry.area # Calculate area of each district.
+        stats = zonal_stats(gdf_districts.geometry, self.raster_path,  layer="polygons", stats="count", categorical=True) # Cross districts with foragelands
+        gdf_districts['forageland_count'] = pd.DataFrame.from_dict(stats)[1] # Count areas of values == 1, foragelands, per district
+        gdf_districts['area_count'] = pd.DataFrame.from_dict(stats)["count"] # Total number of pixels per district
+        gdf_districts = gdf_districts[gdf_districts['forageland_count'].notnull()] # drop nulls
         gdf_districts['forageland_area'] = gdf_districts['forageland_count'] * gdf_districts['area'] / gdf_districts[
             'area_count']
         #Filter columns
@@ -134,8 +135,8 @@ class Forageland:
         :return: The Forageland table in both a parquet and csv format with the date added in the name.
         '''
         forageland_df = self.add_fact_ids()
-        self.flats.export_parquet_w_date(forageland_df, filename)
-        #self.flats.export_output_w_date(forageland_df, filename)
+        self.flats.export_to_parquet(forageland_df, filename)
+        #self.flats.export_csv_w_date(forageland_df, filename)
         
 if __name__ == '__main__':
 
@@ -143,10 +144,11 @@ if __name__ == '__main__':
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    INPUT_PATH = cfg["data"]['landing']
-    OUTPUT_PATH = cfg["data"]['reporting']
-    print(INPUT_PATH)
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting forageland area per district table ---------")
-    Forageland().export_table('forageland_fact/forageland')
-    #Forageland().export_table('forageland')
+    Forageland(INPUT_PATH, OUTPUT_PATH).export_table('/forageland_fact/forageland')
+    #Forageland(INPUT_PATH, OUTPUT_PATH).export_table('forageland')

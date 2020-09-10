@@ -27,6 +27,7 @@ from refugees_table import RefugeesTable
 from conflicts_table import ConflictsTable
 from violence_table import ViolenceTable
 from famine_table import FamineTable
+from risk_indicators import RiskTables
 import os
 import yaml
 
@@ -95,50 +96,45 @@ if __name__ == '__main__':
        print("------- Extracting prices table ---------")
        #prices = PricesTable().filter_prices()
        #prices = PricesTable().location_id_to_markets()
-       PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
+       PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('/price_fact/price_table')
 
     elif module == 'cropland':
 
        # 7. Calculation of cropland
        print("------- Extracting cropland area per district table ---------")
-       Cropland(INPUT_PATH, OUTPUT_PATH).export_table("cropland_fact/Cropland")
+       Cropland(INPUT_PATH, OUTPUT_PATH).export_table("/cropland_fact/cropland")
 
     elif module == 'forageland':
 
        # 8. Calculation of forageland
        print("------- Extracting forageland area per district table ---------")
-       Forageland(INPUT_PATH, OUTPUT_PATH).export_table("forageland_fact/Forageland")
+       Forageland(INPUT_PATH, OUTPUT_PATH).export_table("/forageland_fact/forageland")
 
     elif module == 'foragelandlocust':
 
        # 9. Calculation of forageland affected by locust
        print("------- Extracting forageland area affected by locust per district table ---------")
-       ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('forageland_locust_fact/Forage_impact_locust_district')
+       ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('/forageland_locust_fact/forage_impact_locust_district')
 
     elif module == 'croplandlocust':
 
        # 10 Calculation of cropland affected by locust
        print("------- Extracting cropland area affected by locust per district table ---------")
-       CroplandLocust(INPUT_PATH, OUTPUT_PATH).export_table('cropland_locust_fact/Crops_impact_locust_district')
-
-    elif module == 'prices':
-
-        print("------- Extracting prices table ---------")
-        PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('price_fact/price_table')
+       CroplandLocust(INPUT_PATH, OUTPUT_PATH).export_table('/cropland_locust_fact/crops_impact_locust_district')
 
     elif module == 'displacements':
-        print("------- Extracting displacements table ---------")
-        DisplacementTable().export_files(INPUT_PATH, OUTPUT_PATH)
+       print("------- Extracting displacements table ---------")
+       DisplacementTable().export_files(INPUT_PATH, OUTPUT_PATH)
 
     elif module == 'refugees':
 
-        print("------- Extracting refugees table ---------")
-        RefugeesTable(INPUT_PATH, OUTPUT_PATH).export_files()
+       print("------- Extracting refugees table ---------")
+       RefugeesTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     elif module == 'conflicts':
 
-        print("------- Extracting conflict events table ---------")
-        ConflictsTable(INPUT_PATH, OUTPUT_PATH).export_files()
+       print("------- Extracting conflict events table ---------")
+       ConflictsTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     elif module == 'violence':
 
@@ -147,8 +143,18 @@ if __name__ == '__main__':
 
     elif module == 'famine':
 
-        print("------- Extracting famine vulnerability table ---------")
-        FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
+       print("------- Extracting famine vulnerability table ---------")
+       FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
+
+    elif module == 'locust_risk':
+
+        print("------- Extracting locust risk table ---------")
+        RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('locust')
+
+    elif module == 'RVF':
+
+        print("------- Extracting RVF risk table ---------")
+        RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('RVF')
 
     else:
 
