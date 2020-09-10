@@ -31,7 +31,7 @@ class FlatFiles:
         :return: The initial dataframe adding the dateID column
         '''
         # Merge with dates and add dateID
-        self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
+        self.dates = pd.read_csv(self.path_out + '/Date_Dim/Date_Dim.csv', sep=",")
         self.dates['date'] = pd.to_datetime(self.dates['date'])
         df[column] = pd.to_datetime([f'{y}-01-01' for y in df[column]])
         df = df.merge(self.dates, left_on=column, right_on='date', how='left')

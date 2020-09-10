@@ -30,8 +30,8 @@ class ForagelandLocust:
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        self.dates = pd.read_csv(self.path_out + 'Date_Dim/Date_Dim.csv', sep=",")
-        self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%d-%m-%Y')
+        self.dates = pd.read_csv(self.path_out + '/Date_Dim/Date_Dim.csv', sep=",")
+        self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%m/%d/%Y')
         self.flats = FlatFiles(path_in, path_out)
 
         # # Import forageland vector
@@ -39,10 +39,10 @@ class ForagelandLocust:
         # self.forageland_v.crs = {"init": "epsg:4326"}
 
         # Forageland 2003 raster path
-        self.raster_path = self.path_in + 'forageland/forageland2003.tif'
+        self.raster_path = self.path_in + '/forageland/forageland2003.tif'
 
         # Import locust gdf
-        self.locust_gdf = gpd.read_file(self.path_in + "swarm/Swarm_Master.shp")
+        self.locust_gdf = gpd.read_file(self.path_in + "/swarm/Swarm_Master.shp")
         #print(self.locust_gdf.COUNTRYID.unique()) # to select new countries
 
     def read_boundaries_shp(self, country, hierarchy):
@@ -52,7 +52,7 @@ class ForagelandLocust:
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
         '''
-        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        gdf_country = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
         GID_column = 'GID_' + str(hierarchy)
         gdf_country = gdf_country[[GID_column, 'geometry']]
         gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
@@ -188,7 +188,7 @@ class ForagelandLocust:
         return locust_district
 
     def load_forageland_area(self):
-        forageland_area = pd.read_parquet(self.path_out + 'forageland.parquet', engine='pyarrow')[['locationID', 'value']]
+        forageland_area = pd.read_parquet(self.path_out + '/forageland_fact/forageland.parquet', engine='pyarrow')[['locationID', 'value']]
         #forageland_area = pd.read_parquet(self.path_out + 'forageland_fact/forageland.parquet', engine='pyarrow')[['locationID', 'value']]
         forageland_area = forageland_area.rename(columns={'value': 'forageland_area'})
         return forageland_area
@@ -251,11 +251,11 @@ if __name__ == '__main__':
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    INPUT_PATH = cfg["data"]['landing']
-    OUTPUT_PATH = cfg["data"]['reporting']
-    print(INPUT_PATH)
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting forageland area affected by locust per district table ---------")
-    ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('forageland_locust_fact/forage_impact_locust_district')
+    ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('/forageland_locust_fact/forage_impact_locust_district')
     #ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('forage_impact_locust_district')
-
