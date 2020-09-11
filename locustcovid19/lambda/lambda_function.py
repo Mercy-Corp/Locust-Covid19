@@ -10,6 +10,11 @@ def lambda_handler(event, context):
     ec2 = boto3.resource('ec2')
 
     EC2_NAME = os.environ['EC2_NAME']
+    BUCKET = os.environ['BUCKET']
+    BUCKET_KEY = os.environ['BUCKET_KEY']
+    KEY = os.environ['KEY']
+    keypaths3 = 'keys/' + KEY + '.pem'
+    keypath = '/tmp/' + KEY + '.pem'
 
     # Get information for all running instances
     running_instances = ec2.instances.filter(Filters=[{
@@ -21,17 +26,11 @@ def lambda_handler(event, context):
           if 'Name'in tag['Key'] and tag['Value'] == EC2_NAME:
            host = instance.public_ip_address
 
-    # BUCKET_KEY = 'mercy-locust-covid19-key' 
-    # BUCKET = 'mercy-locust-covid19-deploy-ec2'
-    KEY = 'keys/mercy3.pem' 
-    BUCKET = os.environ['BUCKET']
-    BUCKET_KEY = os.environ['BUCKET_KEY']
-
     s3 = boto3.resource('s3')
 
-    s3.Bucket(BUCKET_KEY).download_file(KEY, '/tmp/mercy3.pem')
+    s3.Bucket(BUCKET_KEY).download_file(keypaths3, keypath)
 
-    k = paramiko.RSAKey.from_private_key_file('/tmp/mercy3.pem')
+    k = paramiko.RSAKey.from_private_key_file(keypath)
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 

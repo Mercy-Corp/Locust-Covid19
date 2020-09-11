@@ -37,7 +37,7 @@ class Shapefiles:
         :param hierarchy: 0 for the country level, 1-3 for the rest of regional levels
         :return: A shapefile
         '''
-        shp = gpd.read_file(self.path_in + "Spatial/gadm36" + str(country) + str(self.hierarchy) + ".shp")
+        shp = gpd.read_file(self.path_in + "/Spatial/gadm36" + str(country) + str(self.hierarchy) + ".shp")
         return shp
 
     def shapefiles_list(self):

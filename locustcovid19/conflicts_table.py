@@ -8,7 +8,8 @@ Created on Thu Jun 24 13:36:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-# Imports
+import os
+import yaml
 import pandas as pd
 from utils.flat_files import FlatFiles
 import numpy as np
@@ -29,7 +30,7 @@ class ConflictsTable:
         self.flats = FlatFiles(self.path_in, self.path_out)
 
     def load_conflicts(self):
-        conflicts_df = pd.read_csv(self.path_in + "social_cohesion/conflicts/ged201.csv", sep=",", encoding='utf-8')
+        conflicts_df = pd.read_csv(self.path_in + "/social_cohesion/conflicts/ged201.csv", sep=",", encoding='utf-8')
         conflicts_df['geometry'] = conflicts_df['geom_wkt'].apply(wkt.loads)
         conflicts_gdf = gpd.GeoDataFrame(conflicts_df, crs='epsg:4326')
         return conflicts_gdf
@@ -54,7 +55,7 @@ class ConflictsTable:
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
         '''
-        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        gdf_country = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
         GID_column = 'GID_' + str(hierarchy)
         gdf_country = gdf_country[[GID_column, 'geometry']]
         gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
@@ -108,7 +109,7 @@ class ConflictsTable:
         conflicts_df = self.add_ids()
         #self.flats.export_csv_w_date(conflicts_df, 'conflict_table')
         #self.flats.export_parquet_w_date(conflicts_df, 'conflict_table')
-        self.flats.export_to_parquet(displacement_df, 'conflict_fact/conflict_table')
+        self.flats.export_to_parquet(conflicts_df, '/conflict_fact/conflict_table')
 
 
 if __name__ == '__main__':

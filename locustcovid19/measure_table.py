@@ -16,7 +16,7 @@ class MeasuresTable:
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        self.measures_df = pd.read_csv(path_in + 'Measures_csv.csv', sep=";")
+        self.measures_df = pd.read_csv(path_in + 'measures_csv.csv', sep=";")
 
 
 if __name__ == '__main__':
@@ -29,4 +29,3 @@ if __name__ == '__main__':
 
     # Export
     FlatFiles().export_to_parquet(measures_df, "measures")
-    FlatFiles().export_to_csv(measures_df, "measures")

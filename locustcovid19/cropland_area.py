@@ -7,10 +7,11 @@ Created on Mon Jul 13 11:16:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-# Imports
+import os
 import pandas as pd
 import geopandas as gpd
 from utils.flat_files import FlatFiles
+from utils.s3_glob import s3_glob
 from rasterstats import zonal_stats
 import glob
 import boto3
@@ -32,12 +33,12 @@ class Cropland:
         self.flats = FlatFiles(self.path_in, self.path_out)
 
         # Import districts
-        self.shp2_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Sudan = gpd.read_file(self.path_in + "Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
-        self.shp2_SSudan = gpd.read_file(self.path_in + "Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Kenya = gpd.read_file(self.path_in + "/Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Somalia = gpd.read_file(self.path_in + "/Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Ethiopia = gpd.read_file(self.path_in + "/Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Uganda = gpd.read_file(self.path_in + "/Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Sudan = gpd.read_file(self.path_in + "/Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_SSudan = gpd.read_file(self.path_in + "/Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
 
         # Import cropland vector
         #self.crops = gpd.read_file(self.path_in + "crops/Crops_vectorized.shp")
@@ -60,8 +61,8 @@ class Cropland:
         :param raster: The geotiff indicating the cropland area
         :return: A df with two columns, district id and cropland area.
         '''
-        print("Processing raster "+ raster)
-        raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
+        print("Processing raster " + raster)
+        raster_path = self.path_in + "/cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
         gdf_districts = self.get_districts()
 
         stats = zonal_stats(gdf_districts.geometry, raster_path,  layer="polygons", stats="count", categorical=True)
@@ -113,55 +114,14 @@ class Cropland:
         :return: A concatenated df of all zonal statistics.
         '''
 
-        path_in = 's3://mercy-locust-covid19-landing-test'
+        path_in = self.path_in
 
-        resp = client.list_objects_v2(Bucket=path_in[5:], Prefix='cropland')
-#        resp = client.list_objects_v2(Bucket='mercy-locust-covid19-landing')
-        keys = []
-        all_files = []
-        for obj in resp['Contents']:
-            keys.append(obj['Key'])
-        for i in keys:
-            if 'cropland/crops_' in i:
-              s = path_in + '/' + str(i)
-              all_files.append(s)
-
-
+        all_files = s3_glob(path_in, 'cropland', 'cropland/crops_')
         print(all_files)
+
         df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
         concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
         return concatenated_df
-
-
-    # def filter_crops(self):
-    #     '''
-    #
-    #     :return: The crops vector filtered by the crops id.
-    #     '''
-    #
-    #     crops = self.crops
-    #     crops = crops[crops['Crops'] == 1]
-    #     crops.Crops = 12
-    #     return crops
-
-    # def crops_district(self):
-    #     '''
-    #
-    #     :return: A geodataframe with the crops intersected by district.
-    #     '''
-    #     crops = gpd.GeoDataFrame(self.filter_crops())
-    #     gdf_districts = self.get_districts()
-    #     crops_district = gpd.overlay(crops, gdf_districts, how='intersection')
-    #     return crops_district
-    #
-    # def crops_area(self):
-    #     '''
-    #
-    #     :return: A geodataframe with the area of crops per district calculated.
-    #     '''
-    #     crops_district = gpd.GeoDataFrame(self.crops_district())
-    #     crops_district['area_inter'] = crops_district.geometry.area
-    #     return crops_district
 
     def add_fact_ids(self):
         '''
@@ -205,9 +165,9 @@ if __name__ == '__main__':
 
     print("------- Extracting cropland area per district table ---------")
     #Call the class
-    cropland_area = Cropland()
+    cropland_area = Cropland(INPUT_PATH, OUTPUT_PATH)
     #Extract all zonal statistics per raster
     cropland_area.extract_crops()
     #Load zonal statistics and prepare & export the cropland fact table
     #cropland_area.export_table("Cropland") #local export
-    cropland_area.export_table('cropland_fact/Cropland') #export to S3
+    cropland_area.export_table('/cropland_fact/cropland') #export to S3
