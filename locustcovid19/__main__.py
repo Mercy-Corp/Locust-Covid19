@@ -102,25 +102,25 @@ if __name__ == '__main__':
 
        # 7. Calculation of cropland
        print("------- Extracting cropland area per district table ---------")
-       Cropland(INPUT_PATH, OUTPUT_PATH).export_table("cropland_fact/Cropland")
+       Cropland(INPUT_PATH, OUTPUT_PATH).export_table("/cropland_fact/cropland")
 
     elif module == 'forageland':
 
        # 8. Calculation of forageland
        print("------- Extracting forageland area per district table ---------")
-       Forageland(INPUT_PATH, OUTPUT_PATH).export_table("forageland_fact/Forageland")
+       Forageland(INPUT_PATH, OUTPUT_PATH).export_table("/forageland_fact/forageland")
 
     elif module == 'foragelandlocust':
 
        # 9. Calculation of forageland affected by locust
        print("------- Extracting forageland area affected by locust per district table ---------")
-       ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('forageland_locust_fact/Forage_impact_locust_district')
+       ForagelandLocust(INPUT_PATH, OUTPUT_PATH).export_table('/forageland_locust_fact/forage_impact_locust_district')
 
     elif module == 'croplandlocust':
 
        # 10 Calculation of cropland affected by locust
        print("------- Extracting cropland area affected by locust per district table ---------")
-       CroplandLocust(INPUT_PATH, OUTPUT_PATH).export_table('cropland_locust_fact/Crops_impact_locust_district')
+       CroplandLocust(INPUT_PATH, OUTPUT_PATH).export_table('/cropland_locust_fact/crops_impact_locust_district')
 
     elif module == 'displacements':
        print("------- Extracting displacements table ---------")
