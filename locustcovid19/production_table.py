@@ -8,7 +8,7 @@ Created on Thu Jun 30 15:36:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-# Imports
+import os
 import pandas as pd
 from utils.flat_files import FlatFiles
 import numpy as np
@@ -35,8 +35,8 @@ class ProductionTable:
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        self.production_df = pd.read_csv(self.path_in + "FAOSTAT_data.csv", sep=",", encoding='utf-8')
-        self.locations = pd.read_parquet(self.path_out + "location_dim/location_table.parquet", engine='pyarrow')
+        self.production_df = pd.read_csv(self.path_in + "/production/FAOSTAT_data.csv", sep=",", encoding='utf-8')
+        self.locations = pd.read_parquet(self.path_out + "/location_dim/location_table.parquet", engine='pyarrow')
 #        self.locations = pd.read_csv(self.path_out + "location_dim/location_table.csv", sep = "|", encoding='utf-8')[['locationID', 'name']]
         self.flats = FlatFiles(self.path_in, self.path_out)
 
@@ -89,7 +89,7 @@ class ProductionTable:
         '''
         production_df = self.add_ids_to_table()
         #self.flats.export_csv_w_date(production_df, 'production_table')
-        self.flats.export_parquet_w_date(production_df, 'production_fact/production_table')
+        self.flats.export_to_parquet(production_df, '/production_fact/production_table')
 
 if __name__ == '__main__':
 
@@ -97,19 +97,14 @@ if __name__ == '__main__':
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    INPUT_PATH = cfg["data"]['landing']
-    OUTPUT_PATH = cfg["data"]['reporting']
-    print(INPUT_PATH)
-
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting production table ---------")
 
     prod_table = ProductionTable(INPUT_PATH, OUTPUT_PATH)
 
-    # Create dataframe
-    #production_df = prod_table.add_ids_to_table()
-
     # Export
     prod_table.export_files()
-
-

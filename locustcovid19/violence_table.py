@@ -8,6 +8,7 @@ Created on Thu Sep 02 12:21:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
+import os
 import pandas as pd
 import geopandas as gpd
 from utils.flat_files import FlatFiles
@@ -26,7 +27,7 @@ class ViolenceTable:
         self.path_in = path_in
         self.path_out = path_out
         self.flats = FlatFiles(self.path_in, self.path_out)
-        self.violence = pd.read_csv(self.path_in + "social_cohesion/violence/violence.csv", sep=",",
+        self.violence = pd.read_csv(self.path_in + '/social_cohesion/violence/violence.csv', sep=',',
                                     encoding='utf-8')[['event_date', 'latitude', 'longitude', 'fatalities', 'timestamp']]
 
     def coord_to_geometry(self):
@@ -50,7 +51,7 @@ class ViolenceTable:
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
         '''
-        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        gdf_country = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
         GID_column = 'GID_' + str(hierarchy)
         gdf_country = gdf_country[[GID_column, 'geometry']]
         gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
@@ -75,7 +76,7 @@ class ViolenceTable:
 
         # Add dateID
         violence['date'] = pd.to_datetime(violence['event_date'])
-        violence["date"] = [d.date() for d in violence["date"]]
+        violence['date'] = [d.date() for d in violence['date']]
         violence['dateID'] = violence['date'].apply(lambda x: datetime.strftime(x, '%Y%m%d'))
         violence['dateID'] = violence['dateID'].astype(int)
 
@@ -104,11 +105,9 @@ class ViolenceTable:
         violence_df = self.add_ids()
         #self.export_csv_w_date(violence_df, 'violence_table')
         #self.export_parquet_w_date(violence_df, 'violence_table')
-        self.flats.export_parquet_w_date(violence_df, 'violence_fact/violence_table')
+        self.flats.export_to_parquet(violence_df, '/violence_fact/violence_table')
 
 if __name__ == '__main__':
-
-    print("------- Extracting violence against civilians table ---------")
 
     filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
     with open(filepath, "r") as ymlfile:
@@ -116,8 +115,10 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    module = cfg['module']
-    print(INPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
+    
+    print("------- Extracting violence against civilians table ---------")
 
     violence = ViolenceTable(INPUT_PATH, OUTPUT_PATH)
 
@@ -128,4 +129,4 @@ if __name__ == '__main__':
     #print(violence_df.head())
 
     # Export
-    violence.export_files(INPUT_PATH, OUTPUT_PATH)
+    violence.export_files()

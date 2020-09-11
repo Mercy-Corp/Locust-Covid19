@@ -8,17 +8,11 @@ Created on Thu Jun 19 11:04:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
+import os
 import yaml
 import pandas as pd
 import geopandas as gpd
 from utils.shapefiles import Shapefiles
-
-#with open("config/application.yaml", "r") as ymlfile:
-#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-#INPUT_PATH = cfg["data"]['landing']
-#OUTPUT_PATH = cfg["data"]['reporting']
-#print(INPUT_PATH)
 
 class ShapefileTable:
     '''
@@ -55,7 +49,7 @@ class ShapefileTable:
         :param file_name: the name of the file to be exported
         '''
         gdf = self.concat_sub_tables()
-        gdf.to_file(self.path_out+'shape_boundary/'+file_name+".shp", driver='ESRI Shapefile')
+        gdf.to_file(self.path_out + '/shape_boundary/' + file_name + ".shp", driver='ESRI Shapefile')
         print("Shapefile table extracted")
 
 
