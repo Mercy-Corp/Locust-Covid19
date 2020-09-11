@@ -189,7 +189,7 @@ class Cropland:
         :return: The Cropland table in a parquet format with the date added in the name.
         '''
         crops_df = self.add_fact_ids()
-        self.flats.export_parquet_w_date(crops_df, filename)
+        self.flats.export_to_parquet(crops_df, filename)
         #self.flats.export_csv_w_date(crops_df, filename) #only for testing purposes
         
 if __name__ == '__main__':
@@ -200,7 +200,8 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    print(INPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting cropland area per district table ---------")
     #Call the class

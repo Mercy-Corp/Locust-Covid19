@@ -81,7 +81,7 @@ class DisplacementTable:
         displacement_df = self.add_ids_to_table()
         #self.flats.export_csv_w_date(displacement_df, 'displacement_table')
         #self.flats.export_parquet_w_date(displacement_df, 'displacement_table')
-        self.flats.export_parquet_w_date(displacement_df, 'displacement_fact/displacement_table')
+        self.flats.export_to_parquet(displacement_df, 'displacement_fact/displacement_table')
 
 if __name__ == '__main__':
 
@@ -91,8 +91,8 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    print(INPUT_PATH)
-    print(OUTPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting displacements table ---------")
 

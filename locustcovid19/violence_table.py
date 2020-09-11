@@ -104,11 +104,9 @@ class ViolenceTable:
         violence_df = self.add_ids()
         #self.export_csv_w_date(violence_df, 'violence_table')
         #self.export_parquet_w_date(violence_df, 'violence_table')
-        self.flats.export_parquet_w_date(violence_df, 'violence_fact/violence_table')
+        self.flats.export_to_parquet(violence_df, 'violence_fact/violence_table')
 
 if __name__ == '__main__':
-
-    print("------- Extracting violence against civilians table ---------")
 
     filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
     with open(filepath, "r") as ymlfile:
@@ -116,8 +114,10 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    module = cfg['module']
-    print(INPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
+    
+    print("------- Extracting violence against civilians table ---------")
 
     violence = ViolenceTable(INPUT_PATH, OUTPUT_PATH)
 

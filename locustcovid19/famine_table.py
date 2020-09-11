@@ -157,6 +157,7 @@ if __name__ == '__main__':
     OUTPUT_PATH = cfg['data']['reporting']
     print('INPUT_PATH: ' + INPUT_PATH)
     print('OUTPUT_PATH: ' + OUTPUT_PATH)
+
     print("------- Extracting famine vulnerability table ---------")
 
     famine = FamineTable(INPUT_PATH, OUTPUT_PATH)
