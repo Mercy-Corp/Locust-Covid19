@@ -74,12 +74,32 @@ class VegetationTable:
 
         return df_districts
 
+    def add_fact_ids(self):
+        '''
+        Adds the fact tables ids
+        :return:  A filtered dataframe by the columns we need for fact tables.
+        '''
+        vegetation_district = self.get_stats()
+        vegetation_district['measureID'] = 45
+        vegetation_district['factID'] = 'VEG_' + vegetation_district.index.astype(str)
+        vegetation_district['year'] = 2020
+        # vegetation_district['date'] = pd.to_datetime([f'{y}-01-01' for y in vegetation_district.year])
+        vegetation_district['value'] = vegetation_district['avg_ndvi']
+
+        # Add dateID
+        vegetation_district = self.flats.add_date_id(vegetation_district, column='year')
+
+        # Select fact table columns
+        vegetation_df = self.flats.select_columns_fact_table(df=vegetation_district)
+
+        return vegetation_df
+
     def export_table(self, filename):
         '''
 
         :return: The Forageland table in both a parquet and csv format with the date added in the name.
         '''
-        forageland_df = self.get_stats()
+        forageland_df = self.add_fact_ids()
         #self.flats.export_to_parquet(forageland_df, filename)
         self.flats.export_csv_w_date(forageland_df, filename)
 
