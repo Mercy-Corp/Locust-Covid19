@@ -8,22 +8,11 @@ Created on Thu Jun 18 09:16:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
+import os
 import yaml
 import pandas as pd
 import geopandas as gpd
 from utils.shapefiles import Shapefiles
-
-# S3 paths
-
-#with open("config/application.yaml", "r") as ymlfile:
-#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-#INPUT_PATH = cfg["data"]['landing']
-#OUTPUT_PATH = cfg["data"]['reporting']
-#print(INPUT_PATH)
-
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
 
 class LocationTable:
     '''
@@ -57,7 +46,7 @@ class LocationTable:
         :param file_name: the name of the file to be exported
         '''
         df = self.concat_sub_tables()
-        df.to_parquet(self.path_out + 'location_dim/' + file_name + '.parquet', index=False)
+        df.to_parquet(self.path_out + '/location_dim/' + file_name + '.parquet', index=False)
         print("Location table extracted to parquet format.")
 
     def export_to_csv(self, file_name):
@@ -67,8 +56,6 @@ class LocationTable:
         :return:
         '''
         df = self.concat_sub_tables()
-#        df.to_csv(self.path_out+'location_dim/'+file_name+'.csv', sep='|', encoding='utf-8', index=False)
-#        print("Location table extracted to csv format.")
 
 if __name__ == '__main__':
 
@@ -83,7 +70,7 @@ if __name__ == '__main__':
 
     print("------- Extracting location table ---------")
 
-    loc_table = LocationTable()
+    loc_table = LocationTable(INPUT_PATH, OUTPUT_PATH)
     # Create geodataframe
     gdf_all = loc_table.concat_sub_tables()
     # Export table to csv

@@ -9,6 +9,7 @@ Last modified on Thu Aug 27 13:04:01 2020
 @author: linnea.evanson@accenture.com, ioanna.papachristou@accenture.com
 """
 
+import os
 import yaml
 import pandas as pd
 import numpy as np
@@ -57,7 +58,7 @@ class DemandTable:
         :param cmdt: The commodity to load.
         :return: The raster with the population density for the reference country.
         '''
-        raster_cmdt = self.path_in + "demand/" + cmdt + "_cons00.tif"
+        raster_cmdt = self.path_in + "/demand/" + cmdt + "_cons00.tif"
 
         return raster_cmdt
 
@@ -68,7 +69,7 @@ class DemandTable:
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
         '''
-        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
+        gdf_country = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country + "_" + str(hierarchy) + ".shp")
         GID_column = 'GID_' + str(hierarchy)
         gdf_country = gdf_country[[GID_column, 'geometry']]
         gdf_country = gdf_country.rename(columns={GID_column: 'locationID'})
@@ -321,7 +322,7 @@ class DemandTable:
         demand_final.insert(0, 'factID', [str('DEF_' + str(i + 1)) for i in
                                           range(len(demand_final['value']))])  # insert at first columns
 
-        self.flats.export_to_parquet(demand_final, "demand_fact/demand_table")
+        self.flats.export_to_parquet(demand_final, "/demand_fact/demand_table")
         #self.flats.export_output_w_date(demand_final, "demand_table")
 
         return demand_final
@@ -329,9 +330,18 @@ class DemandTable:
 
 if __name__ == '__main__':
 
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
+
     print("------- Extracting demand table ---------")
 
-    dem_table = DemandTable()
+    dem_table = DemandTable(INPUT_PATH, OUTPUT_PATH)
 
     # Create dataframe
     demand_df = dem_table.create_demand_table()

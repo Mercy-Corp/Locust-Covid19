@@ -8,7 +8,8 @@ Created on Thu Jun 25 12:18:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-# Imports
+import os
+import yaml
 import pandas as pd
 from utils.flat_files import FlatFiles
 
@@ -22,7 +23,7 @@ class RefugeesTable:
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        self.refugees_df = pd.read_csv(self.path_in + "social_cohesion/refugees/population.csv", skiprows=14, sep=",", encoding='utf-8')
+        self.refugees_df = pd.read_csv(self.path_in + "/social_cohesion/refugees/population.csv", skiprows=14, sep=",", encoding='utf-8')
         self.flats = FlatFiles(self.path_in, self.path_out)
 
     def convert_to_numeric(self, df):
@@ -65,7 +66,7 @@ class RefugeesTable:
         refugees_df = self.add_ids()
         #self.flats.export_csv_w_date(refugees_df, 'refugees_table')
         #self.flats.export_parquet_w_date(refugees_df, 'refugees_table')
-        self.flats.export_to_parquet(refugees_df, 'refugees_fact/refugees_table')
+        self.flats.export_to_parquet(refugees_df, '/refugees_fact/refugees_table')
 
 if __name__ == '__main__':
 

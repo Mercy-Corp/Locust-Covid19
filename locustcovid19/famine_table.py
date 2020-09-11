@@ -50,7 +50,9 @@ class FamineTable:
                  s = path_in + '/' + str(i)
                  all_files.append(s)
 
-#        print('all_files loop')
+        print(all_files)
+
+#        all_files0 = [for f in all_files1]
 
         for file in all_files:
             # Split by "_"

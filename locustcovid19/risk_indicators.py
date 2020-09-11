@@ -24,8 +24,8 @@ class RiskTables:
         self.flats = FlatFiles(self.path_in, self.path_out)
         self.locations = pd.read_parquet(self.path_out + '/location_dim/location_table.parquet', engine='pyarrow')[
             ['locationID', 'name', 'hierarchy', 'GID_0']]
-        self.locust_risk = pd.read_csv(self.path_in + '/Locustincidencerisk.csv', sep = ';')
-        self.RVF_risk = pd.read_csv(self.path_in + '/RVFrisk.csv', sep = ';')
+        self.locust_risk = pd.read_csv(self.path_in + '/risk/Locustincidencerisk.csv', sep = ';')
+        self.RVF_risk = pd.read_csv(self.path_in + '/risk/RVFrisk.csv', sep = ';')
 
     def location_id_to_risk(self, indicator, country_id):
         # Load files
@@ -71,7 +71,7 @@ class RiskTables:
         '''
         risk_df = self.risk_table(indicator)
         #self.flats.export_csv_w_date(risk_df, indicator + '_risk_table')
-        self.flats.export_to_parquet(risk_df, '/'+ indicator + '_fact/' + indicator + '_risk_table')
+        self.flats.export_to_parquet(risk_df, '/'+ indicator.lower() + '_risk_fact/' + indicator.lower() + '_risk_table')
 
 if __name__ == '__main__':
 
