@@ -57,7 +57,7 @@ class LocationTable:
         :param file_name: the name of the file to be exported
         '''
         df = self.concat_sub_tables()
-        df.to_parquet(self.path_out+'location_dim/'+file_name+".parquet", index=False)
+        df.to_parquet(self.path_out + 'location_dim/' + file_name + '.parquet', index=False)
         print("Location table extracted to parquet format.")
 
     def export_to_csv(self, file_name):
@@ -76,9 +76,10 @@ if __name__ == '__main__':
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    INPUT_PATH = cfg["data"]['landing']
-    OUTPUT_PATH = cfg["data"]['reporting']
-    print(INPUT_PATH)
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting location table ---------")
 

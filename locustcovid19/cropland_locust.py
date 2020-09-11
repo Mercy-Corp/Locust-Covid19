@@ -304,7 +304,7 @@ class CroplandLocust:
         :return: The Cropland table in both a parquet and csv format with the date added in the name.
         '''
         crops_loc_df = self.add_fact_ids()
-        self.flats.export_parquet_w_date(crops_loc_df, filename)
+        self.flats.export_to_parquet(crops_loc_df, filename)
         #self.flats.export_csv_w_date(crops_loc_df, filename) #only for testing purposes
 
 if __name__ == '__main__':
@@ -314,10 +314,10 @@ if __name__ == '__main__':
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    INPUT_PATH = cfg["data"]['landing']
-    OUTPUT_PATH = cfg["data"]['reporting']
-    print(INPUT_PATH)
-
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting cropland area affected by locust per district table ---------")
     crop_loc = CroplandLocust(INPUT_PATH, OUTPUT_PATH)

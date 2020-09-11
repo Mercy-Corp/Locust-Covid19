@@ -321,13 +321,14 @@ class DemandTable:
         demand_final.insert(0, 'factID', [str('DEF_' + str(i + 1)) for i in
                                           range(len(demand_final['value']))])  # insert at first columns
 
-        self.flats.export_output_w_date(demand_final, "demand_fact/demand_table")
+        self.flats.export_to_parquet(demand_final, "demand_fact/demand_table")
         #self.flats.export_output_w_date(demand_final, "demand_table")
 
         return demand_final
 
 
 if __name__ == '__main__':
+
     print("------- Extracting demand table ---------")
 
     dem_table = DemandTable()

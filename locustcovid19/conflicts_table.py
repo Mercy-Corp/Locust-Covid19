@@ -108,7 +108,7 @@ class ConflictsTable:
         conflicts_df = self.add_ids()
         #self.flats.export_csv_w_date(conflicts_df, 'conflict_table')
         #self.flats.export_parquet_w_date(conflicts_df, 'conflict_table')
-        self.flats.export_parquet_w_date(displacement_df, 'conflict_fact/conflict_table')
+        self.flats.export_to_parquet(displacement_df, 'conflict_fact/conflict_table')
 
 
 if __name__ == '__main__':
@@ -119,8 +119,8 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    module = cfg['module']
-    print(INPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting conflict events table ---------")
 

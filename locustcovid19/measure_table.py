@@ -30,4 +30,3 @@ if __name__ == '__main__':
     # Export
     FlatFiles().export_to_parquet(measures_df, "measures")
     FlatFiles().export_to_csv(measures_df, "measures")
-

@@ -65,7 +65,7 @@ class RefugeesTable:
         refugees_df = self.add_ids()
         #self.flats.export_csv_w_date(refugees_df, 'refugees_table')
         #self.flats.export_parquet_w_date(refugees_df, 'refugees_table')
-        self.flats.export_parquet_w_date(refugees_df, 'refugees_fact/refugees_table')
+        self.flats.export_to_parquet(refugees_df, 'refugees_fact/refugees_table')
 
 if __name__ == '__main__':
 
@@ -75,8 +75,8 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    print(INPUT_PATH)
-    print(OUTPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting refugees table ---------")
 
