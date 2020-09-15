@@ -233,7 +233,7 @@ class CroplandLocust:
         :return: A concatenated df of all zonal statistics.
         '''
        
-        all_files = s3_glob(path_in, 'cropland', 'cropland/crops_locust_distr')
+        all_files = s3_glob(self.path_in, 'cropland', 'cropland/crops_locust_distr')
 
         print(all_files)
         
@@ -285,7 +285,4 @@ if __name__ == '__main__':
 
     print("------- Extracting cropland area affected by locust per district table ---------")
     crop_loc = CroplandLocust(INPUT_PATH, OUTPUT_PATH)
-    crop_loc.extract_crops_locust()
     crop_loc.export_table('/cropland_locust_fact/crops_impact_locust_district') 
-
-
