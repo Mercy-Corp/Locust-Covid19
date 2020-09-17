@@ -23,9 +23,9 @@ import yaml
 #import warnings
 #warnings.filterwarnings("ignore")
 
-#local paths
-INPUT_PATH = r'data/input'
-OUTPUT_PATH = r'data/output'
+# #local paths
+# INPUT_PATH = r'data/input'
+# OUTPUT_PATH = r'data/output'
 
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
