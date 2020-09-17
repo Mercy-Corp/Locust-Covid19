@@ -159,7 +159,8 @@ if __name__ == '__main__':
     elif module == 'vegetation':
 
         print("------- Extracting vegetation index per district table ---------")
-        periods_list = [2021, 2022, 2023]
+        periods_list = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                        2017, 2018, 2019, 2020, 2021, 2022, 2023]
         for period in periods_list:
             VegetationTable(period, INPUT_PATH, OUTPUT_PATH).export_table('vegetation_table')
 
