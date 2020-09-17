@@ -40,8 +40,8 @@ class VegetationTable:
         self.flats = FlatFiles(self.path_in, self.path_out)
 
         # NDVI raster path
-        self.raster_path = self.path_in + '/vegetation/ea' + self.period + 'm.tif'
-        self.raster_path_out = self.path_in + '/vegetation/ea' + self.period + 'm_out.tif'
+        self.raster_path = self.path_in + '/vegetation/ea' + self.period + '.tif'
+        self.raster_path_out = self.path_in + '/vegetation/ea' + self.period + '_out.tif'
 
     def clip_raster(self):
         # Load merged countries' boundaries
@@ -159,8 +159,8 @@ class VegetationTable:
             # x normalized = (x – x minimum) / (x maximum – x minimum)
             ndvi_normed = (ndvi_filtered - 100) / (200 - 100)
             # Replace nan with 0s
-            ndvi_final = np.nan_to_num(ndvi_normed, copy=True, nan=0.0, posinf=None, neginf=None)
-
+            #ndvi_final = np.nan_to_num(ndvi_normed, copy=True, nan=0.0, posinf=None, neginf=None)
+            ndvi_final = ndvi_normed
             # Save raster
             number_of_bands, height, width = ndvi_final.shape
             raster_new = rasterio.open(self.raster_path_out, 'w',
@@ -169,7 +169,9 @@ class VegetationTable:
                                        width=width,
                                        count = number_of_bands,
                                        dtype = ndvi_final.dtype,
-                                       crs='EPSG:4326',
+                                       nodata=0,
+                                       crs=raster.crs,
+                                       transform=raster.transform,
                                        compress='lzw')
             raster_new.write(ndvi_final)
             raster_new.close()
@@ -245,27 +247,29 @@ class VegetationTable:
     def export_table(self, filename):
         '''
 
-        :return: The Forageland table in both a parquet and csv format with the date added in the name.
+        :return: The Vegetation index table in both a parquet format with the period added in their name.
         '''
         forageland_df = self.add_fact_ids()
-        self.flats.export_to_parquet(forageland_df, filename + '_' + self.period)
-        self.flats.export_csv_w_date(forageland_df, filename)
+        self.flats.export_to_parquet(forageland_df, '/vegetation_fact/' + filename + '_' + self.period)
+        #self.flats.export_csv_w_date(forageland_df, filename + '_' + self.period + '_')
 
 
 if __name__ == '__main__':
 
-    # filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
-    # with open(filepath, "r") as ymlfile:
-    #     cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-    #
-    # INPUT_PATH = cfg['data']['landing']
-    # OUTPUT_PATH = cfg['data']['reporting']
-    # print('INPUT_PATH: ' + INPUT_PATH)
-    # print('OUTPUT_PATH: ' + OUTPUT_PATH)
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting vegetation index per district table ---------")
 
     #veg = VegetationTable(INPUT_PATH, OUTPUT_PATH)
     #veg.mask_green_values()
     #VegetationTable(2023, INPUT_PATH, OUTPUT_PATH).export_table('/vegetation_fact/vegetation_table')
-    VegetationTable(2023, INPUT_PATH, OUTPUT_PATH).export_table('/vegetation_table')
+    periods_list = [2021, 2022, 2023]
+    for period in periods_list:
+        VegetationTable(period, INPUT_PATH, OUTPUT_PATH).export_table('vegetation_table')
