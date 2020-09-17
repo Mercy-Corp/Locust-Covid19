@@ -156,6 +156,13 @@ if __name__ == '__main__':
         print("------- Extracting RVF risk table ---------")
         RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('RVF')
 
+    elif module == 'vegetation':
+
+        print("------- Extracting vegetation index per district table ---------")
+        periods_list = [2021, 2022, 2023]
+        for period in periods_list:
+            VegetationTable(period, INPUT_PATH, OUTPUT_PATH).export_table('vegetation_table')
+
     else:
 
        print('Invalid module: {}'.format(module))
