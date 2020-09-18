@@ -11,7 +11,7 @@ SELECT
 , "date_parse"("d"."date", '%m/%d/%Y') "date"
 , "pf"."commodity_name" "name"
 , "pf"."value"
-, 'WFP/Numbeo' "Source_Name"
+, 'WFP/Numbeo/REACH' "Source_Name"
 FROM
   (((price_fact_test pf
 LEFT JOIN measure_dim_test m ON ("pf"."measureid" = "m"."measureid"))
@@ -306,3 +306,39 @@ FROM
 LEFT JOIN measure_dim_test m ON ("famine"."measureid" = "m"."measureid"))
 LEFT JOIN location_dim_test l ON ("famine"."locationid" = "l"."locationid"))
 LEFT JOIN date_dim_test d ON ("famine"."dateid" = "d"."dateid"))
+UNION ALL SELECT
+  "fact"."factid"
+, "m"."measure"
+, "l"."locationid"
+, "l"."hierarchy"
+, "l"."name_0" "location_1"
+, "l"."name_1" "location_2"
+, "l"."name_2" "location_3"
+, "l"."name_3" "location_4"
+, "date_parse"("d"."date", '%m/%d/%Y') "date"
+, null "name"
+, "fact"."value"
+, 'ICPAC' "Source_Name"
+FROM
+  (((locust_risk_fact_test fact
+LEFT JOIN measure_dim_test m ON ("fact"."measureid" = "m"."measureid"))
+LEFT JOIN location_dim_test l ON ("fact"."locationid" = "l"."locationid"))
+LEFT JOIN date_dim_test d ON ("fact"."dateid" = "d"."dateid"))
+UNION ALL SELECT
+  "fact"."factid"
+, "m"."measure"
+, "l"."locationid"
+, "l"."hierarchy"
+, "l"."name_0" "location_1"
+, "l"."name_1" "location_2"
+, "l"."name_2" "location_3"
+, "l"."name_3" "location_4"
+, "date_parse"("d"."date", '%m/%d/%Y') "date"
+, null "name"
+, "fact"."value"
+, 'ICPALD' "Source_Name"
+FROM
+  (((rvf_risk_fact_test fact
+LEFT JOIN measure_dim_test m ON ("fact"."measureid" = "m"."measureid"))
+LEFT JOIN location_dim_test l ON ("fact"."locationid" = "l"."locationid"))
+LEFT JOIN date_dim_test d ON ("fact"."dateid" = "d"."dateid"))

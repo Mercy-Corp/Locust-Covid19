@@ -50,7 +50,9 @@ class FamineTable:
                  s = path_in + '/' + str(i)
                  all_files.append(s)
 
-#        print('all_files loop')
+        print(all_files)
+
+#        all_files0 = [for f in all_files1]
 
         for file in all_files:
             # Split by "_"
@@ -157,6 +159,7 @@ if __name__ == '__main__':
     OUTPUT_PATH = cfg['data']['reporting']
     print('INPUT_PATH: ' + INPUT_PATH)
     print('OUTPUT_PATH: ' + OUTPUT_PATH)
+
     print("------- Extracting famine vulnerability table ---------")
 
     famine = FamineTable(INPUT_PATH, OUTPUT_PATH)

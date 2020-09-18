@@ -16,6 +16,7 @@ import geopandas
 from datetime import datetime
 from rasterstats import zonal_stats
 from utils.flat_files import FlatFiles
+from utils.s3_glob import s3_glob
 import glob
 import warnings
 import yaml
@@ -34,34 +35,18 @@ class CroplandLocust:
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        #self.dates = pd.read_csv(self.path_out + 'date_23_06-2020.csv', sep=",")
-        #self.dates['date'] = pd.to_datetime(self.dates['date'], format = '%d-%m-%Y')
         self.flats = FlatFiles(self.path_in, self.path_out)
 
         # Import districts
-        self.shp2_Kenya = gpd.read_file(self.path_in + "Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Somalia = gpd.read_file(self.path_in + "Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Ethiopia = gpd.read_file(self.path_in + "Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Uganda = gpd.read_file(self.path_in + "Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
-        self.shp2_Sudan = gpd.read_file(self.path_in + "Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
-        self.shp2_SSudan = gpd.read_file(self.path_in + "Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
-
-        # # Import cropland vector
-        # self.crops = gpd.read_file(self.path_in + "cropland/Crops_vectorized.shp")
+        self.shp2_Kenya = gpd.read_file(self.path_in + "/Spatial/gadm36_KEN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Somalia = gpd.read_file(self.path_in + "/Spatial/gadm36_SOM_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Ethiopia = gpd.read_file(self.path_in + "/Spatial/gadm36_ETH_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Uganda = gpd.read_file(self.path_in + "/Spatial/gadm36_UGA_2.shp")[['GID_2', 'geometry']]
+        self.shp2_Sudan = gpd.read_file(self.path_in + "/Spatial/gadm36_SDN_2.shp")[['GID_2', 'geometry']]
+        self.shp2_SSudan = gpd.read_file(self.path_in + "/Spatial/gadm36_SSD_2.shp")[['GID_2', 'geometry']]
 
         # Import locust gdf
-        self.locust_gdf = gpd.read_file(self.path_in + "swarm/Swarm_Master.shp")
-
-    # def filter_crops(self):
-    #     '''
-    #
-    #     :return: The crops vector filtered by the crops id.
-    #     '''
-    #
-    #     crops = self.crops
-    #     crops = crops[crops['Crops'] == 1]
-    #     crops.Crops = 12
-    #     return crops
+        self.locust_gdf = gpd.read_file(self.path_in + "/swarm/Swarm_Master.shp")
 
     def get_districts(self):
         '''
@@ -195,7 +180,7 @@ class CroplandLocust:
         :return: A df with two columns, district id and cropland area.
         '''
 
-        raster_path = self.path_in + "cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
+        raster_path = self.path_in + "/cropland/GFSAD30AFCE_2015_" + raster + "_001_2017261090100.tif"
         locust_distr = self.area_districts_affected_locust()
 
         stats = zonal_stats(locust_distr.geometry, raster_path, stats="count", categorical=True)
@@ -247,31 +232,14 @@ class CroplandLocust:
         Loads all intermediate files (csvs) on zonal statistics per raster.
         :return: A concatenated df of all zonal statistics.
         '''
-        resp = client.list_objects_v2(Bucket='mercy-locust-covid19-in-dev')
-        keys = []
-        all_files = []
-        for obj in resp['Contents']:
-            keys.append(obj['Key'])
-        for i in keys:
-            if 'inbound/sourcedata/cropland/crops_locust_distr' in i:
-              s = 's3://mercy-locust-covid19-in-dev/' + str(i)
-              all_files.append(s)
-        #all_files = glob.glob(self.path_in + "cropland/crops_locust_distr_*" + ".csv")
-        #mercy-locust-covid19-in-dev/inbound/sourcedata/cropland/crops_locust_distr_*.csv
-        df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
+       
+        all_files = s3_glob(self.path_in, 'cropland', 'cropland/crops_locust_distr')
+
         print(all_files)
+        
+        df_from_each_file = (pd.read_csv(f, sep = "|") for f in all_files)
         concatenated_df = pd.concat(df_from_each_file, ignore_index=True)
         return concatenated_df
-
-    # def area_crops_affected_locust(self):
-    #     '''
-    #     Calculates the area affected by locust
-    #     :return: A gdf including the area in degrees
-    #     '''
-    #     crops_locust_district = self.intersect()
-    #     crops_locust_district['crops_locust_area'] = crops_locust_district.geometry.area
-    #
-    #     return crops_locust_district
 
     def add_fact_ids(self):
         '''
@@ -290,9 +258,6 @@ class CroplandLocust:
         crops_locust_district['dateID'] = crops_locust_district['dateID'].astype(int) #Athena accepts a bigint to prepare the view
         #print(crops_locust_district[['date', 'dateID']].head())
 
-        # Add dateID
-        #crops_loc_df = crops_locust_district.merge(self.dates, on='date', how='left')
-
         # Select fact table columns
         crops_locust_district = crops_locust_district[['factID', 'measureID', 'dateID', 'locationID', 'value']]
 
@@ -304,8 +269,7 @@ class CroplandLocust:
         :return: The Cropland table in both a parquet and csv format with the date added in the name.
         '''
         crops_loc_df = self.add_fact_ids()
-        self.flats.export_parquet_w_date(crops_loc_df, filename)
-        #self.flats.export_csv_w_date(crops_loc_df, filename) #only for testing purposes
+        self.flats.export_to_parquet(crops_loc_df, filename)
 
 if __name__ == '__main__':
 
@@ -314,16 +278,11 @@ if __name__ == '__main__':
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    INPUT_PATH = cfg["data"]['landing']
-    OUTPUT_PATH = cfg["data"]['reporting']
-    print(INPUT_PATH)
-
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting cropland area affected by locust per district table ---------")
     crop_loc = CroplandLocust(INPUT_PATH, OUTPUT_PATH)
-#    crop_loc.load_extracted_crops()
-    crop_loc.extract_crops_locust()
-    #crop_loc.export_table('Crops_impact_locust_district') #local export
-    crop_loc.export_table('cropland_locust_fact/Crops_impact_locust_district') #export to S3
-
-
+    crop_loc.export_table('/cropland_locust_fact/crops_impact_locust_district') 

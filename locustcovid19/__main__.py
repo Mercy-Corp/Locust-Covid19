@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     elif module == 'displacements':
        print("------- Extracting displacements table ---------")
-       DisplacementTable().export_files(INPUT_PATH, OUTPUT_PATH)
+       DisplacementTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
     elif module == 'refugees':
 
@@ -146,15 +146,15 @@ if __name__ == '__main__':
        print("------- Extracting famine vulnerability table ---------")
        FamineTable(INPUT_PATH, OUTPUT_PATH).export_files()
 
-    elif module == 'locust_risk':
+    elif module == 'risk.locust':
 
-        print("------- Extracting locust risk table ---------")
-        RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('locust')
+       print("------- Extracting locust risk table ---------")
+       RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('locust')
 
-    elif module == 'RVF':
+    elif module == 'risk.rvf':
 
-        print("------- Extracting RVF risk table ---------")
-        RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('RVF')
+       print("------- Extracting RVF risk table ---------")
+       RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('RVF')
 
     elif module == 'vegetation':
 

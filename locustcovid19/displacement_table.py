@@ -8,7 +8,8 @@ Created on Thu Jun 24 09:36:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-# Imports
+import os
+import yaml
 import pandas as pd
 from utils.flat_files import FlatFiles
 
@@ -23,7 +24,7 @@ class DisplacementTable:
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        self.displacement_df = pd.read_csv(self.path_in + "social_cohesion/displacement/API_VC.IDP.NWDS_DS2_en_csv_v2_1223058.csv", skiprows=4, sep=",", encoding='utf-8')
+        self.displacement_df = pd.read_csv(self.path_in + "/social_cohesion/displacement/API_VC.IDP.NWDS_DS2_en_csv_v2_1223058.csv", skiprows=4, sep=",", encoding='utf-8')
         self.flats = FlatFiles(self.path_in, self.path_out)
 
     def filter_year(self, displacements_df, year):
@@ -81,7 +82,7 @@ class DisplacementTable:
         displacement_df = self.add_ids_to_table()
         #self.flats.export_csv_w_date(displacement_df, 'displacement_table')
         #self.flats.export_parquet_w_date(displacement_df, 'displacement_table')
-        self.flats.export_parquet_w_date(displacement_df, 'displacement_fact/displacement_table')
+        self.flats.export_to_parquet(displacement_df, '/displacement_fact/displacement_table')
 
 if __name__ == '__main__':
 
@@ -91,8 +92,8 @@ if __name__ == '__main__':
 
     INPUT_PATH = cfg['data']['landing']
     OUTPUT_PATH = cfg['data']['reporting']
-    print(INPUT_PATH)
-    print(OUTPUT_PATH)
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
     print("------- Extracting displacements table ---------")
 

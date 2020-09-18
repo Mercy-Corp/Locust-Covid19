@@ -138,7 +138,6 @@ class PopulationTable:
         file_name = 'population_fact/population_table_' + str(self.year)
         #file_name = 'population_table_all_countries_' + str(self.year)
         population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
-        self.flats.export_to_csv(population_df, file_name)
         print("Dataframe exported to parquet format")
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-environment: 'test'
+environment: 'production'
 data:
-        landing: 's3://mercy-locust-covid19-landing-test'
-        reporting: 's3://mercy-locust-covid19-reporting-test'
+        landing: 's3://mercy-locust-covid19-landing'
+        reporting: 's3://mercy-locust-covid19-reporting'
