@@ -4,6 +4,7 @@ The aim of this module is to extract the NDVI vegetation growth indicator per di
 Data source: https://earlywarning.usgs.gov/fews/product/448
 
 Created on Mon Sep 10 11:16:40 2020
+Latest update on Fri Sep 18 13:11:40 2020
 
 @author: ioanna.papachristou@accenture.com
 """
@@ -31,7 +32,7 @@ COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
 class VegetationTable:
     '''
-    This class calculates the NDVI vegetation index per district.
+    This class calculates the avg NDVI vegetation index per district for a given date.
     '''
     def __init__(self, period, path_in, path_out):
         self.path_in = path_in
