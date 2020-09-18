@@ -44,6 +44,10 @@ class VegetationTable:
         self.raster_path_out = self.path_in + '/vegetation/ea' + self.period + '_out.tif'
 
     def clip_raster(self):
+        '''
+        Clips the raster based on a vector
+        :return: A clipped raster
+        '''
         # Load merged countries' boundaries
         countries = self.get_all_countries(1)
         #rdf = gpd.GeoDataFrame(pd.concat(dataframesList, ignore_index=True))
@@ -72,32 +76,42 @@ class VegetationTable:
         with rasterio.open(out_tif, "w", **out_meta) as dest:
             dest.write(out_img)
 
-    def mask_green_values(self):
-        # # first copy the chm array so we can further select a subset (need to use copy because arrays are mutable/changeable)
-        # raster = rasterio.open(self.raster_path)
-        # ndvi = raster.read()
-        # print(ndvi.shape)
-        # print(ndvi)
-        #
-        # ndvi_filtered = copy.copy(ndvi)
-        # ndvi_filtered[ndvi < 100] = 0
-        # ndvi_filtered[ndvi > 200] = 0
-        # print(ndvi_filtered.shape)
-        # print(ndvi_filtered)  # display
-
+    def filter_n_norm_raster(self):
+        # Filter raster
         with rasterio.open(self.raster_path, 'r+') as raster:
+            print("... filtering and normalising raster.")
             ndvi = raster.read()  # read all raster values
-            print(ndvi.shape)
-            print(ndvi)
-
+            # transform values < 100 and > 200 to nan
             ndvi_filtered = copy.copy(ndvi)
-            ndvi_filtered[ndvi < 100] = 0
-            ndvi_filtered[ndvi > 200] = 0
-            print(ndvi_filtered.shape)
-            print(ndvi_filtered)
+            ndvi_filtered[ndvi < 100] = 0.0
+            ndvi_filtered[ndvi > 200] = 0.0
+            ndvi_filtered = ndvi_filtered.astype('float32')
+            ndvi_filtered[ndvi_filtered == 0.0] = np.nan
 
-            raster.write(ndvi_filtered)
+            # normalise values
+            # x normalized = (x – x minimum) / (x maximum – x minimum)
+            ndvi_normed = (ndvi_filtered - 100) / (200 - 100)
 
+            # Replace nan with 0s
+            #ndvi_final = np.nan_to_num(ndvi_normed, copy=True, nan=0.0, posinf=None, neginf=None)
+            ndvi_final = ndvi_normed
+
+            # Save new raster
+            number_of_bands, height, width = ndvi_final.shape
+            raster_new = rasterio.open(self.raster_path_out, 'w',
+                                       driver='GTiff',
+                                       height=height,
+                                       width=width,
+                                       count = number_of_bands,
+                                       dtype = ndvi_final.dtype,
+                                       nodata=0,
+                                       crs=raster.crs,
+                                       transform=raster.transform,
+                                       compress='lzw')
+            raster_new.write(ndvi_final)
+            raster_new.close()
+
+    '''
     def get_filtered_raster(self):
         # Check: https://rasterio.readthedocs.io/en/latest/api/rasterio.fill.html
         raster = rasterio.open(self.path_in + '/vegetation/ea2023m.tif') #TODO mask - on countries
@@ -114,7 +128,7 @@ class VegetationTable:
 
         print(type(vegetation))
         print(vegetation)
-
+    '''
     def read_boundaries_shp(self, country, hierarchy):
         '''
 
@@ -132,8 +146,10 @@ class VegetationTable:
     def get_all_countries(self, hierarchy):
         '''
 
+        :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with all districts of the 6 countries concatenated.
         '''
+
         gdf_countries = gpd.GeoDataFrame()
         for country in COUNTRIES_IDS:
             gdf_country = self.read_boundaries_shp(country, hierarchy)
@@ -146,78 +162,47 @@ class VegetationTable:
 
         :return: A df with two columns, district id and cropland area.
         '''
-        # Filter raster
-        with rasterio.open(self.raster_path, 'r+') as raster:
-            ndvi = raster.read()  # read all raster values
-            # transform values < 100 and > 200 to nan
-            ndvi_filtered = copy.copy(ndvi)
-            ndvi_filtered[ndvi < 100] = 0.0
-            ndvi_filtered[ndvi > 200] = 0.0
-            ndvi_filtered = ndvi_filtered.astype('float32')
-            ndvi_filtered[ndvi_filtered == 0.0] = np.nan
-            # normalise values
-            # x normalized = (x – x minimum) / (x maximum – x minimum)
-            ndvi_normed = (ndvi_filtered - 100) / (200 - 100)
-            # Replace nan with 0s
-            #ndvi_final = np.nan_to_num(ndvi_normed, copy=True, nan=0.0, posinf=None, neginf=None)
-            ndvi_final = ndvi_normed
-            # Save raster
-            number_of_bands, height, width = ndvi_final.shape
-            raster_new = rasterio.open(self.raster_path_out, 'w',
-                                       driver='GTiff',
-                                       height=height,
-                                       width=width,
-                                       count = number_of_bands,
-                                       dtype = ndvi_final.dtype,
-                                       nodata=0,
-                                       crs=raster.crs,
-                                       transform=raster.transform,
-                                       compress='lzw')
-            raster_new.write(ndvi_final)
-            raster_new.close()
+        # Filter and normalise raster
+        self.filter_n_norm_raster()
 
         gdf_districts = self.get_all_countries(2)
-        stats = zonal_stats(gdf_districts.geometry, self.raster_path_out,  layer="polygons", stats="mean") # Cross districts with ndvi
+
+        print("... calculating zonal statistics.")
+        stats = zonal_stats(gdf_districts.geometry, self.raster_path_out,  layer="polygons", stats="mean") # Cross districts with normalised ndvi
         gdf_districts['avg_ndvi'] = pd.DataFrame(stats)
         #Filter columns
         df_districts = gdf_districts[['locationID', 'avg_ndvi']]
 
         return df_districts
 
-    def normalise_index(self):
-        ndvi = self.get_stats()
-
-        # x normalized = (x – x minimum) / (x maximum – x minimum)
-        ndvi['normalised'] = (ndvi['avg_ndvi'] - 100) / (200 - 100)
-        print(ndvi.describe())
-        print(ndvi.head())
-        return ndvi
-
     def extract_date(self):
+        '''
+        Extracts year and period from filename.
+        :return: A string of the year and the period.
+        '''
         base = os.path.basename(self.raster_path)
         filename = os.path.splitext(base)[0]
         file_number = re.sub("[^0-9]", "", filename)
         file_year = file_number[:2]
         year = str(2000 + int(file_year))
-        print(type(year))
 
         file_period = file_number[2:]
-        print(type(file_period))
+
         return year, file_period
 
     def add_fact_ids(self):
         '''
-        Adds the fact tables ids
+        Adds the fact tables ids.
         :return:  A filtered dataframe by the columns we need for fact tables.
         '''
         vegetation_district = self.get_stats()
+        # Adding measureID
         vegetation_district['measureID'] = 45
-
+        # Adding factID
         vegetation_district = vegetation_district.reset_index(drop=True)
         vegetation_district['factID'] = 'VEG_' + vegetation_district.index.astype(str)
-
+        # Adding dateID
         vegetation_district['year'], vegetation_district['period'] = self.extract_date()
-        print(vegetation_district.head())
 
         replacements = {'01': '0101', '02': '0111', '03': '0121', '04': '0201', '05': '0211', '06': '0221', '07': '0301',
                         '08': '0311', '09': '0321', '10': '0401', '11': '0411', '12': '0421', '13': '0501', '14': '0511',
@@ -227,17 +212,11 @@ class VegetationTable:
                         '36': '1221'}
 
         vegetation_district['period'].replace(replacements, inplace=True)
-
-        print(vegetation_district.head())
         vegetation_district['date'] = vegetation_district['year'] + vegetation_district['period']
-        print(vegetation_district.head())
         vegetation_district['dateID'] = vegetation_district['date'].astype(int)
 
-        # vegetation_district['date'] = pd.to_datetime([f'{y}-01-01' for y in vegetation_district.year])
+        #Adding value column
         vegetation_district['value'] = vegetation_district['avg_ndvi']
-
-        # Add dateID
-        #vegetation_district = self.flats.add_date_id(vegetation_district, column='year')
 
         # Select fact table columns
         vegetation_df = self.flats.select_columns_fact_table(df=vegetation_district)
@@ -247,7 +226,7 @@ class VegetationTable:
     def export_table(self, filename):
         '''
 
-        :return: The Vegetation index table in both a parquet format with the period added in their name.
+        :return: The Vegetation index table in a parquet format with the period added in its name.
         '''
         forageland_df = self.add_fact_ids()
         self.flats.export_to_parquet(forageland_df, '/vegetation_fact/' + filename + '_' + self.period)
