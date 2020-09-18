@@ -270,6 +270,12 @@ if __name__ == '__main__':
     #veg = VegetationTable(INPUT_PATH, OUTPUT_PATH)
     #veg.mask_green_values()
     #VegetationTable(2023, INPUT_PATH, OUTPUT_PATH).export_table('/vegetation_fact/vegetation_table')
+    '''
+    # 2019:
+    periods_list = [1916, 1917, 1918, 1919, 1920, 1921, 1922, 1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931, 
+    1932, 1933, 1934, 1935, 1936]
+    '''
+    # 2020:
     periods_list = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
                     2017, 2018, 2019, 2020, 2021, 2022, 2023]
     for period in periods_list:
