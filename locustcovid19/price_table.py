@@ -49,6 +49,10 @@ class PricesTable:
         self.prices = pd.read_csv(self.path_in + '/price/wfpvam_foodprices.csv', sep=',')
 
     def filter_prices(self):
+        '''
+        Filters prices table.
+        :return: A df filtered per country, Retail, year & commodity.
+        '''
         #Load prices
         prices = self.prices
         #Filter countries
@@ -115,7 +119,7 @@ class PricesTable:
 
     def read_region_shp(self, country_id):
         '''
-
+        Reads boundaries shp.
         :param country: The reference country
         :return: A geodataframe with 2 columns: district id and geometry.
         '''
@@ -140,6 +144,10 @@ class PricesTable:
         return df_region
 
     def add_adm1_SSudan(self):
+        '''
+        Manually crosses markets to regions for South Sudan.
+        :return: A df with two columns: the market name and the adm1 name (region)
+        '''
         # initialize list of lists
         data = [['Bentiu', 'Central Equatoria'], ['Yida', 'Unity'], ['Rubkona', 'Unity'], ['Aniet', 'Unity'],
                 ['Konyokonyo', 'Central Equatoria'], ['Kapoeta South', 'Eastern Equatoria'],
@@ -153,6 +161,12 @@ class PricesTable:
         return df
 
     def add_location_id(self, country, country_id):
+        '''
+        Adds locationIDs.
+        :param country: The country of reference-
+        :param country_id: The country location ID of reference.
+        :return: A df with the location IDs.
+        '''
         prices = self.normalise_currencies()
         prices_country = prices[prices['adm0_name'] == country]
 
@@ -201,12 +215,12 @@ class PricesTable:
         # print(prices_countries.columns)
         # print(prices_countries.head())
 
-        #prices_countries.to_csv(self.path_in + 'prices_districts.csv', sep='|', encoding='utf-8', index=False)
+        #prices_countries.to_csv(self.path_in + 'prices_districts.csv', sep='|', encoding='utf-8', index=False) # for testing purposes only.
         return prices_countries
 
     def create_measure_df(self):
         '''
-
+        Created the measure table with the selected commodities and their ids.
         :return: A dataframe with the measure ids of the commodities.
         '''
         # initialize list of lists
@@ -247,11 +261,15 @@ class PricesTable:
         return price_table_filtered
 
     def Numbeo_to_USD(self):
+        '''
+        Transform prices from Numbeo from local currencies to USD.
+        :return: A df with prices in USD and all the fact tables' columns.
+        '''
         numbeo_prices = pd.read_csv(self.path_in + '/price/Numbeo_pricecom.csv', sep=';')
         numbeo_prices = numbeo_prices[numbeo_prices['value'].notna()]
 
         numbeo_norm = pd.merge(numbeo_prices, self.rates, how='left', on=['currency'])
-        print(numbeo_norm.head())
+        #print(numbeo_norm.head())
         # For 'currency' == USD, 'value USD' = 1
         numbeo_norm['value USD'].fillna(1.0, inplace=True)
         numbeo_norm['value'] = numbeo_norm['value'] * numbeo_norm['value USD']
@@ -262,6 +280,11 @@ class PricesTable:
         return numbeo_norm_filtered
 
     def cross_price_w_numbeo(self):
+        '''
+        Crosses the prices table created from WFP data source with the one created from Numbeo according to business
+        rules established per country and commodity.
+        :return: A df with all the columns of a fact table.
+        '''
         prices = self.add_ids_to_table()
         numbeo_prices = self.Numbeo_to_USD()
 
@@ -304,6 +327,10 @@ class PricesTable:
         return prices
 
     def load_REACH_data(self):
+        '''
+        Loads and treats data from REACH.
+        :return: A df with data on prices from REACH and all fact table columns.
+        '''
         reach = pd.read_excel(self.path_in + '/price/ULEARN_WFP_UGA_Market-Monitor_Price_Table-15-31-July-2020.xlsx', sheet_name='District Mean')
         reach = reach[['District', 'Regions', 'Period', 'price_maize_g', 'price_maize_f', 'price_beans', 'price_milk']]
 
@@ -355,6 +382,11 @@ class PricesTable:
         return reach_df_filtered
 
     def cross_price_w_REACH(self):
+        '''
+        Crosses existing prices table with data from REACH and applies the established business rules on the selection
+        of new data per commodity and country (only data for Uganda included in this case).
+        :return: A df containing data from WFP, numbeo and REACH on prices and all columns of fact tables.
+        '''
         prices = self.cross_price_w_numbeo()
         reach = self.load_REACH_data()
 
@@ -369,6 +401,11 @@ class PricesTable:
         return prices_new
 
     def add_missing_locIDs(self):
+        '''
+        Adds region location IDS for all regions that do not have any prices. Solution for the display of locations with
+        no data in Tableau.
+        :return: The final prices df including regions with empty values.
+        '''
         prices = self.cross_price_w_REACH()
         # Load location table
         location_table = self.locations[['locationID', 'hierarchy']]
