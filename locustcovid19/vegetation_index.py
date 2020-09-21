@@ -16,6 +16,7 @@ from rasterio.mask import mask
 from utils.flat_files import FlatFiles
 from rasterstats import zonal_stats
 from utils.s3_local import s3_local
+from utils.removefile import removefile
 import numpy as np
 import copy
 import os
@@ -238,6 +239,9 @@ class VegetationTable:
         forageland_df = self.add_fact_ids()
         self.flats.export_to_parquet(forageland_df, '/vegetation_fact/' + filename + '_' + self.period)
         #self.flats.export_csv_w_date(forageland_df, filename + '_' + self.period + '_')
+        removefile(self.localdir + '/vegetation/ea' + self.period + '.tif')
+        removefile(self.localdir + '/vegetation/ea' + self.period + '_out.tif')
+
 
 
 if __name__ == '__main__':
