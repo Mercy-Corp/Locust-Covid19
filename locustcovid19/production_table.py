@@ -14,19 +14,9 @@ from utils.flat_files import FlatFiles
 import numpy as np
 import yaml
 
-#S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-landing/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-
 #local paths
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
-
-#with open("config/application.yaml", "r") as ymlfile:
-#    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-#INPUT_PATH = cfg["data"]['landing']
-#OUTPUT_PATH = cfg["data"]['reporting']
 
 class ProductionTable:
     '''
@@ -36,13 +26,12 @@ class ProductionTable:
         self.path_in = path_in
         self.path_out = path_out
         self.production_df = pd.read_csv(self.path_in + "/production/FAOSTAT_data.csv", sep=",", encoding='utf-8')
-        self.locations = pd.read_parquet(self.path_out + "/location_dim/location_table.parquet", engine='pyarrow')
-#        self.locations = pd.read_csv(self.path_out + "location_dim/location_table.csv", sep = "|", encoding='utf-8')[['locationID', 'name']]
+        self.locations = pd.read_parquet(self.path_out + "/location_dim/location_table.parquet", engine='pyarrow')[['locationID', 'name']]
         self.flats = FlatFiles(self.path_in, self.path_out)
 
     def create_measure_df(self):
         '''
-
+        Creates the measures df.
         :return: A dataframe with the 5 measure ids and types we need.
         '''
         # initialize list of lists
@@ -50,14 +39,13 @@ class ProductionTable:
         # Create the pandas DataFrame
         measure_df = pd.DataFrame(measure_id_data, columns=['measureID', 'Item'])
         self.measure_df = measure_df
-        self.measure_df.head()
+        #self.measure_df.head()
         return self.measure_df
 
 
     def add_ids_to_table(self):
         '''
         Merges with all other tables and extracts all ids.
-
         :return: The production dataframe with all columns as defined in the data model.
         '''
         # Merge production with measure and add measureID
