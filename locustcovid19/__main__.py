@@ -1,15 +1,3 @@
-"""
-This file is executed when the module is run from the command line.
-This file runs the following:
-\n-Extracts location table-
-\n-Extracts shapefile table-
-\n-Extracts production table-
-\n-Extracts population tables-
-\n-Extracts measures table-
-\n-Extracts demand table-
-
-"""
-# python -m my_package
 from location_table import LocationTable
 from shapefile_table import ShapefileTable
 from production_table import ProductionTable
@@ -28,6 +16,7 @@ from conflicts_table import ConflictsTable
 from violence_table import ViolenceTable
 from famine_table import FamineTable
 from risk_indicators import RiskTables
+from vegetation_index import VegetationTable
 import os
 import yaml
 
@@ -155,6 +144,20 @@ if __name__ == '__main__':
 
        print("------- Extracting RVF risk table ---------")
        RiskTables(INPUT_PATH, OUTPUT_PATH).export_files('RVF')
+
+    elif module == 'vegetation':
+
+       print("------- Extracting vegetation index per district table ---------")
+       '''
+       # 2019:
+       periods_list = [1916, 1917, 1918, 1919, 1920, 1921, 1922, 1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931,
+       1932, 1933, 1934, 1935, 1936]
+       '''
+       # 2020:
+       periods_list = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+                       2017, 2018, 2019, 2020, 2021, 2022, 2023]
+       for period in periods_list:
+           VegetationTable(period, INPUT_PATH, OUTPUT_PATH).export_table('vegetation_table')
 
     else:
 
