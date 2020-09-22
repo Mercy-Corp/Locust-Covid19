@@ -16,7 +16,6 @@ Created on Mon Sep 21 18:14:40 2020
 import os
 import pandas as pd
 from utils.flat_files import FlatFiles
-import numpy as np
 import yaml
 
 # #local paths
