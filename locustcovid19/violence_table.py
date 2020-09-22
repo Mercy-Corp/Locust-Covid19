@@ -92,22 +92,22 @@ class ViolenceTable:
         violence['dateID'] = violence['date'].apply(lambda x: datetime.strftime(x, '%Y%m%d'))
         violence['dateID'] = violence['dateID'].astype(int)
 
-        # Add value & factID per table (occurencies and deaths)
-        occurencies = violence.copy().reset_index(drop=True)
-        occurencies['value'] = 1
-        occurencies['measureID'] = 31
-        occurencies['factID'] = 'VIOL_OCC_' + occurencies.index.astype(str)
+        # Add value & factID per table (occurrences and deaths)
+        occurrences = violence.copy().reset_index(drop=True)
+        occurrences['value'] = 1
+        occurrences['measureID'] = 31
+        occurrences['factID'] = 'VIOL_OCC_' + occurrences.index.astype(str)
         deaths = violence.copy().reset_index(drop=True)
         deaths['value'] = deaths['fatalities']
         deaths['measureID'] = 43
         deaths['factID'] = 'VIOL_DEATHS_' + deaths.index.astype(str)
 
         # Filter only needed columns to export
-        occurencies_df = occurencies[['factID', 'measureID', 'dateID', 'locationID', 'value']]
+        occurrences_df = occurrences[['factID', 'measureID', 'dateID', 'locationID', 'value']]
         deaths_df = deaths[['factID', 'measureID', 'dateID', 'locationID', 'value']]
 
         # Append the 2 tables
-        violence_df = occurencies_df.append(deaths_df)
+        violence_df = occurrences_df.append(deaths_df)
         return violence_df
 
     def export_files(self):
