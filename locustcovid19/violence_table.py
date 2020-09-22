@@ -31,6 +31,10 @@ class ViolenceTable:
                                     encoding='utf-8')[['event_date', 'latitude', 'longitude', 'fatalities', 'timestamp']]
 
     def coord_to_geometry(self):
+        '''
+        Transforms coordinates to geometry.
+        :return: A geodataframe with the geometry column.
+        '''
         violence_df = self.violence
 
         # creating a geometry column
@@ -46,7 +50,7 @@ class ViolenceTable:
 
     def read_boundaries_shp(self, country, hierarchy):
         '''
-
+        Reads the boundary files for the selected country and hierarchy.
         :param country: The reference country
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
@@ -59,6 +63,10 @@ class ViolenceTable:
         return gdf_country
 
     def get_districts(self):
+        '''
+        Uses the read_boundary_shp function to read and concatenate all boundaries
+        :return: A geodataframe with all districts of the 6 countries concatenated.
+        '''
         all_districts = gpd.GeoDataFrame()
         for country in COUNTRIES_IDS:
             gdf_district = self.read_boundaries_shp(country, 2)
@@ -68,6 +76,10 @@ class ViolenceTable:
         return all_districts
 
     def add_ids(self):
+        '''
+        Adds the fact tables ids.
+        :return:  A filtered dataframe by the columns we need for fact tables.
+        '''
         violence = self.coord_to_geometry()
 
         # Spatial join with districts and add locationID
