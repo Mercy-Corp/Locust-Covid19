@@ -81,6 +81,9 @@ class FinancialInclusion:
         # Add locationID
         inclusion_df.rename(columns={'Country Code': 'locationID'}, inplace=True)
 
+        # Replace values
+        inclusion_df.replace(to_replace="..", value="")
+
         # Filter only needed columns to export
         inclusion_df = self.flats.select_columns_fact_table(inclusion_df)
         return inclusion_df
