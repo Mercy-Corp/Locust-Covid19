@@ -30,12 +30,20 @@ class ConflictsTable:
         self.flats = FlatFiles(self.path_in, self.path_out)
 
     def load_conflicts(self):
+        '''
+        Loads conflicts and transforms it to a geodataframe.
+        :return: The conflicts geodataframe.
+        '''
         conflicts_df = pd.read_csv(self.path_in + "/social_cohesion/conflicts/ged201.csv", sep=",", encoding='utf-8')
         conflicts_df['geometry'] = conflicts_df['geom_wkt'].apply(wkt.loads)
         conflicts_gdf = gpd.GeoDataFrame(conflicts_df, crs='epsg:4326')
         return conflicts_gdf
 
     def filter_data(self):
+        '''
+        Filters conflicts countries, year span and columns.
+        :return: A geodataframe with the filtered data.
+        '''
         conflicts = self.load_conflicts()
         # Filter countries
         conflicts = conflicts[conflicts['country'].isin(COUNTRIES)]
@@ -63,6 +71,10 @@ class ConflictsTable:
         return gdf_country
 
     def get_districts(self):
+        '''
+        Uses the read_boundary_shp function to read and concatenate all boundaries.
+        :return: A geodataframe with all districts of the 6 countries concatenated.
+        '''
         all_districts = gpd.GeoDataFrame()
         for country in COUNTRIES_IDS:
             gdf_district = self.read_boundaries_shp(country, 2)
@@ -71,6 +83,10 @@ class ConflictsTable:
         return all_districts
 
     def add_ids(self):
+        '''
+        Adds the fact tables ids.
+        :return:  A filtered dataframe with the columns we need for fact tables.
+        '''
         conflicts = self.filter_data()
 
         # Spatial join with districts and add locationID
