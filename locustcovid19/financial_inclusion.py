@@ -15,6 +15,7 @@ Created on Mon Sep 21 18:14:40 2020
 
 import os
 import pandas as pd
+import numpy as np
 from utils.flat_files import FlatFiles
 import yaml
 
@@ -82,7 +83,8 @@ class FinancialInclusion:
         inclusion_df.rename(columns={'Country Code': 'locationID'}, inplace=True)
 
         # Replace values
-        inclusion_df.replace(to_replace="..", value="")
+        inclusion_df = inclusion_df.replace(to_replace="..", value=np.nan)
+        inclusion_df['value'] = inclusion_df['value'].astype(float)
 
         # Filter only needed columns to export
         inclusion_df = self.flats.select_columns_fact_table(inclusion_df)
