@@ -9,6 +9,7 @@ The aim of this module is to selected financial inclusion indicators per country
 Data source: https://datacatalog.worldbank.org/dataset/global-financial-inclusion-global-findex-database
 
 Created on Mon Sep 21 18:14:40 2020
+Latest update Wed Sep 23 10:00:40 2020
 
 @author: ioanna.papachristou@accenture.com
 """
@@ -51,33 +52,62 @@ class FinancialInclusion:
 
         return measure_df
 
+    def change_columns_name(self, df):
+        '''
+        Changes the name of the year columns.
+        :param df: The inclusion df.
+        :return: A df with the columns named by years.
+        '''
+        new_columns = []
+        for column in df.columns.tolist():
+            if "[" in column:
+                new_column = column.split(' ')[0]
+                new_columns.append(new_column)
+            else:
+                new_columns.append(column)
+
+        df.columns = new_columns
+
+        return df
+
+    def filter_years(self, df):
+        '''
+
+        :param df: The input df.
+        :return: A df with the financial inclusion indicators for the existing years.
+        '''
+        inclusion_all_years = pd.DataFrame()
+
+        for year in range(2000, 2030):
+            if str(year) in df.columns:
+                inclusion_year = df.copy()
+                # Create year column
+                inclusion_year['year'] = int(year)
+                # Create value column
+                inclusion_year['value'] = inclusion_year[str(year)]
+                # Filter columns
+                inclusion_year = inclusion_year[['Country Code', 'Series Name', 'year', 'value']]
+                #  Append
+                inclusion_all_years = inclusion_all_years.append(inclusion_year)
+
+        return inclusion_all_years
+
     def add_ids_to_table(self):
         '''
         Merges with all other tables and extracts all ids.
-        :return: The production dataframe with all columns as defined in the data model.
+        :return: The inclusion dataframe with all columns as defined in the data model.
         '''
-        # Merge production with measure and add measureID
-        inclusion = self.fin_inclusion_df.merge(self.create_measure_df(), left_on='Series Name', right_on ='indicator_name', how='left')
+        # Change column names
+        inclusion = self.change_columns_name(self.fin_inclusion_df)
+
+        # Merge inclusion with measure and add measureID
+        inclusion = self.filter_years(inclusion).merge(self.create_measure_df(), left_on='Series Name', right_on ='indicator_name', how='left')
 
         # Create factID
         inclusion['factID'] = 'Fin_' + inclusion.index.astype(str)
 
-        # Merge with dates and add dateID
-        inclusion_2011 = inclusion.drop(['2014 [YR2014]', '2017 [YR2017]'], axis=1)
-        inclusion_2011.rename(columns={'2011 [YR2011]': 'value'}, inplace=True)
-        inclusion_2011['year'] = 2011
-
-        inclusion_2014 = inclusion.drop(['2011 [YR2011]', '2017 [YR2017]'], axis=1)
-        inclusion_2014.rename(columns={'2014 [YR2014]': 'value'}, inplace=True)
-        inclusion_2014['year'] = 2014
-
-        inclusion_2017 = inclusion.drop(['2014 [YR2014]', '2011 [YR2011]'], axis=1)
-        inclusion_2017.rename(columns={'2017 [YR2017]': 'value'}, inplace=True)
-        inclusion_2017['year'] = 2017
-
-        inclusion_df = pd.DataFrame()
-        inclusion_df = inclusion_df.append([inclusion_2011, inclusion_2014, inclusion_2017], ignore_index=True)
-        inclusion_df = self.flats.add_date_id(inclusion_df, 'year')
+        # Add dateID
+        inclusion_df = self.flats.add_date_id(inclusion, 'year')
 
         # Add locationID
         inclusion_df.rename(columns={'Country Code': 'locationID'}, inplace=True)
