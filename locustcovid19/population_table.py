@@ -7,16 +7,16 @@ Created on Thu Jul 02 17:16:40 2020
 @author: ioanna.papachristou@accenture.com
 """
 
-#imports
 import pandas as pd
 import geopandas as gpd
 from rasterstats import zonal_stats
 from utils.flat_files import FlatFiles
 import boto3
+import os
+import yaml
 client = boto3.client('s3')
 
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
-#COUNTRIES = ["SDN", "SSD"]
 
 class PopulationTable:
     '''
@@ -34,7 +34,7 @@ class PopulationTable:
         :param country: The reference country
         :return: A geodataframe with 2 columns: district id and geometry.
         '''
-        gdf_country = gpd.read_file(self.path_in + "Spatial/gadm36_" + country + "_2.shp")[['GID_2', 'geometry']]
+        gdf_country = gpd.read_file(self.path_in + "/Spatial/gadm36_" + country + "_2.shp")[['GID_2', 'geometry']]
         return gdf_country
 
     def read_population_raster(self, country):
@@ -43,7 +43,7 @@ class PopulationTable:
         :param country: The reference country
         :return: The raster with the population density for the reference country.
         '''
-        raster_country = self.path_in + "population/" + country + "_pop_" + str(self.year) + ".tif"
+        raster_country = self.path_in + "/population/" + country + "_pop_" + str(self.year) + ".tif"
         return raster_country
 
     def calc_population(self, country):
@@ -93,8 +93,7 @@ class PopulationTable:
         population_gdf['year'] = self.year
 
         # Add factID
-        population_gdf['factID'] = 'Pop_' + population_gdf['locationID'].astype(str) + "_" + population_gdf[
-            'year'].astype(str)
+        population_gdf['factID'] = 'Pop_' + population_gdf['locationID'].astype(str) + "_" + population_gdf['year'].astype(str)
 
         # Add dateID
         population_gdf = self.flats.add_date_id(population_gdf, column = 'year')
@@ -107,11 +106,10 @@ class PopulationTable:
 
     def export_population(self):
         '''
-
         :return: Exports population fact table to parquet format.
         '''
         population_df = self.add_ids_to_table()
-        file_name = 'population_fact/population_table_' + str(self.year)
+        file_name = '/population_fact/population_table_' + str(self.year)
         #file_name = 'population_table_' + str(self.year)
         population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
         print("Dataframe exported to parquet format")
@@ -123,7 +121,7 @@ class PopulationTable:
         self.flats.export_to_parquet(population_df, filename)
 
     def append_populations_year(self):
-        population_initial = pd.read_csv(self.path_out + 'population_table_' + str(self.year) + ".csv", sep="|")
+        population_initial = pd.read_csv(self.path_out + '/population_table_' + str(self.year) + ".csv", sep="|")
         population_Sudan= self.add_ids_to_table()
         #population_Sudan= pd.read_csv(self.path_out + 'population_table_Sudan_' + str(self.year) + ".csv", sep="|")
         population_total = population_initial.append(population_Sudan)
@@ -135,15 +133,25 @@ class PopulationTable:
         :return: Exports population fact table to parquet format.
         '''
         population_df = self.append_populations_year()
-        file_name = 'population_fact/population_table_' + str(self.year)
+        file_name = '/population_fact/population_table_' + str(self.year)
         #file_name = 'population_table_all_countries_' + str(self.year)
         population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
         print("Dataframe exported to parquet format")
 
 if __name__ == '__main__':
 
+    filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
+    with open(filepath, "r") as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    INPUT_PATH = cfg['data']['landing']
+    OUTPUT_PATH = cfg['data']['reporting']
+    print('INPUT_PATH: ' + INPUT_PATH)
+    print('OUTPUT_PATH: ' + OUTPUT_PATH)
+
+
     print("------- Extracting population tables ---------")
-    PopulationTable(2000).export_population()
+    PopulationTable(2000, INPUT_PATH, OUTPUT_PATH).export_population()
     #PopulationTable(2014).export_population()
     #PopulationTable(2015).export_population()
     #PopulationTable(2016).export_population()
