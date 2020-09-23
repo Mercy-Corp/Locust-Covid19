@@ -18,6 +18,9 @@ from utils.flat_files import FlatFiles
 COUNTRIES_IDS = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 
 class RiskTables:
+    '''
+    This class creates the RVG and locust risk tables.
+    '''
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
@@ -28,6 +31,12 @@ class RiskTables:
         self.RVF_risk = pd.read_csv(self.path_in + '/risk/RVFrisk.csv', sep = ';')
 
     def location_id_to_risk(self, indicator, country_id):
+        '''
+        Makes necessary replacements to name and adds locationID to table.
+        :param indicator: 'locust' or 'RVF'
+        :param country_id: The reference country.
+        :return: A dataframe including the locationID column.
+        '''
         # Load files
         if indicator == 'locust':
             risk_country = self.locust_risk[self.locust_risk['CountryID'] == country_id]
@@ -56,6 +65,11 @@ class RiskTables:
         return risk_country
 
     def risk_table(self, indicator):
+        '''
+        Prepared the fact table.
+        :param indicator: 'locust' or 'RVF'
+        :return: A dataframe with all locationIDs and fact table columns.
+        '''
         risk_df = pd.DataFrame()
         for country_id in COUNTRIES_IDS:
             risk_country = self.location_id_to_risk(indicator, country_id)
