@@ -46,9 +46,8 @@ class DemandTable:
         :param year: The year of the population file.
         :return: The file related to the population we would like to load.
         '''
-        #population_year = pd.read_csv(self.path_out + "population_fact/population_table_all_countries_" + str(year) + ".csv", sep='|')
-        population_year = pd.read_csv(
-            self.path_out + "population_table_all_countries_" + str(year) + ".csv", sep='|')
+        #population_year = pd.read_csv(self.path_out + "/population_table_all_countries_" + str(year) + ".csv", sep='|')
+        population_year = pd.read_parquet(self.path_out + '/population_fact/population_table_all_countries_' + str(year) + '.parquet', engine='pyarrow')
 
         return population_year
 
