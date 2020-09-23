@@ -69,7 +69,7 @@ class FamineTable:
 
     def read_boundaries_shp(self, country, hierarchy):
         '''
-
+        Reads geographical boundaries.
         :param country: The reference country
         :param hierarchy: The boundaries level, 0 for countries, 1 for regions, 2 for districts.
         :return: A geodataframe with 2 columns: locationID and geometry.
@@ -96,7 +96,7 @@ class FamineTable:
 
     def rename_columns(self, gdf):
         '''
-
+        Renames the df columns to IPC and HA.
         :param gdf: The geodataframe.
         :return: The geodataframe with it's column names changed
         '''
@@ -106,7 +106,7 @@ class FamineTable:
 
     def intersect_w_districts(self):
         '''
-
+        Intersects district boundaries with the famine indicator.
         :return: A geodataframe with the famine intersected by district.
         '''
         famine = self.rename_columns(self.read_famine_data())
@@ -145,7 +145,7 @@ class FamineTable:
         Exports to parquet format.
         '''
         famine_df = self.add_ids()
-        #self.flats.export_csv_w_date(famine_df, 'famine_table')
+        #self.flats.export_csv_w_date(famine_df, '/famine_table')
         self.flats.export_to_parquet(famine_df, '/famine_fact/famine_table')
 
 
