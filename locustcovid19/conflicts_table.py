@@ -124,7 +124,6 @@ class ConflictsTable:
         '''
         conflicts_df = self.add_ids()
         #self.flats.export_csv_w_date(conflicts_df, 'conflict_table')
-        #self.flats.export_parquet_w_date(conflicts_df, 'conflict_table')
         self.flats.export_to_parquet(conflicts_df, '/conflict_fact/conflict_table')
 
 
