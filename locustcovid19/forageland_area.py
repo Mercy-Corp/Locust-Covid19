@@ -19,10 +19,6 @@ from rasterstats import zonal_stats
 import warnings
 warnings.filterwarnings("ignore")
 
-#S3 paths
-#INPUT_PATH = r's3://mercy-locust-covid19-in-dev/inbound/sourcedata/'
-#OUTPUT_PATH = r's3://mercy-locust-covid19-reporting/'
-
 #local paths
 #INPUT_PATH = r'data/input/'
 #OUTPUT_PATH = r'data/output/'
@@ -111,7 +107,7 @@ class Forageland:
 
     def add_fact_ids(self):
         '''
-        Adds the fact tables ids
+        Adds the fact tables ids.
         :return:  A filtered dataframe by the columns we need for fact tables.
         '''
         forageland_district = self.get_stats()
@@ -132,7 +128,7 @@ class Forageland:
     def export_table(self, filename):
         '''
 
-        :return: The Forageland table in both a parquet and csv format with the date added in the name.
+        :return: The Forageland table in parquet format.
         '''
         forageland_df = self.add_fact_ids()
         self.flats.export_to_parquet(forageland_df, filename)
