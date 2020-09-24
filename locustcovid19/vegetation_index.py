@@ -16,6 +16,7 @@ from rasterio.mask import mask
 from utils.flat_files import FlatFiles
 from rasterstats import zonal_stats
 from utils.s3_local import s3_local
+from utils.s3_latest import s3_latest
 from utils.removefile import removefile
 import numpy as np
 import copy
@@ -29,10 +30,9 @@ class VegetationTable:
     '''
     This class calculates the avg NDVI vegetation index per district for a given date.
     '''
-    def __init__(self, period, path_in, path_out):
+    def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        self.period = str(period)
         self.flats = FlatFiles(self.path_in, self.path_out)
         self.localdir = '/home/ec2-user/Locust-Covid19/'
           
@@ -43,11 +43,20 @@ class VegetationTable:
            print("Directory already exists")
 
 
+        filepath = s3_latest(self.path_in, 'vegetation', 'ea')
+        print("filepath")
+        print(filepath)
+        filename = filepath.split('/')[-1]
+        self.filename = filename
+        print(filename)
+        self.period = str(re.findall('\d+', filename)[0])
+        print('period')
+        print(self.period)
+        newname = filename.replace('.tif', '_out.tif')
+        print(newname)
         # NDVI raster path
-        self.raster_path = s3_local(self.path_in, 'vegetation/ea' + self.period + '.tif' , self.localdir)
-
-        # self.raster_path = self.path_in + '/vegetation/ea' + self.period + '.tif'
-        self.raster_path_out = self.localdir + '/vegetation/ea' + self.period + '_out.tif'
+        self.raster_path = s3_local(self.path_in, 'vegetation/' + filename, self.localdir)
+        self.raster_path_out = self.localdir + 'vegetation/' + newname
 
     def clip_raster(self):
         '''
@@ -118,24 +127,6 @@ class VegetationTable:
             raster_new.write(ndvi_final)
             raster_new.close()
 
-    '''
-    def get_filtered_raster(self):
-        # Check: https://rasterio.readthedocs.io/en/latest/api/rasterio.fill.html
-        raster = rasterio.open(self.path_in + '/vegetation/ea2023m.tif') #TODO mask - on countries
-        ndvi = raster.read()
-        print(type(ndvi))
-        print(ndvi)
-
-        filter = rasterio.open(self.path_in + '/vegetation/filter_colours_2023.tif')
-        filter_colours = filter.read()
-        print(type(filter_colours))
-        print(filter_colours)
-
-        vegetation = np.multiply(ndvi, filter_colours)
-
-        print(type(vegetation))
-        print(vegetation)
-    '''
     def read_boundaries_shp(self, country, hierarchy):
         '''
 
@@ -231,17 +222,13 @@ class VegetationTable:
 
         return vegetation_df
 
-    def export_table(self, filename):
+    def export_table(self):
         '''
 
         :return: The Vegetation index table in a parquet format with the period added in its name.
         '''
         forageland_df = self.add_fact_ids()
-        self.flats.export_to_parquet(forageland_df, '/vegetation_fact/' + filename + '_' + self.period)
-        #self.flats.export_csv_w_date(forageland_df, filename + '_' + self.period + '_')
-        removefile(self.localdir + '/vegetation/ea' + self.period + '.tif')
-        removefile(self.localdir + '/vegetation/ea' + self.period + '_out.tif')
-
+        self.flats.export_to_parquet(forageland_df, '/vegetation_fact/vegetation_table_' + self.period)
 
 
 if __name__ == '__main__':
@@ -257,16 +244,4 @@ if __name__ == '__main__':
 
     print("------- Extracting vegetation index per district table ---------")
 
-    #veg = VegetationTable(INPUT_PATH, OUTPUT_PATH)
-    #veg.mask_green_values()
-    #VegetationTable(2023, INPUT_PATH, OUTPUT_PATH).export_table('/vegetation_fact/vegetation_table')
-    '''
-    # 2019:
-    periods_list = [1916, 1917, 1918, 1919, 1920, 1921, 1922, 1923, 1924, 1925, 1926, 1927, 1928, 1929, 1930, 1931, 
-    1932, 1933, 1934, 1935, 1936]
-    '''
-    # 2020:
-    periods_list = [2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
-                    2017, 2018, 2019, 2020, 2021, 2022, 2023]
-    for period in periods_list:
-        VegetationTable(period, INPUT_PATH, OUTPUT_PATH).export_table('vegetation_table')
+    VegetationTable(INPUT_PATH, OUTPUT_PATH).export_table()
