@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 The aim of this module is to extract the cropland area per district.
+Data source: https://lpdaac.usgs.gov/products/gfsad30afcev001/
 
 Created on Mon Jul 13 11:16:40 2020
 
@@ -21,7 +22,6 @@ import warnings
 warnings.filterwarnings("ignore")
 
 RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-#RASTER_NAMES = ["N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"]
 
 class Cropland:
     '''
@@ -69,8 +69,6 @@ class Cropland:
 
         if raster == "N00E50":
             gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[1]
-        #else:
-         #   gdf_districts['croplands_count'] = pd.DataFrame.from_dict(stats)[2]
 
         elif raster in RASTER_NAMES:
             try:
@@ -146,7 +144,7 @@ class Cropland:
     def export_table(self, filename):
         '''
 
-        :return: The Cropland table in a parquet format with the date added in the name.
+        :return: The Cropland table in a parquet format.
         '''
         crops_df = self.add_fact_ids()
         self.flats.export_to_parquet(crops_df, filename)
