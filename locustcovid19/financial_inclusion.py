@@ -27,7 +27,8 @@ class FinancialInclusion:
     def __init__(self, path_in, path_out):
         self.path_in = path_in
         self.path_out = path_out
-        self.fin_inclusion_df = pd.read_csv(self.path_in + "/social_cohesion/financial_inclusion/FINDEX_Data.csv", sep=',', skipinitialspace = True, skipfooter = 5, engine = 'python')
+        df = pd.read_csv(self.path_in + '/social_cohesion/financial_inclusion/FINDEX_Data.csv')
+        self.fin_inclusion_df = df.iloc[:-5]
         self.flats = FlatFiles(self.path_in, self.path_out)
 
     def create_measure_df(self):
