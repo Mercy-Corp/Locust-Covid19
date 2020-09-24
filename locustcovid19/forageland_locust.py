@@ -210,7 +210,7 @@ class ForagelandLocust:
 
         districts_locust = districts_locust.merge(self.load_forageland_area(), on = 'locationID', how = 'left')
 
-        # Correct DQ issues with some of the prices (detected in Ethiopia)
+        # Correct DQ issues with some of the values (detected in Ethiopia)
         districts_locust.loc[(districts_locust['forageland_area_locust'] > districts_locust['forageland_area']), 'forageland_area_locust'] = districts_locust.loc[(districts_locust['forageland_area_locust'] > districts_locust['forageland_area']), 'forageland_area']
 
         #Filter columns
