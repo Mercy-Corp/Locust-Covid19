@@ -26,7 +26,6 @@ client = boto3.client('s3')
 import os
 
 RASTER_NAMES = ["N00E30", "S10E40", "S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"] #if project extended to more countries, their corresponding geotiffs refering to croplands could be added here in the list
-#RASTER_NAMES = ["S10E30", "S10E20", "N10E50", "N10E40", "N10E30", "N00E50", "N00E40", "N00E20", "N20E30", "N20E20", "N10E20"]
 
 class CroplandLocust:
     '''
@@ -251,12 +250,10 @@ class CroplandLocust:
         crops_locust_district['factID'] = 'CROP_LOC_DIS' + crops_locust_district.index.astype(str)
         crops_locust_district['locationID'] = crops_locust_district['GID_2']
         crops_locust_district['value'] = crops_locust_district['crops_locust_area']
-        #crops_locust_district['date'] = pd.to_datetime(crops_locust_district['date'], format = '%Y-%m-%d')
 
         crops_locust_district['date'] = crops_locust_district['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
         crops_locust_district['dateID'] = crops_locust_district['date'].apply(lambda x: datetime.strftime(x, '%Y%m%d'))
         crops_locust_district['dateID'] = crops_locust_district['dateID'].astype(int) #Athena accepts a bigint to prepare the view
-        #print(crops_locust_district[['date', 'dateID']].head())
 
         # Select fact table columns
         crops_locust_district = crops_locust_district[['factID', 'measureID', 'dateID', 'locationID', 'value']]
@@ -266,7 +263,7 @@ class CroplandLocust:
     def export_table(self, filename):
         '''
 
-        :return: The Cropland table in both a parquet and csv format with the date added in the name.
+        :return: The Cropland table in a parquet.
         '''
         crops_loc_df = self.add_fact_ids()
         self.flats.export_to_parquet(crops_loc_df, filename)
