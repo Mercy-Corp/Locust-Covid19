@@ -12,7 +12,7 @@ STORED AS INPUTFORMAT
 OUTPUTFORMAT 
   'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
 LOCATION
-  's3://mercy-locust-covid19-out-dev/disease_fact/'
+  's3://mercy-locust-covid19-reporting/disease_fact'
 TBLPROPERTIES (
   'CrawlerSchemaDeserializerVersion'='1.0', 
   'CrawlerSchemaSerializerVersion'='1.0', 
@@ -27,4 +27,5 @@ TBLPROPERTIES (
   'recordCount'='805', 
   'sizeKey'='34651', 
   'skip.header.line.count'='1', 
+  'transient_lastDdlTime'='1600785028', 
   'typeOfData'='file')
