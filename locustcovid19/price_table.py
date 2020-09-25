@@ -16,14 +16,16 @@ import yaml
 import os
 import geopandas as gpd
 import pandas as pd
-from geopy.geocoders import Nominatim
-from functools import partial
-from geopy.extra.rate_limiter import RateLimiter
 import pickle
 import warnings
 warnings.filterwarnings("ignore")
 from datetime import datetime
 from utils.flat_files import FlatFiles
+import glob
+
+# #local paths
+# INPUT_PATH = r'data/input'
+# OUTPUT_PATH = r'data/output'
 
 COUNTRY_LIST = ['Uganda', 'Kenya', 'Somalia', 'Ethiopia', 'Sudan', 'South Sudan']
 COUNTRIES_DICT = {'Uganda': 'UGA', 'Kenya': 'KEN', 'Somalia': 'SOM', 'Ethiopia': 'ETH', 'Sudan': 'SDN', 'South Sudan': 'SSD'}
@@ -34,7 +36,7 @@ CURRENCIES_DICT = {'Ethiopia': {'ETB': 1, 'USD': 0.03}, 'Kenya': {'KES': 1, 'USD
 
 class PricesTable:
     '''
-    This class extracts the markets of the prices and demand dfs. # TODO extract markets from demand df. Currently only working on prices.
+    This class extracts the markets of the prices and demand dfs.
     '''
     def __init__(self, path_in, path_out):
         self.path_in = path_in
@@ -331,32 +333,36 @@ class PricesTable:
         Loads and treats data from REACH.
         :return: A df with data on prices from REACH and all fact table columns.
         '''
-        reach = pd.read_excel(self.path_in + '/price/ULEARN_WFP_UGA_Market-Monitor_Price_Table-15-31-July-2020.xlsx', sheet_name='District Mean')
-        reach = reach[['District', 'Regions', 'Period', 'price_maize_g', 'price_maize_f', 'price_beans', 'price_milk']]
+        reach_all = pd.DataFrame()
+        for file in glob.glob(self.path_in + '/price/ULEARN_WFP_UGA_Market*'):
+            reach = pd.read_excel(file, sheet_name='District Mean')
+            reach = reach[['District', 'Regions', 'Period', 'price_maize_g', 'price_maize_f', 'price_beans', 'price_milk']]
+            reach_all = reach_all.append(reach)
 
         # Add dateID
         periods = {'July_1-14': 20200701, 'July_15-30': 20200715, 'March': 20200301}
-        reach['dateID'] = reach['Period']
-        reach['dateID'].replace(periods, inplace=True)
+        reach_all['dateID'] = reach_all['Period']
+        reach_all['dateID'].astype(str).replace(periods, inplace=True)
+        reach_all['dateID'] = reach_all['dateID'].astype(int)
 
         # Add value column
-        maize_g = reach.copy()[['District', 'Regions', 'price_maize_g', 'dateID']]
+        maize_g = reach_all.copy()[['District', 'Regions', 'price_maize_g', 'dateID']]
         maize_g['measureID'] = 6
         maize_g = maize_g.rename(columns={'price_maize_g': 'value'})
         maize_g['commodity_name'] = 'price_maize_g, REACH'
 
         ''' # maize flour excluded
-        maize_f = reach.copy()[['District', 'Regions', 'price_maize_f', 'dateID']]
+        maize_f = reach_all.copy()[['District', 'Regions', 'price_maize_f', 'dateID']]
         maize_f['measureID'] = 6
         maize_f = maize_f.rename(columns={'price_maize_f': 'value'})
         maize_f['commodity_name'] = 'price_maize_f, REACH'
         '''
-        beans = reach.copy()[['District', 'Regions', 'price_beans', 'dateID']]
+        beans = reach_all.copy()[['District', 'Regions', 'price_beans', 'dateID']]
         beans['measureID'] = 11
         beans = beans.rename(columns={'price_beans': 'value'})
         beans['commodity_name'] = 'price_beans, REACH'
 
-        milk = reach.copy()[['District', 'Regions', 'price_milk', 'dateID']]
+        milk = reach_all.copy()[['District', 'Regions', 'price_milk', 'dateID']]
         milk['measureID'] = 9
         milk = milk.rename(columns={'price_milk': 'value'})
         milk['commodity_name'] = 'price_milk, REACH'
@@ -435,7 +441,7 @@ class PricesTable:
     def export_table(self, filename):
         '''
 
-        :return: The price table in a parquet format with the date added in the name.
+        :return: The price table in a parquet format.
         '''
         prices_df = self.add_missing_locIDs()
         self.flats.export_to_parquet(prices_df, filename)
@@ -457,5 +463,5 @@ if __name__ == '__main__':
     #PricesTable().normalise_units()
     #prices = PricesTable().filter_prices()
     #prices = PricesTable().location_id_to_markets()
-    #PricesTable().export_table('price_table')
+    #PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('/price_table')
     PricesTable(INPUT_PATH, OUTPUT_PATH).export_table('/price_fact/price_table')
