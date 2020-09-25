@@ -11,10 +11,8 @@ import pandas as pd
 import geopandas as gpd
 from rasterstats import zonal_stats
 from utils.flat_files import FlatFiles
-import boto3
-import os
 import yaml
-client = boto3.client('s3')
+import os
 
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
 
@@ -93,7 +91,8 @@ class PopulationTable:
         population_gdf['year'] = self.year
 
         # Add factID
-        population_gdf['factID'] = 'Pop_' + population_gdf['locationID'].astype(str) + "_" + population_gdf['year'].astype(str)
+        population_gdf['factID'] = 'Pop_' + population_gdf['locationID'].astype(str) + "_" + population_gdf[
+            'year'].astype(str)
 
         # Add dateID
         population_gdf = self.flats.add_date_id(population_gdf, column = 'year')
@@ -103,27 +102,27 @@ class PopulationTable:
 
         return population_df
 
-
     def export_population(self):
         '''
+
         :return: Exports population fact table to parquet format.
         '''
         population_df = self.add_ids_to_table()
         file_name = '/population_fact/population_table_' + str(self.year)
-        #file_name = 'population_table_' + str(self.year)
+        #file_name = '/population_table_' + str(self.year)
         population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
         print("Dataframe exported to parquet format")
 
     def export_intermediate_pop(self):
         population_df = self.add_ids_to_table()
-        filename = 'population_table_Sudan_' + str(self.year)
+        filename = '/population_table_Sudan_' + str(self.year)
         self.flats.export_to_csv(population_df, filename)
         self.flats.export_to_parquet(population_df, filename)
 
     def append_populations_year(self):
         population_initial = pd.read_csv(self.path_out + '/population_table_' + str(self.year) + ".csv", sep="|")
         population_Sudan= self.add_ids_to_table()
-        #population_Sudan= pd.read_csv(self.path_out + 'population_table_Sudan_' + str(self.year) + ".csv", sep="|")
+        #population_Sudan= pd.read_csv(self.path_out + '/population_table_Sudan_' + str(self.year) + ".csv", sep="|")
         population_total = population_initial.append(population_Sudan)
         return population_total
 
@@ -134,12 +133,13 @@ class PopulationTable:
         '''
         population_df = self.append_populations_year()
         file_name = '/population_fact/population_table_' + str(self.year)
-        #file_name = 'population_table_all_countries_' + str(self.year)
+        #file_name = '/population_table_all_countries_' + str(self.year)
         population_df.to_parquet(self.path_out + file_name + ".parquet", index=False)
         print("Dataframe exported to parquet format")
 
 if __name__ == '__main__':
 
+    print("------- Extracting population tables ---------")
     filepath = os.path.join(os.path.dirname(__file__), 'config/application.yaml')
     with open(filepath, "r") as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
@@ -149,13 +149,5 @@ if __name__ == '__main__':
     print('INPUT_PATH: ' + INPUT_PATH)
     print('OUTPUT_PATH: ' + OUTPUT_PATH)
 
-
-    print("------- Extracting population tables ---------")
-    PopulationTable(2000, INPUT_PATH, OUTPUT_PATH).export_population()
-    #PopulationTable(2014).export_population()
-    #PopulationTable(2015).export_population()
-    #PopulationTable(2016).export_population()
-    #PopulationTable(2017).export_population()
-    #PopulationTable(2018).export_population()
-    #PopulationTable(2019).export_population()
-    #PopulationTable(2020).export_population()
+    for i in ['2020']:
+        PopulationTable(i, INPUT_PATH, OUTPUT_PATH).export_population()

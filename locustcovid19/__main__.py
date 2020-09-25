@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
        # 4. Creation of population table
        print("------- Extracting population tables ---------")
-       years = [2000, 2014, 2015, 2016, 2017, 2018, 2020]
+       years = [2020]
 
        for year in years:
            print("Population {}:".format(year))
