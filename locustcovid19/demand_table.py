@@ -18,7 +18,6 @@ from scipy.optimize import curve_fit
 import re
 import geopandas as gpd
 from rasterstats import zonal_stats
-import io
 
 COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SSD", "SDN"]
 

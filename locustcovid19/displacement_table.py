@@ -17,8 +17,8 @@ from utils.flat_files import FlatFiles
 COUNTRIES = ["Kenya", "Somalia", "Ethiopia", "Uganda", "South Sudan", "Sudan"]
 
 # #local paths
-INPUT_PATH = r'data/input'
-OUTPUT_PATH = r'data/output'
+# INPUT_PATH = r'data/input'
+# OUTPUT_PATH = r'data/output'
 
 class DisplacementTable:
     '''
