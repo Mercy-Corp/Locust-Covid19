@@ -11,7 +11,7 @@ STORED AS INPUTFORMAT
 OUTPUTFORMAT 
   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
 LOCATION
-  's3://mercy-locust-covid19-out-dev/cropland_fact/'
+  's3://mercy-locust-covid19-reporting/cropland_fact'
 TBLPROPERTIES (
   'CrawlerSchemaDeserializerVersion'='1.0', 
   'CrawlerSchemaSerializerVersion'='1.0', 
@@ -22,4 +22,5 @@ TBLPROPERTIES (
   'objectCount'='1', 
   'recordCount'='844', 
   'sizeKey'='20362', 
+  'transient_lastDdlTime'='1600776846', 
   'typeOfData'='file')

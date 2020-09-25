@@ -42,7 +42,28 @@ environment is selfexplanatory, can be production or test
 
 data holds the location of the input bucket (landing) and output bucket (reporting) on s3
 
-module is the python module that will be executed, valid module names are location, shapefile, production, population, measure, demand, cropland, croplandlocust, forageland and foragelandlocust 
+module is the python module that will be executed, valid module names are:
+
+conflicts
+cropland
+croplandlocust
+demand
+displacements
+famine
+fin_inclusion
+forageland
+foragelandlocust
+location
+measure
+shapefile
+population
+price
+production
+refugees
+risk.locust
+risk.rvf
+vegetation
+violence
 
 ## Modules
 
@@ -116,5 +137,7 @@ A docker container is deployed to run the modules.
 - *locustcovid19* is the folder that has the module code. 
 - *config* yaml configuration files
 - *tests* is the folder where python unittests are run
+- *lambda* lambda functions used in AWS
+- *resources/ddl* DDL statements for views and tables
 - *utils* have auxiliary script that may be needed to make the package work, for example table creation scripts
 - *extras* this is a cointainer for anything that might be useful but is not part of the package itself. For example Jupyter notebooks, log outputs, test files, etc.
