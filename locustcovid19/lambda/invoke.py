@@ -34,9 +34,11 @@ def lambda_handler(event, context):
     c = paramiko.SSHClient()
     c.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    print ("Connecting to " + host)
-    c.connect( hostname = host, username = "ec2-user", pkey = k )
-    print ("Connected to " + host)
+    try:
+       c.connect( hostname = host, username = "ec2-user", pkey = k )
+       print ("Connected to " + host)
+    except UnboundLocalError as error:
+       print ("Could not establish connection with host ")
 
     print ("Running commands ... ")
     commands = [
@@ -44,11 +46,14 @@ def lambda_handler(event, context):
             "aws s3 cp " + 's3://' + BUCKET + "/config/moduletag /home/ec2-user/moduletag",
         ]
     for command in commands:
-        c.exec_command(command)
-        print ("Executing {}".format(command))
-        stdin , stdout, stderr = c.exec_command(command)
-        print (stdout.read())
-        print (stderr.read())
+        try:
+           c.exec_command(command)
+           print ("Executing {}".format(command))
+           stdin , stdout, stderr = c.exec_command(command)
+           print (stdout.read())
+           print (stderr.read())
+        except Exception as exception:
+           print ("Could not copy locustcovid19.zip file")
 
     codepipeline = boto3.client('codepipeline')
     job_id = event['CodePipeline.job']['id']
