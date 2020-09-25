@@ -1,4 +1,4 @@
-CREATE EXTERNAL TABLE `locust_risk_fact`(
+CREATE EXTERNAL TABLE `rvf_risk_fact`(
   `factid` string, 
   `measureid` bigint, 
   `dateid` int, 
@@ -11,13 +11,10 @@ STORED AS INPUTFORMAT
 OUTPUTFORMAT 
   'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
 LOCATION
-  's3://mercy-locust-covid19-reporting/locust_risk_fact'
+  's3://mercy-locust-covid19-reporting/rvf_risk_fact'
 TBLPROPERTIES (
-  'CrawlerSchemaDeserializerVersion'='1.0', 
-  'CrawlerSchemaSerializerVersion'='1.0', 
-  'UPDATED_BY_CRAWLER'='locust_risk_fact', 
   'averageRecordSize'='10', 
   'classification'='parquet', 
   'compressionType'='none', 
-  'transient_lastDdlTime'='1599667144', 
+  'transient_lastDdlTime'='1601028365', 
   'typeOfData'='file')
