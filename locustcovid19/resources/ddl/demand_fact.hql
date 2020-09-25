@@ -5,26 +5,23 @@ CREATE EXTERNAL TABLE `demand_fact`(
   `locationid` string, 
   `value` double, 
   `dm_commodity_name` string)
-ROW FORMAT DELIMITED 
-  FIELDS TERMINATED BY '|' 
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' 
 STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' 
 OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
 LOCATION
-  's3://mercy-locust-covid19-out-dev/demand_fact/'
+  's3://mercy-locust-covid19-reporting/demand_fact'
 TBLPROPERTIES (
   'CrawlerSchemaDeserializerVersion'='1.0', 
   'CrawlerSchemaSerializerVersion'='1.0', 
-  'UPDATED_BY_CRAWLER'='demand_fact', 
-  'areColumnsQuoted'='false', 
-  'averageRecordSize'='54', 
-  'classification'='csv', 
-  'columnsOrdered'='true', 
+  'UPDATED_BY_CRAWLER'='cropland_fact', 
+  'averageRecordSize'='20', 
+  'classification'='parquet', 
   'compressionType'='none', 
-  'delimiter'='|', 
   'objectCount'='1', 
-  'recordCount'='9434', 
-  'sizeKey'='509456', 
-  'skip.header.line.count'='1', 
+  'recordCount'='844', 
+  'sizeKey'='20362', 
+  'transient_lastDdlTime'='1600784508', 
   'typeOfData'='file')

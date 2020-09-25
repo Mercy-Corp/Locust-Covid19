@@ -19,5 +19,5 @@ TBLPROPERTIES (
   'averageRecordSize'='10', 
   'classification'='parquet', 
   'compressionType'='none', 
-  'transient_lastDdlTime'='1599667144', 
+  'transient_lastDdlTime'='1601030287', 
   'typeOfData'='file')

@@ -11,26 +11,23 @@ CREATE EXTERNAL TABLE `location_dim`(
   `name_1` string, 
   `name_2` string, 
   `name_3` string)
-ROW FORMAT DELIMITED 
-  FIELDS TERMINATED BY '|' 
+ROW FORMAT SERDE 
+  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe' 
 STORED AS INPUTFORMAT 
-  'org.apache.hadoop.mapred.TextInputFormat' 
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat' 
 OUTPUTFORMAT 
-  'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
 LOCATION
-  's3://mercy-locust-covid19-out-dev/location_dim/'
+  's3://mercy-locust-covid19-reporting/location_dim'
 TBLPROPERTIES (
   'CrawlerSchemaDeserializerVersion'='1.0', 
   'CrawlerSchemaSerializerVersion'='1.0', 
   'UPDATED_BY_CRAWLER'='location_dim', 
-  'areColumnsQuoted'='false', 
-  'averageRecordSize'='52', 
-  'classification'='csv', 
-  'columnsOrdered'='true', 
+  'averageRecordSize'='17', 
+  'classification'='parquet', 
   'compressionType'='none', 
-  'delimiter'='|', 
   'objectCount'='1', 
-  'recordCount'='8184', 
-  'sizeKey'='425603', 
-  'skip.header.line.count'='1', 
+  'recordCount'='116', 
+  'sizeKey'='5336', 
+  'transient_lastDdlTime'='1600844601', 
   'typeOfData'='file')
