@@ -17,11 +17,10 @@ import yaml
 # client = boto3.client('s3')
 
 #local paths
-INPUT_PATH = r'data/input'
-OUTPUT_PATH = r'data/output'
+# INPUT_PATH = r'data/input'
+# OUTPUT_PATH = r'data/output'
 
-#COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
-COUNTRIES = ["ETH", "SOM"]
+COUNTRIES = ["KEN", "SOM", "ETH", "UGA", "SDN", "SSD"]
 
 class PopulationTable:
     '''
