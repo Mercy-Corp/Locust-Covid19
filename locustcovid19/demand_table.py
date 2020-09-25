@@ -4,7 +4,7 @@ The prediction of current demand is based on demand in 2000 and population
 values from 2014-2020.
 
 Created on Fri Jul 17 10:59:01 2020
-Last modified on Thu Aug 27 13:04:01 2020
+Last modified on Fri Sep 25 08:27:01 2020
 
 @author: linnea.evanson@accenture.com, ioanna.papachristou@accenture.com
 """
@@ -46,9 +46,9 @@ class DemandTable:
         :param year: The year of the population file.
         :return: The file related to the population we would like to load.
         '''
-        #population_year = pd.read_csv(self.path_out + "population_fact/population_table_all_countries_" + str(year) + ".csv", sep='|')
-        population_year = pd.read_csv(
-            self.path_out + "population_table_all_countries_" + str(year) + ".csv", sep='|')
+        population_year = pd.read_parquet(self.path_out + "/population_fact/population_table_" + str(year) + ".parquet",  engine='pyarrow')
+        #population_year = pd.read_csv(
+           # self.path_out + "population_table_" + str(year) + ".csv", sep='|')
 
         return population_year
 
@@ -56,7 +56,7 @@ class DemandTable:
         '''
 
         :param cmdt: The commodity to load.
-        :return: The raster with the population density for the reference country.
+        :return: The raster with the consumption for the selected commodity.
         '''
         raster_cmdt = self.path_in + "/demand/" + cmdt + "_cons00.tif"
 
@@ -182,9 +182,6 @@ class DemandTable:
         '''
         return initial * ((1 + r) ** x)  # same formula used above
 
-    def removeNull(row):
-        return ['0' if i == '' else i for i in row]
-
     def get_consumption_preds(self,frames):
         '''
         Predicts consumption in 2014-2020 based on population values from the same period, and
@@ -236,7 +233,7 @@ class DemandTable:
 
         demand['region_params'] = region_params #so their indices match (especially for plotting)
 
-        cons14, cons15, cons16, cons17, cons18, cons19, cons20 = [], [], [], [], [], [], []
+        cons14, cons15, cons16, cons17, cons18, cons19, cons20, cons21, cons22, cons23, cons24, cons25, cons26, cons27, cons28, cons29, cons30 = [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
         i = 0
         for row in demand['Cons00']:
             cons14.append(self.func(14, region_params[i], row))
@@ -246,9 +243,20 @@ class DemandTable:
             cons18.append(self.func(18, region_params[i], row))
             cons19.append(self.func(19, region_params[i], row))
             cons20.append(self.func(20, region_params[i], row))
+            cons21.append(self.func(21, region_params[i], row))
+            cons22.append(self.func(22, region_params[i], row))
+            cons23.append(self.func(23, region_params[i], row))
+            cons24.append(self.func(24, region_params[i], row))
+            cons25.append(self.func(25, region_params[i], row))
+            cons26.append(self.func(26, region_params[i], row))
+            cons27.append(self.func(27, region_params[i], row))
+            cons28.append(self.func(28, region_params[i], row))
+            cons29.append(self.func(29, region_params[i], row))
+            cons30.append(self.func(30, region_params[i], row))
+
             i += 1
 
-        return demand, cons14, cons15, cons16, cons17, cons18, cons19, cons20
+        return demand, cons14, cons15, cons16, cons17, cons18, cons19, cons20, cons21, cons22, cons23, cons24, cons25, cons26, cons27, cons28, cons29, cons30
 
     def create_demand_table(self):
         '''
@@ -262,7 +270,7 @@ class DemandTable:
         #frames = pd.read_csv(self.path_in + "demand_districts.csv", sep = "|", encoding = 'utf-8') #for test purposes only!!
         frames = frames.rename(columns={'value': 'Cons00'})
 
-        demand, cons14, cons15, cons16, cons17, cons18, cons19, cons20 = self.get_consumption_preds(frames)
+        demand, cons14, cons15, cons16, cons17, cons18, cons19, cons20, cons21, cons22, cons23, cons24, cons25, cons26, cons27, cons28, cons29, cons30 = self.get_consumption_preds(frames)
 
         # Concat each of the predictions for each year with demand so they have location ID and measureID and commodity name
         demand2 = demand[['measureID', 'locationID', 'Cons00', 'dm_commodity_name']]
@@ -278,6 +286,16 @@ class DemandTable:
         df18 = pd.concat([pd.DataFrame(cons18, columns=['value']), demand2.reset_index(drop=True)], axis=1)
         df19 = pd.concat([pd.DataFrame(cons19, columns=['value']), demand2.reset_index(drop=True)], axis=1)
         df20 = pd.concat([pd.DataFrame(cons20, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df21 = pd.concat([pd.DataFrame(cons21, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df22 = pd.concat([pd.DataFrame(cons22, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df23 = pd.concat([pd.DataFrame(cons23, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df24 = pd.concat([pd.DataFrame(cons24, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df25 = pd.concat([pd.DataFrame(cons25, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df26 = pd.concat([pd.DataFrame(cons26, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df27 = pd.concat([pd.DataFrame(cons27, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df28 = pd.concat([pd.DataFrame(cons28, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df29 = pd.concat([pd.DataFrame(cons29, columns=['value']), demand2.reset_index(drop=True)], axis=1)
+        df30 = pd.concat([pd.DataFrame(cons30, columns=['value']), demand2.reset_index(drop=True)], axis=1)
 
         # Create date IDs for each of the different year predictions:
         date00 = [2000 for i in range(len(df00['value']))]
@@ -312,7 +330,47 @@ class DemandTable:
         df20.insert(1, 'date', date20)
         df20 = self.flats.add_date_id(df20, 'date')
 
-        demand_final = pd.concat([df00, df14, df15, df16, df17, df18, df19, df20])
+        date21 = [2021 for i in range(len(cons21))]
+        df21.insert(1, 'date', date21)
+        df21 = self.flats.add_date_id(df21, 'date')
+
+        date22 = [2022 for i in range(len(cons22))]
+        df22.insert(1, 'date', date22)
+        df22 = self.flats.add_date_id(df22, 'date')
+
+        date23 = [2023 for i in range(len(cons23))]
+        df23.insert(1, 'date', date23)
+        df23 = self.flats.add_date_id(df23, 'date')
+
+        date24 = [2024 for i in range(len(cons24))]
+        df24.insert(1, 'date', date24)
+        df24 = self.flats.add_date_id(df24, 'date')
+
+        date25 = [2025 for i in range(len(cons25))]
+        df25.insert(1, 'date', date25)
+        df25 = self.flats.add_date_id(df25, 'date')
+
+        date26 = [2026 for i in range(len(cons26))]
+        df26.insert(1, 'date', date26)
+        df26 = self.flats.add_date_id(df26, 'date')
+
+        date27 = [2027 for i in range(len(cons27))]
+        df27.insert(1, 'date', date27)
+        df27 = self.flats.add_date_id(df27, 'date')
+
+        date28 = [2028 for i in range(len(cons28))]
+        df28.insert(1, 'date', date28)
+        df28 = self.flats.add_date_id(df28, 'date')
+
+        date29 = [2029 for i in range(len(cons29))]
+        df29.insert(1, 'date', date29)
+        df29 = self.flats.add_date_id(df29, 'date')
+
+        date30 = [2030 for i in range(len(cons30))]
+        df30.insert(1, 'date', date30)
+        df30 = self.flats.add_date_id(df30, 'date')
+
+        demand_final = pd.concat([df00, df14, df15, df16, df17, df18, df19, df20, df21, df22, df23, df24, df25, df26, df27, df28, df29, df30])
         demand_final = demand_final.drop(['date'], axis=1)
 
         # Reorder columns:
