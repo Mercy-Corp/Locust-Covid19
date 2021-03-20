@@ -33,7 +33,7 @@ imagesize==1.2.0
 importlib-metadata==1.7.0
 ipython-genutils==0.2.0
 jeepney==0.4.3
-Jinja2==2.11.2
+Jinja2==2.11.3
 jmespath==0.10.0
 keyring==21.3.0
 lxml==4.5.2
