@@ -91,7 +91,7 @@ thrift==0.13.0
 tqdm==4.48.2
 traitlets==4.3.3
 twine==3.2.0
-urllib3==1.25.9
+urllib3==1.26.5
 virtualenv==20.0.30
 webencodings==0.5.1
 wincertstore==0.2
