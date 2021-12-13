@@ -36,7 +36,7 @@ jeepney==0.4.3
 Jinja2==2.11.2
 jmespath==0.10.0
 keyring==21.3.0
-lxml==4.5.2
+lxml==4.6.5
 Markdown==3.2.2
 MarkupSafe==1.1.1
 mistune==0.8.4
